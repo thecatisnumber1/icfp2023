@@ -8,4 +8,8 @@
     <RootNamespace>ICFP2023</RootNamespace>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Lib\Lib.csproj" />
+  </ItemGroup>
+
 </Project>
