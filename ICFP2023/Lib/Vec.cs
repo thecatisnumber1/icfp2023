@@ -65,9 +65,9 @@ namespace ICFP2023
         //SPECULATIVE
         // Todo: make sure int won't overflow here
         public readonly long MagnitudeSq => X * X + Y * Y;
-        
+
         public readonly double Magnitude => Math.Sqrt(MagnitudeSq);
-        
+
         public readonly int Manhattan => Math.Abs(X) + Math.Abs(Y);
 
         public Vec RotateClockwise()

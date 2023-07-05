@@ -1,0 +1,41 @@
+﻿<UserControl x:Class="ICFP2023.ConsoleControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:ICFP2023"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <Grid Background="Black">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <RichTextBox
+            Grid.Row="0"
+            x:Name="RTBox"
+            Background="Transparent"
+            Foreground="White"
+            FontFamily="Courier New"
+            FontSize="16"
+            BorderThickness="0"
+            VerticalScrollBarVisibility="Auto"
+            IsReadOnly="True">
+            <FlowDocument>
+                <Paragraph x:Name="Paragraph" />
+            </FlowDocument>
+        </RichTextBox>
+
+        <TextBox
+            Grid.Row="1"
+            x:Name="InputBox"
+            Background="Transparent"
+            Foreground="White"
+            CaretBrush="White"
+            FontFamily="Courier New"
+            FontSize="20"
+            BorderThickness="0"
+            KeyUp="InputBox_KeyUp"/>
+    </Grid>
+</UserControl>
