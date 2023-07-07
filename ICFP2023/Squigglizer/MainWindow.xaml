@@ -12,12 +12,22 @@
             <RowDefinition Height="*" />
             <RowDefinition Height="400" />
         </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="200" />
+        </Grid.ColumnDefinitions>
+
+        <local:SettingsControl
+            x:Name="SettingsControl"
+            Grid.Column="1"
+            Grid.Row="0"
+            />
 
         <local:ConsoleControl
             x:Name="ConsoleControl"
             Grid.Column="0"
             Grid.Row="1"
-            Grid.ColumnSpan="1"
+            Grid.ColumnSpan="2"
             />
     </Grid>
 </Window>

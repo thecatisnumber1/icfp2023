@@ -20,9 +20,15 @@ namespace ICFP2023
     /// </summary>
     public partial class MainWindow : Window
     {
+        private SquigglizerSettings settings;
+
         public MainWindow()
         {
             InitializeComponent();
+
+            settings = new SquigglizerSettings();
+            settings.ParseArgs(Environment.GetCommandLineArgs()[1..]);
+            SettingsControl.Settings = settings;
 
             Console.WriteLine("Hello World!");
             Console.WriteLine();
