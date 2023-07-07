@@ -14,20 +14,20 @@ namespace ICFP2023
         // Remove unnecesary stuff in the "SPECULATIVE" section
         // Add anything that's missing
         [JsonProperty("x")]
-        public readonly float X;
+        public readonly double X;
 
         [JsonProperty("y")]
-        public readonly float Y;
+        public readonly double Y;
 
         public static readonly Point ORIGIN = new(0, 0);
 
-        public Point(float x, float y)
+        public Point(double x, double y)
         {
             X = x;
             Y = y;
         }
 
-        public void Deconstruct(out float x, out float y)
+        public void Deconstruct(out double x, out double y)
         {
             x = X;
             y = Y;

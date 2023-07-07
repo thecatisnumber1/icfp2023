@@ -14,7 +14,7 @@ namespace ICFP2023
         // Make sure the rotate methods are correct for the coordinate system (they may be backward)
         // Remove unnecesary stuff in the "SPECULATIVE" section
         // Add anything that's missing
-        public readonly float X, Y;
+        public readonly double X, Y;
 
         public static readonly Vec ZERO = new(0, 0);
         public static readonly Vec WEST = new(-1, 0);
@@ -24,13 +24,13 @@ namespace ICFP2023
 
         public static readonly Vec[] DIRECTIONS = new Vec[] { NORTH, EAST, SOUTH, WEST };
 
-        public Vec(float x, float y)
+        public Vec(double x, double y)
         {
             X = x;
             Y = y;
         }
 
-        public readonly void Deconstruct(out float x, out float y)
+        public readonly void Deconstruct(out double x, out double y)
         {
             x = X;
             y = Y;
@@ -46,7 +46,7 @@ namespace ICFP2023
         public static Vec operator *(int scale, Vec v)
             => new(scale * v.X, scale * v.Y);
 
-        public static Vec operator *(float scale, Vec v)
+        public static Vec operator *(double scale, Vec v)
             => new(scale * v.X, scale * v.Y);
 
         public static Vec operator /(Vec v, int scale)
@@ -82,7 +82,7 @@ namespace ICFP2023
 
         public readonly double Magnitude => Math.Sqrt(MagnitudeSq);
 
-        public readonly float Manhattan => Math.Abs(X) + Math.Abs(Y);
+        public readonly double Manhattan => Math.Abs(X) + Math.Abs(Y);
 
         public Vec RotateClockwise()
         {
@@ -94,7 +94,7 @@ namespace ICFP2023
             return new Vec(Y, -X);
         }
 
-        public float DotProduct(Vec b)
+        public double DotProduct(Vec b)
         {
             return X * b.X + Y * b.Y;
         }

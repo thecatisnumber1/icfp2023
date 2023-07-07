@@ -11,9 +11,9 @@ namespace ICFP2023
     public class Attendee
     {
         public Point Location { get; init; }
-        public List<float> Tastes { get; init; }
+        public List<double> Tastes { get; init; }
 
-        public Attendee(float x, float y, List<float> Tastes)
+        public Attendee(double x, double y, List<double> Tastes)
         {
             this.Location = new(x, y);
             this.Tastes = Tastes;

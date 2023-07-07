@@ -30,26 +30,26 @@ namespace Tests
         {
             var spec = ProblemSpec.ReadJson(PROBLEM);
             Assert.IsNotNull(spec);
-            Assert.AreEqual(2000.0f, spec.RoomWidth);
-            Assert.AreEqual(5000.0f, spec.RoomHeight);
-            Assert.AreEqual(1000.0f, spec.StageWidth);
-            Assert.AreEqual(200.0f, spec.StageHeight);
-            Assert.AreEqual(new Point(500.0f, 0.0f), spec.StageBottomLeft);
+            Assert.AreEqual(2000.0, spec.RoomWidth);
+            Assert.AreEqual(5000.0, spec.RoomHeight);
+            Assert.AreEqual(1000.0, spec.StageWidth);
+            Assert.AreEqual(200.0, spec.StageHeight);
+            Assert.AreEqual(new Point(500.0, 0.0), spec.StageBottomLeft);
             Assert.AreEqual(new Musician(0, 0), spec.Musicians[0]);
             Assert.AreEqual(new Musician(1, 1), spec.Musicians[1]);
             Assert.AreEqual(new Musician(2, 0), spec.Musicians[2]);
-            Assert.AreEqual(new Attendee(100.0f, 500.0f, new float[] { 1000.0f, -1000.0f }.ToList()), spec.Attendees[0]);
-            Assert.AreEqual(new Attendee(200.0f, 1000.0f, new float[] { 200.0f, 200.0f }.ToList()), spec.Attendees[1]);
-            Assert.AreEqual(new Attendee(1100.0f, 800.0f, new float[] { 800.0f, 1500.0f }.ToList()), spec.Attendees[2]);
+            Assert.AreEqual(new Attendee(100.0, 500.0, new double[] { 1000.0, -1000.0 }.ToList()), spec.Attendees[0]);
+            Assert.AreEqual(new Attendee(200.0, 1000.0, new double[] { 200.0, 200.0 }.ToList()), spec.Attendees[1]);
+            Assert.AreEqual(new Attendee(1100.0, 800.0, new double[] { 800.0, 1500.0 }.ToList()), spec.Attendees[2]);
         }
 
         [TestMethod]
         public void TestWriteSolution()
         {
             var solution = new Solution(ProblemSpec.ReadJson(PROBLEM));
-            solution.Placements[0] = new(590.0f, 10.0f);
-            solution.Placements[1] = new(1100.0f, 100.0f);
-            solution.Placements[2] = new(1100.0f, 150.0f);
+            solution.Placements[0] = new(590.0, 10.0);
+            solution.Placements[1] = new(1100.0, 100.0);
+            solution.Placements[2] = new(1100.0, 150.0);
             string json = solution.WriteJson();
 
             Assert.AreEqual(SOLUTION.Replace(" ", "").Replace("\r", "").Replace("\n", ""), json);
@@ -59,9 +59,9 @@ namespace Tests
         public void TestReadSolution()
         {
             var expected = new Solution(ProblemSpec.ReadJson(PROBLEM));
-            expected.Placements[0] = new(590.0f, 10.0f);
-            expected.Placements[1] = new(1100.0f, 100.0f);
-            expected.Placements[2] = new(1100.0f, 150.0f);
+            expected.Placements[0] = new(590.0, 10.0);
+            expected.Placements[1] = new(1100.0, 100.0);
+            expected.Placements[2] = new(1100.0, 150.0);
 
             var solution = Solution.ReadJson(SOLUTION);
 

@@ -15,16 +15,16 @@ namespace ICFP2023
         public string ProblemName { get; private set; }
 
         [JsonProperty("room_width")]
-        public float RoomWidth { get; init; }
+        public double RoomWidth { get; init; }
 
         [JsonProperty("room_height")]
-        public float RoomHeight { get; init; }
+        public double RoomHeight { get; init; }
 
         [JsonProperty("stage_width")]
-        public float StageWidth { get; init; }
+        public double StageWidth { get; init; }
 
         [JsonProperty("stage_height")]
-        public float StageHeight { get; init; }
+        public double StageHeight { get; init; }
 
         [JsonProperty("stage_bottom_left")]
         [JsonConverter(typeof(PointConverter))]
@@ -38,10 +38,10 @@ namespace ICFP2023
         public List<Attendee> Attendees { get; init; }
 
         public ProblemSpec(
-            float roomWidth,
-            float roomHeight,
-            float stageWidth,
-            float stageHeight,
+            double roomWidth,
+            double roomHeight,
+            double stageWidth,
+            double stageHeight,
             Point stageBottomLeft,
             List<Musician> musicians,
             List<Attendee> attendees)
@@ -74,7 +74,7 @@ namespace ICFP2023
             public override Point ReadJson(JsonReader reader, Type objectType, Point existingValue, bool hasExistingValue, JsonSerializer serializer)
             {
                 var array = JArray.Load(reader);
-                return new Point(array[0].Value<float>(), array[1].Value<float>());
+                return new Point(array[0].Value<double>(), array[1].Value<double>());
             }
 
             public override void WriteJson(JsonWriter writer, Point value, JsonSerializer serializer)

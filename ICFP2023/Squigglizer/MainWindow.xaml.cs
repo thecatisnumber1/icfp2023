@@ -57,7 +57,7 @@ namespace ICFP2023
             BaseRender.Height = problem.RoomHeight;
 
             // Dynamic dot sizes!? Should be about 0.5% of the long axis.
-            float longAxis = Math.Max(problem.RoomWidth, problem.RoomHeight);
+            double longAxis = Math.Max(problem.RoomWidth, problem.RoomHeight);
             double PersonSizePx = longAxis / 200.0;
 
             // Lazy-assed thing to make everything hit-testable

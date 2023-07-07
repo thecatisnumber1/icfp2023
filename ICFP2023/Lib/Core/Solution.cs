@@ -111,7 +111,7 @@ namespace ICFP2023
 
         private bool IsMusicianBlocked(Point attendee, Musician musician, Musician blockingMusician)
         {
-            const float blockRadius = 5.0f;
+            const double blockRadius = 5.0f;
             var musicianLoc = GetPlacement(musician);
             var blockingLoc = GetPlacement(blockingMusician);
 

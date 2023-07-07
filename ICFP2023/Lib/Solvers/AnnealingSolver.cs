@@ -84,7 +84,7 @@ namespace ICFP2023
                 musicianIndex = random.Next(solution.Placements.Count);
 
                 // Generate a random vector, scaled and translated to be between 0.25 and 2.0
-                delta = new Vec((float)random.NextDouble() * 1.75f + 0.25f, (float)random.NextDouble() * 1.75f + 0.25f);
+                delta = new Vec(random.NextDouble() * 1.75f + 0.25f, random.NextDouble() * 1.75f + 0.25f);
 
                 // Create the move
                 Move move = new Move(musicianIndex, delta);
@@ -165,15 +165,15 @@ namespace ICFP2023
         public static void RandomizeStartingState(Solution solution)
         {
             Random random = new Random();
-            const float edgeDistance = 10.0f; // Distance musicians should be from the stage edges
+            const double edgeDistance = Musician.SOCIAL_DISTANCE; // Distance musicians should be from the stage edges
 
             for (int i = 0; i < solution.Placements.Count; i++)
             {
                 do
                 {
                     solution.Placements[i] = new Point(
-                        solution.Problem.StageBottomLeft.X + edgeDistance + (float)random.NextDouble() * (solution.Problem.StageWidth - 2 * edgeDistance),
-                        solution.Problem.StageBottomLeft.Y + edgeDistance + (float)random.NextDouble() * (solution.Problem.StageHeight - 2 * edgeDistance));
+                        solution.Problem.StageBottomLeft.X + edgeDistance + random.NextDouble() * (solution.Problem.StageWidth - 2 * edgeDistance),
+                        solution.Problem.StageBottomLeft.Y + edgeDistance + random.NextDouble() * (solution.Problem.StageHeight - 2 * edgeDistance));
                 }
                 while (IsTooClose(solution, i));
             }
