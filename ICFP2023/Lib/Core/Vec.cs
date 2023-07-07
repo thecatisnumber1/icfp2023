@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ICFP2023
+namespace LambdaMusic
 {
     public readonly struct Vec
     {
@@ -14,7 +14,7 @@ namespace ICFP2023
         // Make sure the rotate methods are correct for the coordinate system (they may be backward)
         // Remove unnecesary stuff in the "SPECULATIVE" section
         // Add anything that's missing
-        public readonly int X, Y;
+        public readonly float X, Y;
 
         public static readonly Vec ZERO = new(0, 0);
         public static readonly Vec WEST = new(-1, 0);
@@ -24,13 +24,13 @@ namespace ICFP2023
 
         public static readonly Vec[] DIRECTIONS = new Vec[] { NORTH, EAST, SOUTH, WEST };
 
-        public Vec(int x, int y)
+        public Vec(float x, float y)
         {
             X = x;
             Y = y;
         }
 
-        public readonly void Deconstruct(out int x, out int y)
+        public readonly void Deconstruct(out float x, out float y)
         {
             x = X;
             y = Y;
@@ -58,17 +58,28 @@ namespace ICFP2023
 
         public override readonly bool Equals(object obj) => obj is Vec v && this == v;
 
-        public override readonly int GetHashCode() => 0x4d3dd876 ^ X ^ 0xc42d * Y;
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hash = 17;
+
+                hash = hash * 23 + X.GetHashCode();
+                hash = hash * 23 + Y.GetHashCode();
+
+                return hash;
+            }
+        }
 
         public override readonly string ToString() => $"<{X}, {Y}>";
 
         //SPECULATIVE
         // Todo: make sure int won't overflow here
-        public readonly long MagnitudeSq => X * X + Y * Y;
+        public readonly double MagnitudeSq => X * X + Y * Y;
 
         public readonly double Magnitude => Math.Sqrt(MagnitudeSq);
 
-        public readonly int Manhattan => Math.Abs(X) + Math.Abs(Y);
+        public readonly float Manhattan => Math.Abs(X) + Math.Abs(Y);
 
         public Vec RotateClockwise()
         {

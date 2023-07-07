@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace ICFP2023
+namespace LambdaMusic
 {
     public readonly struct Point
     {
@@ -12,17 +12,17 @@ namespace ICFP2023
         // Make sure these names and types are appropriate for the the problem
         // Remove unnecesary stuff in the "SPECULATIVE" section
         // Add anything that's missing
-        public readonly int X, Y;
+        public readonly float X, Y;
 
         public static readonly Point ORIGIN = new(0, 0);
 
-        public Point(int x, int y)
+        public Point(float x, float y)
         {
             X = x;
             Y = y;
         }
 
-        public void Deconstruct(out int x, out int y)
+        public void Deconstruct(out float x, out float y)
         {
             x = X;
             y = Y;
@@ -45,14 +45,25 @@ namespace ICFP2023
 
         public override bool Equals(object obj) => obj is Point p && this == p;
 
-        public override int GetHashCode() => -0x56119d3c ^ X ^ 0xc42d * Y;
+        public override int GetHashCode()
+        {
+            unchecked // Overflow is fine, just wrap
+            {
+                int hash = 17;
+
+                hash = hash * 23 + X.GetHashCode();
+                hash = hash * 23 + Y.GetHashCode();
+
+                return hash;
+            }
+        }
 
         public override string ToString() => $"({X}, {Y})";
 
         //SPECULATIVE
 
         // Todo: make sure int won't overflow here
-        public readonly long DistSq(Point other) => (this - other).MagnitudeSq;
+        public readonly double DistSq(Point other) => (this - other).MagnitudeSq;
 
         public readonly double Dist(Point other) => (this - other).Magnitude;
 
