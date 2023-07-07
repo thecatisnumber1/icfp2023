@@ -90,7 +90,7 @@ namespace ICFP2023
 
         public bool IsValid()
         {
-            // TODO: Check distances to other musicians
+            // Make sure the musicians won't fall off the stage
             foreach(var point in Placements)
             {
                 double minX = Problem.StageBottomLeft.X + Musician.SOCIAL_DISTANCE;
@@ -103,6 +103,18 @@ namespace ICFP2023
                     point.Y < minY || point.Y > maxY)
                 {
                     return false;
+                }
+            }
+
+            // Check for musician social distancing
+            for (int i = 0; i < Placements.Count; i++)
+            {
+                for (int j = i + 1; j < Placements.Count; j++)
+                {
+                    if (Placements[i].DistSq(Placements[j]) < Musician.SOCIAL_DISTANCE * Musician.SOCIAL_DISTANCE)
+                    {
+                        return false;
+                    }
                 }
             }
 
