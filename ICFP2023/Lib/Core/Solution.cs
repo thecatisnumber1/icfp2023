@@ -11,10 +11,16 @@ namespace ICFP2023
     public class Solution
     {
         [JsonIgnore]
-        public readonly ProblemSpec Problem;
+        public ProblemSpec Problem { get; private set; }
 
         [JsonProperty("placements")]
-        public readonly List<Point> Placements;
+        public List<Point> Placements { get; init; }
+
+        [JsonConstructor]
+        private Solution(List<Point> placements)
+        {
+            this.Placements = placements;
+        }
 
         public Solution(ProblemSpec problem)
         {
@@ -82,6 +88,27 @@ namespace ICFP2023
             return score;
         }
 
+        public bool IsValid()
+        {
+            // TODO: Check distances to other musicians
+            foreach(var point in Placements)
+            {
+                float minX = Problem.StageBottomLeft.X + Musician.SOCIAL_DISTANCE;
+                float maxX = Problem.StageBottomLeft.X + Problem.StageWidth - Musician.SOCIAL_DISTANCE;
+                float minY = Problem.StageBottomLeft.Y + Musician.SOCIAL_DISTANCE;
+                float maxY = Problem.StageBottomLeft.Y + Problem.StageHeight - Musician.SOCIAL_DISTANCE;
+
+                if (point == Point.ORIGIN ||
+                    point.X < minX || point.X > maxX ||
+                    point.Y < minY || point.Y > maxY)
+                {
+                    return false;
+                }
+            }
+
+            return true;
+        }
+
         private bool IsMusicianBlocked(Point attendee, Musician musician, Musician blockingMusician)
         {
             const float blockRadius = 5.0f;
@@ -101,6 +128,19 @@ namespace ICFP2023
             // If this point is within the blocking radius, the musician is blocked
             var dp = blockingLoc - projection;
             return dp.DotProduct(dp) <= blockRadius * blockRadius;
+        }
+
+        public static Solution Read(string solutionPath, ProblemSpec problem)
+        {
+            var solutionJson = FileUtil.Read(solutionPath);
+            var solution = ReadJson(solutionJson);
+            solution.Problem = problem;
+            return solution;
+        }
+
+        public static Solution ReadJson(string solutionJson)
+        {
+            return JsonConvert.DeserializeObject<Solution>(solutionJson);
         }
 
         public string WriteJson()

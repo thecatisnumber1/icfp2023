@@ -54,5 +54,18 @@ namespace Tests
 
             Assert.AreEqual(SOLUTION.Replace(" ", "").Replace("\r", "").Replace("\n", ""), json);
         }
+
+        [TestMethod]
+        public void TestReadSolution()
+        {
+            var expected = new Solution(ProblemSpec.ReadJson(PROBLEM));
+            expected.Placements[0] = new(590.0f, 10.0f);
+            expected.Placements[1] = new(1100.0f, 100.0f);
+            expected.Placements[2] = new(1100.0f, 150.0f);
+
+            var solution = Solution.ReadJson(SOLUTION);
+
+            Assert.IsTrue(expected.Placements.SequenceEqual(solution.Placements));
+        }
     }
 }
