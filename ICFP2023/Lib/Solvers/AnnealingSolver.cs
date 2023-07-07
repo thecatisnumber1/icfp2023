@@ -162,6 +162,52 @@ namespace ICFP2023
             return false;
         }
 
+        public static void GridBasedStartingState(Solution solution)
+        {
+            Random random = new Random();
+            const float edgeDistance = 10.0f; // Distance musicians should be from the stage edges
+
+            // Define the grid size. If the musicians are too close together, increase this value.
+            float gridSize = 10.0f;
+
+            // Create a list to hold all the grid points
+            List<Point> gridPoints = new List<Point>();
+
+            // Fill the list with points from the grid
+            for (float x = solution.Problem.StageBottomLeft.X + edgeDistance; x < solution.Problem.StageBottomLeft.X + solution.Problem.StageWidth - edgeDistance; x += gridSize)
+            {
+                for (float y = solution.Problem.StageBottomLeft.Y + edgeDistance; y < solution.Problem.StageBottomLeft.Y + solution.Problem.StageHeight - edgeDistance; y += gridSize)
+                {
+                    gridPoints.Add(new Point(x, y));
+                }
+            }
+
+            // Shuffle the grid points
+            int n = gridPoints.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = random.Next(n + 1);
+                Point value = gridPoints[k];
+                gridPoints[k] = gridPoints[n];
+                gridPoints[n] = value;
+            }
+
+            // Assign each musician to a point from the shuffled list
+            for (int i = 0; i < solution.Placements.Count; i++)
+            {
+                if (i < gridPoints.Count)
+                {
+                    solution.Placements[i] = gridPoints[i];
+                }
+                else
+                {
+                    throw new Exception("Can't place all musicians!");
+                }
+            }
+        }
+
+
         public static void RandomizeStartingState(Solution solution)
         {
             Random random = new Random();

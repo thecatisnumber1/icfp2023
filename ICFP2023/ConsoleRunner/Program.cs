@@ -4,6 +4,7 @@ using System.Text.Json.Serialization;
 using System.Text;
 using System.Text.Json;
 using System;
+using System.Diagnostics;
 
 namespace ICFP2023
 {
@@ -11,17 +12,28 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            for (int problemNum = 1; problemNum <= 45; problemNum++)
+            HashSet<int> toDoList = new HashSet<int> { 5, 7, 18, 56 };
+            foreach (int problemNum in toDoList)
             {
+                Stopwatch sw = Stopwatch.StartNew();
+
                 Console.WriteLine($"Solving problem {problemNum}");
                 Solution solution = new Solution(ProblemSpec.Read($"problem-{problemNum}"));
-                AnnealingSolver.RandomizeStartingState(solution);
+
+                AnnealingSolver.GridBasedStartingState(solution);
                 long bestScore = solution.ComputeScore();
                 Solution bestSolution = solution.Copy();
+
                 for (int i = 0; i < 5; i++)
                 {
-                    AnnealingSolver.RandomizeStartingState(solution);
+                    Stopwatch computeScoreSw = Stopwatch.StartNew();
+
+                    AnnealingSolver.GridBasedStartingState(solution);
                     long score = solution.ComputeScore();
+
+                    computeScoreSw.Stop();
+                    Console.WriteLine($"ComputeScore time for iteration {i + 1}: {computeScoreSw.ElapsedMilliseconds}ms");
+
                     if (score > bestScore)
                     {
                         Console.WriteLine($"New best score: {score}");
@@ -31,6 +43,9 @@ namespace ICFP2023
                 }
 
                 Console.WriteLine($"Submitting score for {problemNum}, with score {bestScore}");
+
+                sw.Stop();
+                Console.WriteLine($"Total time for problem {problemNum}: {sw.ElapsedMilliseconds}ms");
                 SubmitSolution(bestSolution, problemNum).Wait();
             }
         }
