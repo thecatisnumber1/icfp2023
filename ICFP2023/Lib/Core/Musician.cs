@@ -9,7 +9,7 @@ namespace ICFP2023
     public class Musician
     {
         // Min distance from any stage edge or other musician
-        public const double SOCIAL_DISTANCE = 10.0f;
+        public const double SOCIAL_DISTANCE = 10.0;
 
         public int Index { get; init; }
         public int Instrument { get; init; }

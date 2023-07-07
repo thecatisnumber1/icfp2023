@@ -84,7 +84,7 @@ namespace ICFP2023
                 musicianIndex = random.Next(solution.Placements.Count);
 
                 // Generate a random vector, scaled and translated to be between 0.25 and 2.0
-                delta = new Vec(random.NextDouble() * 1.75f + 0.25f, random.NextDouble() * 1.75f + 0.25f);
+                delta = new Vec(random.NextDouble() * 1.75 + 0.25, random.NextDouble() * 1.75 + 0.25);
 
                 // Create the move
                 Move move = new Move(musicianIndex, delta);
@@ -152,7 +152,7 @@ namespace ICFP2023
                 if (solution.Placements[musician.Index] != targetMusician)
                 {
                     // Calculate distance squared to avoid costly square root operation
-                    if (solution.Placements[musician.Index].DistSq(targetMusician) < 10.0f * 10.0f)  // Check if distance is less than 10
+                    if (solution.Placements[musician.Index].DistSq(targetMusician) < 10.0 * 10.0)  // Check if distance is less than 10
                     {
                         return true;
                     }
