@@ -24,14 +24,7 @@ namespace ICFP2023
             set
             {
                 settings = value;
-
-                StringBuilder sb = new();
-                foreach (var setting in settings.AllSettings)
-                {
-                    sb.Append($"{setting.Name}: {settings[setting]}\n");
-                }
-
-                Box.Text = sb.ToString();
+                UpdateDataGridContent();
             }
         }
 
@@ -40,6 +33,19 @@ namespace ICFP2023
         public SettingsControl()
         {
             InitializeComponent();
+        }
+
+        private void UpdateDataGridContent()
+        {
+            DataGridSettings.Items.Clear();
+
+            foreach (var setting in settings.AllSettings)
+            {
+                string settingName = setting.Name;
+                object settingValue = settings[setting];
+
+                DataGridSettings.Items.Add(new { Name = settingName, Value = settingValue });
+            }
         }
     }
 }
