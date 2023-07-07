@@ -13,51 +13,15 @@ namespace ICFP2023
         {
             int problemNum = 1;
             Solution solution = new Solution(ProblemSpec.Read($"problem-{problemNum}"));
-            RandomizeStartingState(solution);
+            AnnealingSolver.RandomizeStartingState(solution);
             while (solution.ComputeScore() < 0)
             {
                 Console.WriteLine($"Score was negative ({solution.ComputeScore()}). Trying again...");
-                RandomizeStartingState(solution);
+                AnnealingSolver.RandomizeStartingState(solution);
             }
 
             Console.WriteLine($"Submitting solution with score {solution.ComputeScore()}");
             SubmitSolution(solution, problemNum).Wait();
-        }
-
-        public static void RandomizeStartingState(Solution solution)
-        {
-            Random random = new Random();
-            const float edgeDistance = 10.0f; // Distance musicians should be from the stage edges
-
-            for (int i = 0; i < solution.Problem.Musicians.Count; i++)
-            {
-                do
-                {
-                    solution.Placements[i] = new Point(
-                        solution.Problem.StageBottomLeft.X + edgeDistance + (float)random.NextDouble() * (solution.Problem.StageWidth - 2 * edgeDistance),
-                        solution.Problem.StageBottomLeft.Y + edgeDistance + (float)random.NextDouble() * (solution.Problem.StageHeight - 2 * edgeDistance));
-                }
-                while (IsTooClose(solution, i));
-            }
-        }
-
-        private static bool IsTooClose(Solution solution, int musicianIndex)
-        {
-            Point targetMusician = solution.Placements[musicianIndex];
-
-            foreach (Musician musician in solution.Problem.Musicians)
-            {
-                if (solution.Placements[musician.Index] != targetMusician)
-                {
-                    // Calculate distance squared to avoid costly square root operation
-                    if (solution.Placements[musician.Index].DistSq(targetMusician) < 10.0f * 10.0f)  // Check if distance is less than 10
-                    {
-                        return true;
-                    }
-                }
-            }
-
-            return false;
         }
 
         public class Submission
