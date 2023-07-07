@@ -36,6 +36,8 @@ namespace ICFP2023
             AllProblems = new ProblemCatalog();
             ProblemSelector.ItemsSource = AllProblems.Names;
 
+            string[] solverList = Solvers.Names();
+            SolverSelector.ItemsSource = solverList;
 
             //RunTask(() =>
             //{
@@ -107,6 +109,11 @@ namespace ICFP2023
         private void ProblemSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             ResetProblem();
+        }
+
+        private void SolverSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            // Do nothing for now. Stole this from last year.
         }
 
         // In debug mode an exception will properly trigger a break in the debugger if "Just My Code" is on.

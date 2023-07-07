@@ -20,6 +20,8 @@
         <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Panel.ZIndex="255">
             <Label Content="Problem" HorizontalAlignment="Right"/>
             <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Top" x:Name="ProblemSelector" SelectionChanged="ProblemSelector_OnSelectionChanged" />
+            <Label Content="Solver" HorizontalAlignment="Right"/>
+            <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Top" x:Name="SolverSelector" SelectionChanged="SolverSelector_OnSelectionChanged" />
             <local:SettingsControl x:Name="SettingsControl" />
         </StackPanel>
         <local:ConsoleControl x:Name="ConsoleControl" Grid.Column="0" Grid.Row="1" Panel.ZIndex="255"/>
