@@ -47,6 +47,7 @@ namespace ICFP2023
         private void RenderProblem(ProblemSpec problem)
         {
             BaseRender.Children.Clear();
+            ZoomArea.Reset();
 
             // Test hackery
             BaseRender.Width = problem.RoomWidth; // Should be problem width/height eventually
@@ -78,13 +79,14 @@ namespace ICFP2023
             // Audience member
             foreach (Attendee a in problem.Attendees)
             {
+                double DotWidth = 5.0;
                 Ellipse ellipse = new Ellipse();
                 ellipse.Width = 5;
                 ellipse.Height = 5;
                 ellipse.Stroke = new SolidColorBrush(Colors.Red);
                 ellipse.Fill = new SolidColorBrush(Colors.Salmon);
-                Canvas.SetTop(ellipse, problem.RoomHeight - a.Location.Y); // These are wrong because of width/height
-                Canvas.SetLeft(ellipse, a.Location.X);
+                Canvas.SetTop(ellipse, problem.RoomHeight - a.Location.Y - DotWidth / 2);
+                Canvas.SetLeft(ellipse, a.Location.X - DotWidth / 2);
                 BaseRender.Children.Add(ellipse);
             }
         }

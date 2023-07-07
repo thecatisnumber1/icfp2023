@@ -25,7 +25,7 @@
         <local:ConsoleControl x:Name="ConsoleControl" Grid.Column="0" Grid.Row="1" Panel.ZIndex="255"/>
 
         <Viewbox Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Left" Grid.Column="0">
-            <local:ZoomBorder>
+            <local:ZoomBorder x:Name="ZoomArea" >
                 <Canvas x:Name="BaseRender" />
             </local:ZoomBorder>
         </Viewbox>
