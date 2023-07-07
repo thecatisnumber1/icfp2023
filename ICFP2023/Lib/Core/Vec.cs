@@ -90,5 +90,10 @@ namespace ICFP2023
         {
             return new Vec(Y, -X);
         }
+
+        public float DotProduct(Vec b)
+        {
+            return X * b.X + Y * b.Y;
+        }
     }
 }

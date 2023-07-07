@@ -9,12 +9,11 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ICFP2023
 {
-    // NOTE!!!!!
-    // This should be the immutable description of a problem.
-    // Do not put mutable state related to the solving of a problem here!
-    // There was a lot of pain in the HumanTetris year related to mutating the original figure.
     public class ProblemSpec
     {
+        [JsonIgnore]
+        public string ProblemName { get; private set; }
+
         [JsonProperty("room_width")]
         public float RoomWidth { get; init; }
 
@@ -60,7 +59,9 @@ namespace ICFP2023
         public static ProblemSpec Read(string problemName)
         {
             var problemJson = FileUtil.Read($@"problems/{problemName}.json");
-            return ReadJson(problemJson);
+            var problem = ReadJson(problemJson);
+            problem.ProblemName = problemName;
+            return problem;
         }
 
         public static ProblemSpec ReadJson(string problemJson)
@@ -88,13 +89,12 @@ namespace ICFP2023
             public override List<Musician> ReadJson(JsonReader reader, Type objectType, List<Musician> existingValue, bool hasExistingValue, JsonSerializer serializer)
             {
                 var array = JArray.Load(reader);
-                return array.Select(a => new Musician(a.Value<int>())).ToList();
+                return array.Select((a, i) => new Musician(i, a.Value<int>())).ToList();
             }
 
             public override void WriteJson(JsonWriter writer, List<Musician> value, JsonSerializer serializer)
             {
-                var array = new JArray(value.Select(m => m.Instrument));
-                array.WriteTo(writer);
+                throw new NotImplementedException();
             }
         }
     }
