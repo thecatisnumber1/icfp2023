@@ -18,7 +18,7 @@ namespace ICFP2023
                 AnnealingSolver.RandomizeStartingState(solution);
                 long bestScore = solution.ComputeScore();
                 Solution bestSolution = solution.Copy();
-                for (int i = 0; i < 25; i++)
+                for (int i = 0; i < 5; i++)
                 {
                     AnnealingSolver.RandomizeStartingState(solution);
                     long score = solution.ComputeScore();
