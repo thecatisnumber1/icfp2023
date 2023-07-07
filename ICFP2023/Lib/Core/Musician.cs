@@ -11,6 +11,9 @@ namespace ICFP2023
         // Min distance from any stage edge or other musician
         public const double SOCIAL_DISTANCE = 10.0;
 
+        // Area around a musician than blocks sound from others
+        public const double BLOCKING_RADIUS = 5.0;
+
         public int Index { get; init; }
         public int Instrument { get; init; }
 
