@@ -14,12 +14,22 @@ namespace ICFP2023
         public readonly ProblemSpec Problem;
 
         [JsonProperty("placements")]
-        public readonly Point[] Placements;
+        public readonly List<Point> Placements;
 
         public Solution(ProblemSpec problem)
         {
             this.Problem = problem;
-            Placements = new Point[problem.Musicians.Count];
+            Placements = new List<Point>();
+            for (int i = 0; i < problem.Musicians.Count; i++)
+            {
+                Placements.Add(Point.ORIGIN);
+            }
+        }
+
+        private Solution(ProblemSpec problem, List<Point> placements)
+        {
+            this.Problem = problem;
+            this.Placements = placements;
         }
 
         public Point GetPlacement(Musician musician)
@@ -30,6 +40,11 @@ namespace ICFP2023
         public void SetPlacement(Musician musician, Point loc)
         {
             Placements[musician.Index] = loc;
+        }
+
+        public Solution Copy()
+        {
+            return new Solution(Problem, Placements);
         }
 
         public long ComputeScore()
