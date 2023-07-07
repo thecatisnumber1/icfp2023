@@ -5,7 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:ICFP2023"
         mc:Ignorable="d"
-        Title="Squigglize This" Height="1050" Width="1600">
+        Title="This One Goes to Eleven" Height="1050" Width="1600">
     
     <Grid>
         <Grid.RowDefinitions>
@@ -17,17 +17,17 @@
             <ColumnDefinition Width="200" />
         </Grid.ColumnDefinitions>
 
-        <local:SettingsControl
-            x:Name="SettingsControl"
-            Grid.Column="1"
-            Grid.Row="0"
-            />
+        <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Panel.ZIndex="255">
+            <Label Content="Problem" HorizontalAlignment="Right"/>
+            <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Top" x:Name="ProblemSelector" SelectionChanged="ProblemSelector_OnSelectionChanged" />
+            <local:SettingsControl x:Name="SettingsControl" />
+        </StackPanel>
+        <local:ConsoleControl x:Name="ConsoleControl" Grid.Column="0" Grid.Row="1" Panel.ZIndex="255"/>
 
-        <local:ConsoleControl
-            x:Name="ConsoleControl"
-            Grid.Column="0"
-            Grid.Row="1"
-            Grid.ColumnSpan="2"
-            />
+        <Viewbox Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Left" Grid.Column="0">
+            <local:ZoomBorder>
+                <Canvas x:Name="BaseRender" />
+            </local:ZoomBorder>
+        </Viewbox>
     </Grid>
 </Window>

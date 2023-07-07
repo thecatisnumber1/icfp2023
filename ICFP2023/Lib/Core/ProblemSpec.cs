@@ -59,7 +59,7 @@ namespace ICFP2023
         // Usually problems are numbered but sometimes folks add their own test problems so this takes a string.
         public static ProblemSpec Read(string problemName)
         {
-            var problemJson = FileUtil.Read($@"problems/problem-{problemName}.json");
+            var problemJson = FileUtil.Read($@"problems/{problemName}.json");
             return ReadJson(problemJson);
         }
 
