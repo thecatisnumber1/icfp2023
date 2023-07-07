@@ -3,7 +3,7 @@ using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
 using System.Windows.Media;
-using WinPoint = System.Windows.Point;
+using WinPoint = System.Windows.Point; // We tend to write our own Point class, but this thing wants the built-in
 
 namespace ICFP2023
 {

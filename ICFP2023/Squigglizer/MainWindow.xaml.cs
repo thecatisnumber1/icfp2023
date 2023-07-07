@@ -13,6 +13,7 @@ using System.Windows.Media.Imaging;
 using System.Windows.Navigation;
 using System.Windows.Shapes;
 using static ICFP2023.ProblemSpec;
+using WinPoint = System.Windows.Point;
 
 namespace ICFP2023
 {
@@ -125,6 +126,23 @@ namespace ICFP2023
                     throw;
                 }
             });
+        }
+
+        private void ManualMove_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
+        {
+            WinPoint cursorPosition = e.GetPosition(ZoomArea);
+            // Ignore stuff outside of the zoom area's bounds
+            if (!IsInZoomArea(e))
+            {
+                return;
+            }
+            
+        }
+
+        private bool IsInZoomArea(MouseButtonEventArgs e)
+        {
+            WinPoint cursorPosition = e.GetPosition(ZoomArea);
+            return !(cursorPosition.X < 0 || cursorPosition.X > ZoomArea.ActualWidth || cursorPosition.Y < 0 || cursorPosition.Y > ZoomArea.ActualHeight);
         }
     }
 }
