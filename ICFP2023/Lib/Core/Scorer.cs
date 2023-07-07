@@ -15,7 +15,7 @@ namespace ICFP2023
         {
             this.problemSpec = problemSpec;
         }
-
+        /*
         public long ComputeScore()
         {
             long score = 0;
@@ -74,6 +74,6 @@ namespace ICFP2023
         {
             return a.X * b.X + a.Y * b.Y;
         }
-
+        */
     }
 }

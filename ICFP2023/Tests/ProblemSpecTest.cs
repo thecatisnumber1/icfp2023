@@ -21,6 +21,17 @@ namespace Tests
         public void TestReadJson()
         {
             var spec = ProblemSpec.ReadJson(PROBLEM);
+            Assert.IsNotNull(spec);
+            Assert.AreEqual(2000.0f, spec.RoomWidth);
+            Assert.AreEqual(5000.0f, spec.RoomHeight);
+            Assert.AreEqual(1000.0f, spec.StageWidth);
+            Assert.AreEqual(200.0f, spec.StageHeight);
+            Assert.AreEqual(new Point(500.0f, 0.0f), spec.StageBottomLeft);
+            Assert.AreEqual(new Musician(0), spec.Musicians[0]);
+            Assert.AreEqual(new Musician(1), spec.Musicians[1]);
+            Assert.AreEqual(new Musician(0), spec.Musicians[2]);
+            Assert.AreEqual(new Attendee(100.0f, 500.0f, new float[] { 1000.0f, -1000.0f }.ToList()), spec.Attendees[0]);
+            Assert.AreEqual(new Attendee(200.0f, 1000.0f, new float[] { 200.0f, 200.0f }.ToList()), spec.Attendees[1]);
         }
     }
 }
