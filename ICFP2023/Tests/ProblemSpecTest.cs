@@ -3,7 +3,7 @@ namespace Tests
     [TestClass]
     public class ProblemSpecTest
     {
-        const string PROBLEM = @"{
+        public const string PROBLEM = @"{
             ""room_width"" : 2000.0,
             ""room_height"" : 5000.0,
             ""stage_width"" : 1000.0,
@@ -12,7 +12,8 @@ namespace Tests
             ""musicians"" : [0, 1, 0],
             ""attendees"" : [
                 { ""x"": 100.0, ""y"": 500.0, ""tastes"": [1000.0, -1000.0] },
-                { ""x"": 200.0, ""y"": 1000.0, ""tastes"": [200.0, 200.0] }
+                { ""x"": 200.0, ""y"": 1000.0, ""tastes"": [200.0, 200.0] },
+                { ""x"": 1100.0, ""y"": 800.0, ""tastes"": [800.0, 1500.0] }
             ]
         }";
 
@@ -39,6 +40,7 @@ namespace Tests
             Assert.AreEqual(new Musician(2, 0), spec.Musicians[2]);
             Assert.AreEqual(new Attendee(100.0f, 500.0f, new float[] { 1000.0f, -1000.0f }.ToList()), spec.Attendees[0]);
             Assert.AreEqual(new Attendee(200.0f, 1000.0f, new float[] { 200.0f, 200.0f }.ToList()), spec.Attendees[1]);
+            Assert.AreEqual(new Attendee(1100.0f, 800.0f, new float[] { 800.0f, 1500.0f }.ToList()), spec.Attendees[2]);
         }
 
         [TestMethod]
