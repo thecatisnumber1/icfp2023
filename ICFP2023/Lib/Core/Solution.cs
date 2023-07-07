@@ -121,7 +121,7 @@ namespace ICFP2023
             return true;
         }
 
-        private bool IsMusicianBlocked(Point attendee, Musician musician, Musician blockingMusician)
+        public bool IsMusicianBlocked(Point attendee, Musician musician, Musician blockingMusician)
         {
             var musicianLoc = GetPlacement(musician);
             var blockingLoc = GetPlacement(blockingMusician);

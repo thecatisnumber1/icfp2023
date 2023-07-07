@@ -29,6 +29,30 @@ namespace ICFP2023
 
         private double PersonSizePx;
 
+        #region Colors
+        private static SolidColorBrush BlackBrush = new SolidColorBrush(Colors.Black);
+        private static SolidColorBrush StageFillBrush = new SolidColorBrush(Colors.LightGray);
+
+        private static SolidColorBrush UnselectedAttendeeBorderBrush = new SolidColorBrush(Colors.Red);
+        private static SolidColorBrush UnselectedAttendeeFillBrush = new SolidColorBrush(Colors.Salmon);
+
+        private static SolidColorBrush UnselectedMusicianBorderBrush = new SolidColorBrush(Colors.Blue);
+        private static SolidColorBrush UnselectedMusicianFillBrush = new SolidColorBrush(Colors.LightBlue);
+
+        private static SolidColorBrush SelectedPersonBorderBrush = new SolidColorBrush(Colors.Green);
+        private static SolidColorBrush SelectedPersonFillBrush = new SolidColorBrush(Colors.LightGreen);
+        #endregion
+
+        #region Control Tracking for Highlighting
+        private Dictionary<Shape, Musician> _musicianShapeToMusician = new Dictionary<Shape, Musician>();
+        private Dictionary<Musician, Shape> _musicianToShape = new Dictionary<Musician, Shape>();
+
+        private Dictionary<Shape, Attendee> _attendeeShapeToAttendee = new Dictionary<Shape, Attendee>();
+        private Dictionary<Attendee, Shape> _attendeeToShape = new Dictionary<Attendee, Shape>();
+        #endregion
+
+        private Solution _currentSolution;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -59,6 +83,10 @@ namespace ICFP2023
         {
             BaseRender.Children.Clear();
             MusicianRender.Children.Clear();
+            _musicianShapeToMusician.Clear();
+            _musicianToShape.Clear();
+            _attendeeShapeToAttendee.Clear();
+            _attendeeToShape.Clear();
             ZoomArea.Reset();
 
             // Test hackery
@@ -84,16 +112,16 @@ namespace ICFP2023
             Rectangle border = new Rectangle();
             border.Width = problem.RoomWidth;
             border.Height = problem.RoomHeight;
-            border.Stroke = new SolidColorBrush(Colors.Black);
-            border.StrokeThickness = 0.5;
+            border.Stroke = BlackBrush;
+            border.StrokeThickness = 1;
             BaseRender.Children.Add(border);
 
             // Stage
             Rectangle stage = new Rectangle();
             stage.Width = problem.StageWidth;
             stage.Height = problem.StageHeight;
-            stage.Stroke = new SolidColorBrush(Colors.Black);
-            stage.Fill = new SolidColorBrush(Colors.LightGray);
+            stage.Stroke = BlackBrush;
+            stage.Fill = StageFillBrush;
             Canvas.SetBottom(stage, problem.StageBottomLeft.Y);
             Canvas.SetLeft(stage, problem.StageBottomLeft.X);
             BaseRender.Children.Add(stage);
@@ -104,10 +132,14 @@ namespace ICFP2023
                 Ellipse ellipse = new Ellipse();
                 ellipse.Width = PersonSizePx;
                 ellipse.Height = PersonSizePx;
-                ellipse.Stroke = new SolidColorBrush(Colors.Red);
-                ellipse.Fill = new SolidColorBrush(Colors.Salmon);
+                ellipse.Stroke = UnselectedAttendeeBorderBrush;
+                ellipse.Fill = UnselectedAttendeeFillBrush;
                 Canvas.SetTop(ellipse, problem.RoomHeight - a.Location.Y - PersonSizePx / 2);
                 Canvas.SetLeft(ellipse, a.Location.X - PersonSizePx / 2);
+                ellipse.MouseLeftButtonDown += AttendeeBubble_MouseDown;
+                _attendeeShapeToAttendee.Add(ellipse, a);
+                _attendeeToShape.Add(a, ellipse);
+
                 BaseRender.Children.Add(ellipse);
             }
         }
@@ -183,18 +215,121 @@ namespace ICFP2023
         // This blindly assumes your solution has the correct problemspec. If it doesn't, you're hosed.
         internal void RenderSolution(Solution solution)
         {
+            _currentSolution = solution;
+
+            _musicianShapeToMusician.Clear();
+            _musicianToShape.Clear();
             MusicianRender.Children.Clear();
 
-            foreach (Point p in solution.Placements)
+            for (int i = 0; i < solution.Placements.Count; i++)
             {
+                Point p = solution.Placements[i];
+
                 Ellipse ellipse = new Ellipse();
                 ellipse.Width = PersonSizePx;
                 ellipse.Height = PersonSizePx;
-                ellipse.Stroke = new SolidColorBrush(Colors.Blue);
-                ellipse.Fill = new SolidColorBrush(Colors.LightBlue);
+                ellipse.Stroke = UnselectedMusicianBorderBrush;
+                ellipse.Fill = UnselectedMusicianFillBrush;
                 Canvas.SetTop(ellipse, _currentProblem.RoomHeight - p.Y - PersonSizePx / 2);
                 Canvas.SetLeft(ellipse, p.X - PersonSizePx / 2);
+                ellipse.MouseLeftButtonDown += MusicianBubble_MouseDown;
+                Musician m = _currentProblem.Musicians.Single(m => m.Index == i);
+                _musicianShapeToMusician.Add(ellipse, m);
+                _musicianToShape.Add(m, ellipse);
+
                 MusicianRender.Children.Add(ellipse);
+            }
+        }
+
+        private void MusicianBubble_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            ResetSelectedPerson();
+
+            // User clicks a musician. Find/highlight the musician.
+            Shape musicianBubble = (Shape)sender;
+            musicianBubble.Stroke = SelectedPersonBorderBrush;
+            musicianBubble.Fill = SelectedPersonFillBrush;
+
+            // Highlight any attendees that can hear them.
+            Musician sourceMusician = _musicianShapeToMusician[musicianBubble];
+            List<Musician> otherMusicians = _musicianToShape.Keys.Where(m => m != sourceMusician).ToList();
+            
+            foreach (var attendee in _attendeeToShape)
+            {
+                Point a = attendee.Key.Location;
+                // If any musician blocks, continue
+                bool blocked = false;
+                foreach (Musician otherMusician in otherMusicians)
+                {
+                    if (_currentSolution.IsMusicianBlocked(a, sourceMusician, otherMusician))
+                    {
+                        blocked = true;
+                        break;
+                    }
+                }
+
+                if (!blocked)
+                {
+                    attendee.Value.Stroke = SelectedPersonBorderBrush;
+                    attendee.Value.Fill = SelectedPersonFillBrush;
+
+                    // TODO: Draw ray
+                }
+            }
+        }
+
+        private void AttendeeBubble_MouseDown(object sender, MouseButtonEventArgs e)
+        {
+            ResetSelectedPerson();
+
+            Shape attendeeBubble = (Shape)sender;
+            attendeeBubble.Stroke = SelectedPersonBorderBrush;
+            attendeeBubble.Fill = SelectedPersonFillBrush;
+
+            // Highlight the musicians they can hear
+            Attendee attendee = _attendeeShapeToAttendee[attendeeBubble];
+            Point p = attendee.Location;
+
+            List<Musician> allMusicians = _musicianShapeToMusician.Values.ToList();
+            for (int sourceIdx = 0; sourceIdx < allMusicians.Count - 1; sourceIdx++)
+            {
+                Musician sourceMusician = allMusicians[sourceIdx];
+                bool blocked = false;
+                for (int candidateIdx = sourceIdx + 1; candidateIdx < allMusicians.Count; candidateIdx++)
+                {
+                    Musician otherMusician = allMusicians[candidateIdx];
+                    
+                    if (_currentSolution.IsMusicianBlocked(p, sourceMusician, otherMusician))
+                    {
+                        blocked = true;
+                        break;
+                    }
+                }
+
+                if (!blocked)
+                {
+                    Shape musicianBubble = _musicianToShape[sourceMusician];
+                    musicianBubble.Stroke = SelectedPersonBorderBrush;
+                    musicianBubble.Fill = SelectedPersonFillBrush;
+
+                    // TODO: Draw ray
+                }
+            }
+
+        }
+
+        private void ResetSelectedPerson()
+        {
+            foreach (Shape attendeeBubble in _attendeeShapeToAttendee.Keys)
+            {
+                attendeeBubble.Stroke = UnselectedAttendeeBorderBrush;
+                attendeeBubble.Fill = UnselectedAttendeeFillBrush;
+            }
+
+            foreach (Shape musicianBubble in _musicianShapeToMusician.Keys)
+            {
+                musicianBubble.Stroke = UnselectedMusicianBorderBrush;
+                musicianBubble.Fill = UnselectedMusicianFillBrush;
             }
         }
 
