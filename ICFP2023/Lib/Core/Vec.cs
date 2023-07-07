@@ -4,7 +4,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace LambdaMusic
+namespace ICFP2023
 {
     public readonly struct Vec
     {
