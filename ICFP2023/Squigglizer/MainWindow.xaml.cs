@@ -39,6 +39,9 @@ namespace ICFP2023
         private static SolidColorBrush UnselectedMusicianBorderBrush = new SolidColorBrush(Colors.Blue);
         private static SolidColorBrush UnselectedMusicianFillBrush = new SolidColorBrush(Colors.LightBlue);
 
+        private static SolidColorBrush MusicianNoTouchingZoneBorderBrush = new SolidColorBrush(Colors.Purple);
+        private static SolidColorBrush MusicianNoTouchingZoneFillBrush = new SolidColorBrush(Colors.Magenta);
+
         private static SolidColorBrush SelectedPersonBorderBrush = new SolidColorBrush(Colors.Green);
         private static SolidColorBrush SelectedPersonFillBrush = new SolidColorBrush(Colors.LightGreen);
         #endregion
@@ -96,9 +99,9 @@ namespace ICFP2023
             MusicianRender.Width = problem.RoomWidth; // You'll need to check whether manual placement is on the stage on your own
             MusicianRender.Height = problem.RoomHeight;
 
-            // Dynamic dot sizes!? Should be about 0.5% of the long axis, but no more than 10 because musicians' no-touching zones
+            // Dynamic dot sizes!? Should be about 0.5% of the long axis, but no more than 20 because musicians' no-touching zones (radius 10, diameter 20)
             double longAxis = Math.Max(problem.RoomWidth, problem.RoomHeight);
-            PersonSizePx = Math.Min(longAxis / 200.0, 10.0);
+            PersonSizePx = Math.Min(longAxis / 200.0, 20.0);
 
             // Lazy-assed thing to make everything hit-testable
             Rectangle hack = new Rectangle();
@@ -225,11 +228,25 @@ namespace ICFP2023
             {
                 Point p = solution.Placements[i];
 
-                Ellipse ellipse = new Ellipse();
+
+                // Blocking zone
+                var ellipse = new Ellipse();
+                ellipse.Width = 10;
+                ellipse.Height = 10;
+                ellipse.Stroke = MusicianNoTouchingZoneBorderBrush;
+                ellipse.Fill = MusicianNoTouchingZoneFillBrush;
+                Canvas.SetTop(ellipse, _currentProblem.RoomHeight - p.Y - 5);
+                Canvas.SetLeft(ellipse, p.X - 5);
+
+                MusicianRender.Children.Add(ellipse);
+
+                // Actual musician
+                ellipse = new Ellipse();
                 ellipse.Width = PersonSizePx;
                 ellipse.Height = PersonSizePx;
                 ellipse.Stroke = UnselectedMusicianBorderBrush;
                 ellipse.Fill = UnselectedMusicianFillBrush;
+                ellipse.Opacity = 0.5;
                 Canvas.SetTop(ellipse, _currentProblem.RoomHeight - p.Y - PersonSizePx / 2);
                 Canvas.SetLeft(ellipse, p.X - PersonSizePx / 2);
                 ellipse.MouseLeftButtonDown += MusicianBubble_MouseDown;
@@ -291,14 +308,11 @@ namespace ICFP2023
             Point p = attendee.Location;
 
             List<Musician> allMusicians = _musicianShapeToMusician.Values.ToList();
-            for (int sourceIdx = 0; sourceIdx < allMusicians.Count - 1; sourceIdx++)
+            foreach (Musician sourceMusician in allMusicians)
             {
-                Musician sourceMusician = allMusicians[sourceIdx];
                 bool blocked = false;
-                for (int candidateIdx = sourceIdx + 1; candidateIdx < allMusicians.Count; candidateIdx++)
+                foreach (Musician otherMusician in allMusicians.Where(m => m != sourceMusician))
                 {
-                    Musician otherMusician = allMusicians[candidateIdx];
-                    
                     if (_currentSolution.IsMusicianBlocked(p, sourceMusician, otherMusician))
                     {
                         blocked = true;
