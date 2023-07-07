@@ -52,6 +52,11 @@ namespace ICFP2023
             // Test hackery
             BaseRender.Width = problem.RoomWidth; // Should be problem width/height eventually
             BaseRender.Height = problem.RoomHeight;
+
+            // Dynamic dot sizes!? Should be about 0.5% of the long axis.
+            float longAxis = Math.Max(problem.RoomWidth, problem.RoomHeight);
+            double PersonSizePx = longAxis / 200.0;
+
             // Lazy-assed thing to make everything hit-testable
             Rectangle hack = new Rectangle();
             hack.Width = problem.RoomWidth;
@@ -67,6 +72,7 @@ namespace ICFP2023
             border.Stroke = new SolidColorBrush(Colors.Black);
             border.StrokeThickness = 0.5;
             BaseRender.Children.Add(border);
+
             // Stage
             Rectangle stage = new Rectangle();
             stage.Width = problem.StageWidth;
@@ -76,17 +82,17 @@ namespace ICFP2023
             Canvas.SetBottom(stage, problem.StageBottomLeft.Y);
             Canvas.SetLeft(stage, problem.StageBottomLeft.X);
             BaseRender.Children.Add(stage);
-            // Audience member
+
+            // Attendees
             foreach (Attendee a in problem.Attendees)
             {
-                double DotWidth = 5.0;
                 Ellipse ellipse = new Ellipse();
-                ellipse.Width = 5;
-                ellipse.Height = 5;
+                ellipse.Width = PersonSizePx;
+                ellipse.Height = PersonSizePx;
                 ellipse.Stroke = new SolidColorBrush(Colors.Red);
                 ellipse.Fill = new SolidColorBrush(Colors.Salmon);
-                Canvas.SetTop(ellipse, problem.RoomHeight - a.Location.Y - DotWidth / 2);
-                Canvas.SetLeft(ellipse, a.Location.X - DotWidth / 2);
+                Canvas.SetTop(ellipse, problem.RoomHeight - a.Location.Y - PersonSizePx / 2);
+                Canvas.SetLeft(ellipse, a.Location.X - PersonSizePx / 2);
                 BaseRender.Children.Add(ellipse);
             }
         }
