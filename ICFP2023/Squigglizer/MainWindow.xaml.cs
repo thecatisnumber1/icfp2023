@@ -79,11 +79,11 @@ namespace ICFP2023
             foreach (Attendee a in problem.Attendees)
             {
                 Ellipse ellipse = new Ellipse();
-                ellipse.Width = 2;
-                ellipse.Height = 2;
+                ellipse.Width = 5;
+                ellipse.Height = 5;
                 ellipse.Stroke = new SolidColorBrush(Colors.Red);
                 ellipse.Fill = new SolidColorBrush(Colors.Salmon);
-                Canvas.SetTop(ellipse, a.Location.Y); // These are wrong because of width/height
+                Canvas.SetTop(ellipse, problem.RoomHeight - a.Location.Y); // These are wrong because of width/height
                 Canvas.SetLeft(ellipse, a.Location.X);
                 BaseRender.Children.Add(ellipse);
             }
