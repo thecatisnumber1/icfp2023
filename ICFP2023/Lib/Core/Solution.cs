@@ -123,7 +123,6 @@ namespace ICFP2023
 
         private bool IsMusicianBlocked(Point attendee, Musician musician, Musician blockingMusician)
         {
-            const double blockRadius = 5.0;
             var musicianLoc = GetPlacement(musician);
             var blockingLoc = GetPlacement(blockingMusician);
 
@@ -158,7 +157,7 @@ namespace ICFP2023
 
             // If this point is within the blocking radius, the musician is blocked
             var dp = blockingLoc - projection;
-            return dp.DotProduct(dp) <= blockRadius * blockRadius;
+            return dp.DotProduct(dp) <= Musician.BLOCKING_RADIUS * Musician.BLOCKING_RADIUS;
         }
 
         public static Solution Read(string solutionPath, ProblemSpec problem)
