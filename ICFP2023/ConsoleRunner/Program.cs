@@ -11,17 +11,25 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            int problemNum = 1;
-            Solution solution = new Solution(ProblemSpec.Read($"problem-{problemNum}"));
+            Solution solution = new Solution(ProblemSpec.Read($"problem-{1}"));
             AnnealingSolver.RandomizeStartingState(solution);
-            while (solution.ComputeScore() < 0)
+            solution = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 50000);
+            ;
+            /*for (int problemNum = 1; problemNum <= 45; problemNum++)
             {
-                Console.WriteLine($"Score was negative ({solution.ComputeScore()}). Trying again...");
+                Solution solution = new Solution(ProblemSpec.Read($"problem-{problemNum}"));
                 AnnealingSolver.RandomizeStartingState(solution);
-            }
+                int iterations = 0;
+                while (solution.ComputeScore() < 0 && iterations < 10)
+                {
+                    Console.WriteLine($"Score was negative ({solution.ComputeScore()}). Trying again...");
+                    AnnealingSolver.RandomizeStartingState(solution);
+                    iterations++;
+                }
 
-            Console.WriteLine($"Submitting solution with score {solution.ComputeScore()}");
-            SubmitSolution(solution, problemNum).Wait();
+                Console.WriteLine($"Submitting solution with score {solution.ComputeScore()}");
+                SubmitSolution(solution, problemNum).Wait();
+            }*/
         }
 
         public class Submission

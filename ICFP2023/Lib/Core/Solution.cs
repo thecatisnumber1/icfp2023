@@ -50,7 +50,7 @@ namespace ICFP2023
 
         public Solution Copy()
         {
-            return new Solution(Problem, Placements);
+            return new Solution(Problem, Placements.ToList());
         }
 
         public long ComputeScore()

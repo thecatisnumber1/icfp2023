@@ -10,7 +10,7 @@ namespace ICFP2023
     {
         private static readonly Random random = new Random();
 
-        public static Solution Solve(Solution initialSolution, Heuristic heuristic, int runtimeMs, int startingTemp = 500000, int endingTemp = 1)
+        public static Solution Solve(Solution initialSolution, Heuristic heuristic, int runtimeMs, int startingTemp = 5000, int endingTemp = 1)
         {
             int logDelayMs = 200;
             int lastLogTime = Environment.TickCount;
@@ -24,14 +24,14 @@ namespace ICFP2023
             {
                 if ((Environment.TickCount - lastLogTime) >= logDelayMs)
                 {
-                    Console.WriteLine($"T = {coolingScheduler.Temperature:F0}, B = {heuristic(bestSolution)}, C = {heuristic(currentSolution)}, % = {((accepted / (accepted + rejected)) * 100):F2}, R = {coolingScheduler.RemainingMs()}");
+                    Console.WriteLine($"T = {coolingScheduler.Temperature:F0}, B = {heuristic(bestSolution)}, C = {heuristic(currentSolution)}, % = {((accepted / (accepted + rejected)) * 100):F2}, R = {coolingScheduler.RemainingMs()}, {accepted + rejected}");
                     accepted = 0;
                     rejected = 0;
                     lastLogTime = Environment.TickCount;
                 }
 
-                double currentCost = heuristic(currentSolution);
                 Move move = GetNeighbor(currentSolution);
+                double currentCost = heuristic(currentSolution);
                 move.Apply(currentSolution);
                 double neighborCost = heuristic(currentSolution);
 
@@ -167,7 +167,7 @@ namespace ICFP2023
             Random random = new Random();
             const float edgeDistance = 10.0f; // Distance musicians should be from the stage edges
 
-            for (int i = 0; i < solution.Problem.Musicians.Count; i++)
+            for (int i = 0; i < 1; i++)
             {
                 do
                 {
