@@ -22,13 +22,23 @@
             <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Top" x:Name="ProblemSelector" SelectionChanged="ProblemSelector_OnSelectionChanged" />
             <Label Content="Solver" HorizontalAlignment="Right"/>
             <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Top" x:Name="SolverSelector" SelectionChanged="SolverSelector_OnSelectionChanged" />
+            <Separator />
+            <Label Content="Solver Stuff" />
+            <Button Content="Run" x:Name="SolverRunButton" Click="SolverRunButton_OnClick" IsEnabled="False" />
+            <!--<Button Content="Break" x:Name="SolverBreakButton" Click="SolverBreakButton_OnClick" IsEnabled="False" />-->
+            <!--<Button Content="Resume" x:Name="SolverResumeButton" Click="SolverResumeButton_OnClick" IsEnabled="False" />-->
+            <Separator />
             <local:SettingsControl x:Name="SettingsControl" />
         </StackPanel>
         <local:ConsoleControl x:Name="ConsoleControl" Grid.Column="0" Grid.Row="1" Panel.ZIndex="255"/>
 
         <Viewbox Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Left" Grid.Column="0">
-            <local:ZoomBorder x:Name="ZoomArea" >
-                <Canvas x:Name="BaseRender" MouseLeftButtonDown="ManualMove_OnMouseLeftButtonDown" />
+            <local:ZoomBorder x:Name="ZoomArea">
+                <Grid>
+                    <Canvas x:Name="BaseRender"/>
+                    <!-- MusicianRender only shows musicians and is where you are able to place musicians -->
+                    <Canvas x:Name="MusicianRender" MouseLeftButtonDown="ManualMove_OnMouseLeftButtonDown" />
+                </Grid>
             </local:ZoomBorder>
         </Viewbox>
     </Grid>

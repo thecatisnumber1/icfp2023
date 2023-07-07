@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
@@ -23,7 +24,10 @@ namespace ICFP2023
     public partial class MainWindow : Window
     {
         private SquigglizerSettings settings;
-        private ProblemCatalog AllProblems;
+        private ProblemCatalog _allProblems;
+        private ProblemSpec _currentProblem;
+
+        private double PersonSizePx;
 
         public MainWindow()
         {
@@ -33,32 +37,40 @@ namespace ICFP2023
             settings.ParseArgs(Environment.GetCommandLineArgs()[1..]);
             SettingsControl.Settings = settings;
 
-            AllProblems = new ProblemCatalog();
-            ProblemSelector.ItemsSource = AllProblems.Names;
+            _allProblems = new ProblemCatalog();
+            ProblemSelector.ItemsSource = _allProblems.Names;
 
             string[] solverList = Solvers.Names();
             SolverSelector.ItemsSource = solverList;
 
-            //RunTask(() =>
-            //{
-            //    Console.Write("What is your favorite color? ");
-            //    string name = Console.ReadLine();
-            //    Console.Error.WriteLine($"Error: {name} is not a creative color!");
-            //});
+            // Have some default selected
+            if (ProblemSelector.SelectedIndex < 0)
+            {
+                ProblemSelector.SelectedIndex = 0;
+            }
+
+            if (SolverSelector.SelectedIndex < 0)
+            {
+                SolverSelector.SelectedIndex = 0;
+            }
         }
 
         private void RenderProblem(ProblemSpec problem)
         {
             BaseRender.Children.Clear();
+            MusicianRender.Children.Clear();
             ZoomArea.Reset();
 
             // Test hackery
             BaseRender.Width = problem.RoomWidth; // Should be problem width/height eventually
             BaseRender.Height = problem.RoomHeight;
 
-            // Dynamic dot sizes!? Should be about 0.5% of the long axis.
+            MusicianRender.Width = problem.RoomWidth; // You'll need to check whether manual placement is on the stage on your own
+            MusicianRender.Height = problem.RoomHeight;
+
+            // Dynamic dot sizes!? Should be about 0.5% of the long axis, but no more than 10 because musicians' no-touching zones
             double longAxis = Math.Max(problem.RoomWidth, problem.RoomHeight);
-            double PersonSizePx = longAxis / 200.0;
+            PersonSizePx = Math.Min(longAxis / 200.0, 10.0);
 
             // Lazy-assed thing to make everything hit-testable
             Rectangle hack = new Rectangle();
@@ -102,8 +114,8 @@ namespace ICFP2023
 
         private void ResetProblem()
         {
-            ProblemSpec selectedProblem = AllProblems.GetSpec(ProblemSelector.SelectedItem.ToString());
-            RenderProblem(selectedProblem);
+            _currentProblem = _allProblems.GetSpec(ProblemSelector.SelectedItem.ToString());
+            RenderProblem(_currentProblem);
         }
 
         private void ProblemSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
@@ -113,7 +125,40 @@ namespace ICFP2023
 
         private void SolverSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            // Do nothing for now. Stole this from last year.
+            SolverRunButton.IsEnabled = true;
+        }
+
+        private void SolverRunButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            Solvers.Solver solver = Solvers.GetSolver(SolverSelector.SelectedItem.ToString());
+
+            SolverRunButton.IsEnabled = false;
+
+            SolverSelector.IsEnabled = false;
+            ProblemSelector.IsEnabled = false;
+
+            var adapter = new UIAdapterImpl(this);
+
+            // This should probably happen *after* the task runs
+            ResetProblem(); // Wipe all state.
+
+            RunTask(() =>
+            {
+                solver.Invoke(_currentProblem, settings, adapter);
+
+                // This will totally screw me over later, but it lets a final Render call go through.
+                Task.Delay(50).Wait();
+
+                // Here is where I should shut down the old UIAdapter. But I'm lazy atm.
+
+                // Cleanup UI on the main thread.
+                Dispatcher.BeginInvoke(() =>
+                {
+                    Console.WriteLine("Done!");
+                    SolverSelector.IsEnabled = true;
+                    ProblemSelector.IsEnabled = true;
+                });
+            });
         }
 
         // In debug mode an exception will properly trigger a break in the debugger if "Just My Code" is on.
@@ -133,6 +178,24 @@ namespace ICFP2023
                     throw;
                 }
             });
+        }
+
+        // This blindly assumes your solution has the correct problemspec. If it doesn't, you're hosed.
+        internal void RenderSolution(Solution solution)
+        {
+            MusicianRender.Children.Clear();
+
+            foreach (Point p in solution.Placements)
+            {
+                Ellipse ellipse = new Ellipse();
+                ellipse.Width = PersonSizePx;
+                ellipse.Height = PersonSizePx;
+                ellipse.Stroke = new SolidColorBrush(Colors.Blue);
+                ellipse.Fill = new SolidColorBrush(Colors.LightBlue);
+                Canvas.SetTop(ellipse, _currentProblem.RoomHeight - p.Y - PersonSizePx / 2);
+                Canvas.SetLeft(ellipse, p.X - PersonSizePx / 2);
+                MusicianRender.Children.Add(ellipse);
+            }
         }
 
         private void ManualMove_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
