@@ -69,7 +69,7 @@ namespace ICFP2023
             return JsonConvert.DeserializeObject<ProblemSpec>(problemJson);
         }
 
-        public class PointConverter : JsonConverter<Point>
+        private class PointConverter : JsonConverter<Point>
         {
             public override Point ReadJson(JsonReader reader, Type objectType, Point existingValue, bool hasExistingValue, JsonSerializer serializer)
             {
@@ -79,12 +79,11 @@ namespace ICFP2023
 
             public override void WriteJson(JsonWriter writer, Point value, JsonSerializer serializer)
             {
-                var array = new JArray { value.X, value.Y };
-                array.WriteTo(writer);
+                throw new NotImplementedException();
             }
         }
 
-        public class MusicianConverter : JsonConverter<List<Musician>>
+        private class MusicianConverter : JsonConverter<List<Musician>>
         {
             public override List<Musician> ReadJson(JsonReader reader, Type objectType, List<Musician> existingValue, bool hasExistingValue, JsonSerializer serializer)
             {

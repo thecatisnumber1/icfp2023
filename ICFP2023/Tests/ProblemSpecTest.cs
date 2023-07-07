@@ -16,6 +16,13 @@ namespace Tests
             ]
         }";
 
+        const string SOLUTION = @"{
+            ""placements"" : [
+                { ""x"" : 590.0 , ""y"" : 10.0 },
+                { ""x"" : 1100.0 , ""y"" : 100.0 },
+                { ""x"" : 1100.0 , ""y"" : 150.0 }
+            ]
+        }";
 
         [TestMethod]
         public void TestReadJson()
@@ -32,6 +39,18 @@ namespace Tests
             Assert.AreEqual(new Musician(2, 0), spec.Musicians[2]);
             Assert.AreEqual(new Attendee(100.0f, 500.0f, new float[] { 1000.0f, -1000.0f }.ToList()), spec.Attendees[0]);
             Assert.AreEqual(new Attendee(200.0f, 1000.0f, new float[] { 200.0f, 200.0f }.ToList()), spec.Attendees[1]);
+        }
+
+        [TestMethod]
+        public void TestWriteSolution()
+        {
+            var solution = new Solution(ProblemSpec.ReadJson(PROBLEM));
+            solution.Placements[0] = new(590.0f, 10.0f);
+            solution.Placements[1] = new(1100.0f, 100.0f);
+            solution.Placements[2] = new(1100.0f, 150.0f);
+            string json = solution.WriteJson();
+
+            Assert.AreEqual(SOLUTION.Replace(" ", "").Replace("\r", "").Replace("\n", ""), json);
         }
     }
 }

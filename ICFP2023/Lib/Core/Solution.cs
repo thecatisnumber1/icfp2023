@@ -1,4 +1,6 @@
-﻿using System;
+﻿using Newtonsoft.Json.Linq;
+using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -8,7 +10,10 @@ namespace ICFP2023
 {
     public class Solution
     {
+        [JsonIgnore]
         public readonly ProblemSpec Problem;
+
+        [JsonProperty("placements")]
         public readonly Point[] Placements;
 
         public Solution(ProblemSpec problem)
@@ -81,6 +86,11 @@ namespace ICFP2023
             // If this point is within the blocking radius, the musician is blocked
             var dp = blockingLoc - projection;
             return dp.DotProduct(dp) <= blockRadius * blockRadius;
+        }
+
+        public string WriteJson()
+        {
+            return JsonConvert.SerializeObject(this);
         }
     }
 }

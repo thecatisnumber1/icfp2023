@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Newtonsoft.Json;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
@@ -12,7 +13,11 @@ namespace ICFP2023
         // Make sure these names and types are appropriate for the the problem
         // Remove unnecesary stuff in the "SPECULATIVE" section
         // Add anything that's missing
-        public readonly float X, Y;
+        [JsonProperty("x")]
+        public readonly float X;
+
+        [JsonProperty("y")]
+        public readonly float Y;
 
         public static readonly Point ORIGIN = new(0, 0);
 
