@@ -167,7 +167,7 @@ namespace ICFP2023
             Random random = new Random();
             const float edgeDistance = 10.0f; // Distance musicians should be from the stage edges
 
-            for (int i = 0; i < 1; i++)
+            for (int i = 0; i < solution.Placements.Count; i++)
             {
                 do
                 {

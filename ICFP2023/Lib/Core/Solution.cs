@@ -93,10 +93,10 @@ namespace ICFP2023
             // TODO: Check distances to other musicians
             foreach(var point in Placements)
             {
-                float minX = Problem.StageBottomLeft.X + Musician.SOCIAL_DISTANCE;
-                float maxX = Problem.StageBottomLeft.X + Problem.StageWidth - Musician.SOCIAL_DISTANCE;
-                float minY = Problem.StageBottomLeft.Y + Musician.SOCIAL_DISTANCE;
-                float maxY = Problem.StageBottomLeft.Y + Problem.StageHeight - Musician.SOCIAL_DISTANCE;
+                double minX = Problem.StageBottomLeft.X + Musician.SOCIAL_DISTANCE;
+                double maxX = Problem.StageBottomLeft.X + Problem.StageWidth - Musician.SOCIAL_DISTANCE;
+                double minY = Problem.StageBottomLeft.Y + Musician.SOCIAL_DISTANCE;
+                double maxY = Problem.StageBottomLeft.Y + Problem.StageHeight - Musician.SOCIAL_DISTANCE;
 
                 if (point == Point.ORIGIN ||
                     point.X < minX || point.X > maxX ||
@@ -115,15 +115,34 @@ namespace ICFP2023
             var musicianLoc = GetPlacement(musician);
             var blockingLoc = GetPlacement(blockingMusician);
 
-            // Calculate the vectors and the scalar projections
-            var da = attendee - musicianLoc;
-            var db = blockingLoc - musicianLoc;
-            var dot = da.DotProduct(db);
-            var len_sq = db.DotProduct(db);
+            // Calculate the vectors
+            var da = attendee - musicianLoc; // vector from musician to attendee
+            var db = blockingLoc - musicianLoc; // vector from musician to blockingMusician
 
-            // Find the point on the line (musician -> attendee) that is closest to the blocking musician
-            var t = Math.Max(0, Math.Min(len_sq, dot)) / (len_sq == 0 ? 1 : len_sq);
-            var projection = musicianLoc + new Vec(t * db.X, t * db.Y);
+            // Calculate the dot product and magnitude squared
+            var dot = da.DotProduct(db);
+            var len_sq = da.DotProduct(da); // magnitude squared of da
+
+            // Compute t as the scalar projection without clamping
+            var t = dot / (len_sq == 0 ? 1 : len_sq);
+
+            // The point on the line (musician to attendee) closest to the blocking musician
+            Point projection;
+
+            // If t is less than 0, the projection falls before the musician's position. If t is greater than 1, it falls after the attendee's position.
+            if (t < 0)
+            {
+                projection = musicianLoc;
+            }
+            else if (t > 1)
+            {
+                projection = attendee;
+            }
+            else
+            {
+                // Compute the projection of the point on the line from the musician to the attendee
+                projection = musicianLoc + t * da; // note: da is the vector from musician to attendee
+            }
 
             // If this point is within the blocking radius, the musician is blocked
             var dp = blockingLoc - projection;
