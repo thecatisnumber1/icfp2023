@@ -23,7 +23,7 @@ namespace Tests
             }
 
             var score = solution.ComputeScore();
-            Assert.AreEqual(score, 9227687);
+            Assert.AreEqual(9227687, score);
         }
 
         [TestMethod]
@@ -40,7 +40,7 @@ namespace Tests
 
 
             var score = solution.ComputeScore();
-            Assert.AreEqual(score, 5343);
+            Assert.AreEqual(5343, score);
             
         }
     }
