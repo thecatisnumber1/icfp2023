@@ -12,6 +12,26 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
+            for (int i = 1; i < 56; i++)
+            {
+                try
+                {
+                    Console.WriteLine($"Solving problem {i}");
+                    Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
+                    AnnealingSolver.GridBasedStartingState(solution);
+                    Solution best = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 45000, 1000000);
+                    Console.WriteLine($"Best score: {best.ScoreCache}");
+                    SubmitSolution(best, i).Wait();
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error on problem {i}: {e.Message}");
+                }
+            }
+        }
+
+        private static void SubmitRandomSolutions()
+        {
             HashSet<int> toDoList = new HashSet<int> { 5, 7, 18, 56 };
             foreach (int problemNum in toDoList)
             {
@@ -21,7 +41,7 @@ namespace ICFP2023
                 Solution solution = new Solution(ProblemSpec.Read($"problem-{problemNum}"));
 
                 AnnealingSolver.GridBasedStartingState(solution);
-                long bestScore = solution.ComputeScore();
+                long bestScore = solution.InitializeScore();
                 Solution bestSolution = solution.Copy();
 
                 for (int i = 0; i < 5; i++)
@@ -29,7 +49,7 @@ namespace ICFP2023
                     Stopwatch computeScoreSw = Stopwatch.StartNew();
 
                     AnnealingSolver.GridBasedStartingState(solution);
-                    long score = solution.ComputeScore();
+                    long score = solution.InitializeScore();
 
                     computeScoreSw.Stop();
                     Console.WriteLine($"ComputeScore time for iteration {i + 1}: {computeScoreSw.ElapsedMilliseconds}ms");

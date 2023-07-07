@@ -12,6 +12,10 @@ namespace ICFP2023
 
         public static Solution Solve(Solution initialSolution, Heuristic heuristic, int runtimeMs, int startingTemp = 5000, int endingTemp = 1)
         {
+            Console.WriteLine($"Starting annealing solver with runtime {runtimeMs}ms, starting temp {startingTemp}, ending temp {endingTemp}");
+            initialSolution.InitializeScore();
+            Console.WriteLine($"Finsihed initializing score: {initialSolution.ScoreCache}");
+
             int logDelayMs = 200;
             int lastLogTime = Environment.TickCount;
             double accepted = 0;
@@ -72,10 +76,25 @@ namespace ICFP2023
 
         public static long ComputeCost(Solution solution)
         {
-            return -solution.ComputeScore();
+            return -solution.ScoreCache;
         }
 
         private static Move GetNeighbor(Solution solution)
+        {
+            // Pick two non-identical indexes
+            int m0;
+            int m1;
+            do
+            {
+                m0 = random.Next(solution.Placements.Count);
+                m1 = random.Next(solution.Placements.Count);
+            } while (solution.Problem.Musicians[m0].Instrument == solution.Problem.Musicians[m1].Instrument);
+
+            return new Move(m0, m1);
+        }
+
+        // Previous version of GetNeighbor which would move points slightly.
+        /*private static Move GetNeighbor(Solution solution)
         {
             int musicianIndex;
             Vec delta;
@@ -102,7 +121,7 @@ namespace ICFP2023
                 // Otherwise, undo the move and try again
                 move.Undo(solution);
             }
-        }
+        }*/
 
         public static bool IsCurrentlyValid(Solution solution)
         {
@@ -174,9 +193,9 @@ namespace ICFP2023
             List<Point> gridPoints = new List<Point>();
 
             // Fill the list with points from the grid
-            for (float x = solution.Problem.StageBottomLeft.X + edgeDistance; x < solution.Problem.StageBottomLeft.X + solution.Problem.StageWidth - edgeDistance; x += gridSize)
+            for (double x = solution.Problem.StageBottomLeft.X + edgeDistance; x < solution.Problem.StageBottomLeft.X + solution.Problem.StageWidth - edgeDistance; x += gridSize)
             {
-                for (float y = solution.Problem.StageBottomLeft.Y + edgeDistance; y < solution.Problem.StageBottomLeft.Y + solution.Problem.StageHeight - edgeDistance; y += gridSize)
+                for (double y = solution.Problem.StageBottomLeft.Y + edgeDistance; y < solution.Problem.StageBottomLeft.Y + solution.Problem.StageHeight - edgeDistance; y += gridSize)
                 {
                     gridPoints.Add(new Point(x, y));
                 }
@@ -225,16 +244,16 @@ namespace ICFP2023
             }
         }
 
-        record Move(int Index, Vec Delta)
+        record Move(int M0, int M1)
         {
             public void Apply(Solution solution)
             {
-                solution.Placements[Index] += Delta;
+                solution.Swap(M0, M1);
             }
 
             public void Undo(Solution solution)
             {
-                solution.Placements[Index] -= Delta;
+                solution.Swap(M1, M0);
             }
         }
     }

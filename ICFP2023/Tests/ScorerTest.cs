@@ -22,7 +22,7 @@ namespace Tests
                 solution.SetPlacement(prob.Musicians[i], points[i]);
             }
 
-            var score = solution.ComputeScore();
+            var score = solution.InitializeScore();
             Assert.AreEqual(9227687, score);
         }
 
@@ -39,7 +39,7 @@ namespace Tests
             }
 
 
-            var score = solution.ComputeScore();
+            var score = solution.InitializeScore();
             Assert.AreEqual(5343, score);
             
         }

@@ -28,7 +28,7 @@ namespace ICFP2023
                 return false;
             }
 
-            long score = solution.ComputeScore();
+            long score = solution.InitializeScore();
             if (score > BestScore)
             {
                 Best = solution.Copy();

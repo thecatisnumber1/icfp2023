@@ -22,6 +22,14 @@ namespace ICFP2023
             this.Placements = placements;
         }
 
+        public long ScoreCache { get; private set; }
+
+        // Index of musician to the list of scores for each attendee
+        private Dictionary<int, List<long>> MusicianScoreCache;
+
+        // Index of the musician to the list of attendees that are blocked from that perspective
+        private Dictionary<Point, HashSet<int>> MusicianBlockedCache;
+
         public Solution(ProblemSpec problem)
         {
             this.Problem = problem;
@@ -32,10 +40,13 @@ namespace ICFP2023
             }
         }
 
-        private Solution(ProblemSpec problem, List<Point> placements)
+        private Solution(ProblemSpec problem, List<Point> placements, Dictionary<int, List<long>> musicianScoreCache, Dictionary<Point, HashSet<int>> musicianBlockedCache, long scoreCache)
         {
-            this.Problem = problem;
-            this.Placements = placements;
+            Problem = problem;
+            Placements = placements;
+            MusicianScoreCache = musicianScoreCache;
+            MusicianBlockedCache = musicianBlockedCache;
+            ScoreCache = scoreCache;
         }
 
         public Point GetPlacement(Musician musician)
@@ -48,18 +59,74 @@ namespace ICFP2023
             Placements[musician.Index] = loc;
         }
 
-        public Solution Copy()
+        public void Swap(int m0, int m1)
         {
-            return new Solution(Problem, Placements.ToList());
+            for (int i = 0; i < Problem.Attendees.Count; i++)
+            {
+                ScoreCache -= MusicianScoreCache[m0][i];
+                ScoreCache -= MusicianScoreCache[m1][i];
+            }
+
+            var temp = Placements[m0];
+            Placements[m0] = Placements[m1];
+            Placements[m1] = temp;
+
+            for (int i = 0; i < Problem.Attendees.Count; i++)
+            {
+                MusicianScoreCache[m0][i] = 0;
+                MusicianScoreCache[m1][i] = 0;
+                if (!MusicianBlockedCache[Placements[m0]].Contains(i))
+                {
+                    MusicianScoreCache[m0][i] = PairScore(m0, i); ;
+                }
+
+                if (!MusicianBlockedCache[Placements[m1]].Contains(i))
+                {
+                    MusicianScoreCache[m1][i] = PairScore(m1, i); ;
+                }
+
+                ScoreCache += MusicianScoreCache[m0][i];
+                ScoreCache += MusicianScoreCache[m1][i];
+            }
         }
 
-        public long ComputeScore()
+        public Solution Copy()
         {
-            long score = 0;
-            foreach (var musician in Problem.Musicians)
+            Dictionary<int, List<long>> cacheCopy = new Dictionary<int, List<long>>();
+            foreach (var kvp in MusicianScoreCache)
             {
-                foreach (var attendee in Problem.Attendees)
+                cacheCopy.Add(kvp.Key, new List<long>(kvp.Value));
+            }
+
+            return new Solution(Problem, new List<Point>(Placements), cacheCopy, MusicianBlockedCache, ScoreCache);
+        }
+
+        private void ResetCaches()
+        {
+            MusicianScoreCache = new Dictionary<int, List<long>>();
+            MusicianBlockedCache = new Dictionary<Point, HashSet<int>>();
+            for (int i = 0; i < Problem.Musicians.Count; i++)
+            {
+                MusicianScoreCache.Add(i, new List<long>());
+                MusicianBlockedCache.Add(Placements[i], new HashSet<int>());
+                for (int j = 0; j < Problem.Attendees.Count; j++)
                 {
+                    MusicianScoreCache[i].Add(0);
+                }
+            }
+        }
+
+        public long InitializeScore()
+        {
+            ScoreCache = 0;
+            ResetCaches();
+            for (int musicianIndex = 0; musicianIndex < Problem.Musicians.Count; musicianIndex++)
+            {
+                var musician = Problem.Musicians[musicianIndex];
+                for (int attendeeIndex = 0; attendeeIndex < Problem.Attendees.Count; attendeeIndex++)
+                {
+                    var attendee = Problem.Attendees[attendeeIndex];
+
                     // Determine if blocked
                     bool blocked = false;
                     foreach (var blockingMusician in Problem.Musicians)
@@ -72,6 +139,7 @@ namespace ICFP2023
                         if (IsMusicianBlocked(attendee.Location, musician, blockingMusician))
                         {
                             blocked = true;
+                            MusicianBlockedCache[Placements[musicianIndex]].Add(attendeeIndex);
                             break;
                         }
                     }
@@ -81,11 +149,20 @@ namespace ICFP2023
                         continue;
                     }
 
-                    score += (long)Math.Ceiling(1000000 * attendee.Tastes[musician.Instrument] / attendee.Location.DistSq(GetPlacement(musician)));
+                    long tempScore = PairScore(musicianIndex, attendeeIndex);
+                    MusicianScoreCache[musicianIndex][attendeeIndex] = tempScore;
+                    ScoreCache += tempScore;
                 }
             }
 
-            return score;
+            return ScoreCache;
+        }
+
+        // Assumes no blocking!
+        private long PairScore(int musicianIndex, int attendeeIndex)
+        {
+            return (long)Math.Ceiling(1000000 * Problem.Attendees[attendeeIndex].Tastes[Problem.Musicians[musicianIndex].Instrument] /
+                Problem.Attendees[attendeeIndex].Location.DistSq(Placements[musicianIndex]));
         }
 
         public bool IsValid()
