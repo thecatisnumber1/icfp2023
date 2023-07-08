@@ -44,10 +44,13 @@ namespace ICFP2023
 
         private static SolidColorBrush SelectedPersonBorderBrush = new SolidColorBrush(Colors.Green);
         private static SolidColorBrush SelectedPersonFillBrush = new SolidColorBrush(Colors.LightGreen);
+
+        private static List<Color> MagicGradient = new List<Color>();
+        private const int MagicGradientSteps = 1024;
         #endregion
 
         #region Control Tracking for Highlighting
-        private Dictionary<Shape, Musician> _musicianShapeToMusician = new Dictionary<Shape, Musician>();
+        private Dictionary<Shape, (Musician Musician, SolidColorBrush FillBrush)> _musicianShapeToMusician = new Dictionary<Shape, (Musician Musician, SolidColorBrush FillBrush)>();
         private Dictionary<Musician, Shape> _musicianToShape = new Dictionary<Musician, Shape>();
 
         private Dictionary<Shape, Attendee> _attendeeShapeToAttendee = new Dictionary<Shape, Attendee>();
@@ -79,6 +82,23 @@ namespace ICFP2023
             if (SolverSelector.SelectedIndex < 0)
             {
                 SolverSelector.SelectedIndex = 0;
+            }
+
+            int size = MagicGradientSteps / 2;
+            for (int i = 0; i < size; i++)
+            {
+                var rAverage = (byte)(Colors.Red.R + (byte)((Colors.White.R - Colors.Red.R) * i / size));
+                var gAverage = (byte)(Colors.Red.G + (byte)((Colors.White.G - Colors.Red.G) * i / size));
+                var bAverage = (byte)(Colors.Red.B + (byte)((Colors.White.B - Colors.Red.B) * i / size));
+                MagicGradient.Add(Color.FromArgb(255, rAverage, gAverage, bAverage));
+            }
+
+            for (int i = 0; i < size; i++)
+            {
+                var rAverage = (byte)(Colors.White.R + (byte)((Colors.Green.R - Colors.White.R) * i / size));
+                var gAverage = (byte)(Colors.White.G + (byte)((Colors.Green.G - Colors.White.G) * i / size));
+                var bAverage = (byte)(Colors.White.B + (byte)((Colors.Green.B - Colors.White.B) * i / size));
+                MagicGradient.Add(Color.FromArgb(255, rAverage, gAverage, bAverage));
             }
         }
 
@@ -219,39 +239,69 @@ namespace ICFP2023
         internal void RenderSolution(Solution solution)
         {
             _currentSolution = solution;
+            _ = _currentSolution.InitializeScore(); // Not doing anything with the total score for now.
 
             _musicianShapeToMusician.Clear();
             _musicianToShape.Clear();
             MusicianRender.Children.Clear();
 
+            long minEffect = -1;
+            long maxEffect = 1;
+            // Compute min/max for gradient purposes
+            for (int i = 0; i < solution.Placements.Count; i++)
+            {
+                long effect = _currentSolution.GetScoreForMusician(i);
+                minEffect = Math.Min(effect, minEffect);
+                maxEffect = Math.Max(effect, maxEffect);
+            }
+
             for (int i = 0; i < solution.Placements.Count; i++)
             {
                 Point p = solution.Placements[i];
 
-
                 // Blocking zone
-                var ellipse = new Ellipse();
-                ellipse.Width = 10;
-                ellipse.Height = 10;
-                ellipse.Stroke = MusicianNoTouchingZoneBorderBrush;
-                ellipse.Fill = MusicianNoTouchingZoneFillBrush;
-                Canvas.SetTop(ellipse, _currentProblem.RoomHeight - p.Y - 5);
-                Canvas.SetLeft(ellipse, p.X - 5);
-
-                MusicianRender.Children.Add(ellipse);
+                // var ellipse = new Ellipse();
+                // ellipse.Width = 10;
+                // ellipse.Height = 10;
+                // ellipse.Stroke = MusicianNoTouchingZoneBorderBrush;
+                // ellipse.Fill = MusicianNoTouchingZoneFillBrush;
+                // Canvas.SetTop(ellipse, _currentProblem.RoomHeight - p.Y - 5);
+                // Canvas.SetLeft(ellipse, p.X - 5);
+                // 
+                // MusicianRender.Children.Add(ellipse);
 
                 // Actual musician
-                ellipse = new Ellipse();
+                var ellipse = new Ellipse();
                 ellipse.Width = PersonSizePx;
                 ellipse.Height = PersonSizePx;
-                ellipse.Stroke = UnselectedMusicianBorderBrush;
-                ellipse.Fill = UnselectedMusicianFillBrush;
-                ellipse.Opacity = 0.5;
+                ellipse.Stroke = BlackBrush;
+
+                SolidColorBrush fillBrush;
+                long effect = _currentSolution.GetScoreForMusician(i);
+                ellipse.ToolTip = effect.ToString();
+
+                int index = 0;
+                int half = MagicGradientSteps / 2;
+                if (effect == 0) {
+                    index = half;
+                }
+                else if (effect < 0)
+                {
+                    index = half - (int)((double)effect / minEffect * half);
+                }
+                else
+                {
+                    index = half + (int)((double)effect / maxEffect * half) - 1;
+                }
+                var brush = new SolidColorBrush(MagicGradient[index]);
+                ellipse.Fill = brush; // More negative = more red. More positive = more green.
+
+                //ellipse.Opacity = 0.5;
                 Canvas.SetTop(ellipse, _currentProblem.RoomHeight - p.Y - PersonSizePx / 2);
                 Canvas.SetLeft(ellipse, p.X - PersonSizePx / 2);
                 ellipse.MouseLeftButtonDown += MusicianBubble_MouseDown;
                 Musician m = _currentProblem.Musicians.Single(m => m.Index == i);
-                _musicianShapeToMusician.Add(ellipse, m);
+                _musicianShapeToMusician.Add(ellipse, (m, brush));
                 _musicianToShape.Add(m, ellipse);
 
                 MusicianRender.Children.Add(ellipse);
@@ -260,7 +310,7 @@ namespace ICFP2023
 
         private void MusicianBubble_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            ResetSelectedPerson();
+            ResetPeople();
 
             // User clicks a musician. Find/highlight the musician.
             Shape musicianBubble = (Shape)sender;
@@ -268,7 +318,7 @@ namespace ICFP2023
             musicianBubble.Fill = SelectedPersonFillBrush;
 
             // Highlight any attendees that can hear them.
-            Musician sourceMusician = _musicianShapeToMusician[musicianBubble];
+            Musician sourceMusician = _musicianShapeToMusician[musicianBubble].Musician;
             List<Musician> otherMusicians = _musicianToShape.Keys.Where(m => m != sourceMusician).ToList();
             
             foreach (var attendee in _attendeeToShape)
@@ -297,7 +347,7 @@ namespace ICFP2023
 
         private void AttendeeBubble_MouseDown(object sender, MouseButtonEventArgs e)
         {
-            ResetSelectedPerson();
+            ResetPeople();
 
             Shape attendeeBubble = (Shape)sender;
             attendeeBubble.Stroke = SelectedPersonBorderBrush;
@@ -307,7 +357,7 @@ namespace ICFP2023
             Attendee attendee = _attendeeShapeToAttendee[attendeeBubble];
             Point p = attendee.Location;
 
-            List<Musician> allMusicians = _musicianShapeToMusician.Values.ToList();
+            List<Musician> allMusicians = _musicianShapeToMusician.Values.Select(x => x.Musician).ToList();
             foreach (Musician sourceMusician in allMusicians)
             {
                 bool blocked = false;
@@ -332,7 +382,7 @@ namespace ICFP2023
 
         }
 
-        private void ResetSelectedPerson()
+        private void ResetPeople()
         {
             foreach (Shape attendeeBubble in _attendeeShapeToAttendee.Keys)
             {
@@ -340,10 +390,11 @@ namespace ICFP2023
                 attendeeBubble.Fill = UnselectedAttendeeFillBrush;
             }
 
-            foreach (Shape musicianBubble in _musicianShapeToMusician.Keys)
+            foreach (var musician in _musicianShapeToMusician)
             {
-                musicianBubble.Stroke = UnselectedMusicianBorderBrush;
-                musicianBubble.Fill = UnselectedMusicianFillBrush;
+                Shape musicianBubble = musician.Key;
+                musicianBubble.Stroke = BlackBrush;
+                musicianBubble.Fill = musician.Value.FillBrush;
             }
         }
 
