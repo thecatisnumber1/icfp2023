@@ -40,6 +40,8 @@ namespace ICFP2023
         private static SolidColorBrush SelectedPersonBorderBrush = new SolidColorBrush(Colors.Green);
         private static SolidColorBrush SelectedPersonFillBrush = new SolidColorBrush(Colors.LightGreen);
 
+        private static SolidColorBrush TransparentBrush = new SolidColorBrush(Colors.Transparent);
+
         private static Color GoodScoreColor = Colors.Green;
         private static Color BadScoreColor = Colors.Red;
         private static List<SolidColorBrush> MagicGradient = new List<SolidColorBrush>();
@@ -53,6 +55,10 @@ namespace ICFP2023
         private Dictionary<Shape, (Attendee Attendee, SolidColorBrush OriginalColor)> _attendeeShapeToAttendee = new Dictionary<Shape, (Attendee Attendee, SolidColorBrush OriginalColor)>();
         private Dictionary<Attendee, Shape> _attendeeToShape = new Dictionary<Attendee, Shape>();
         private Dictionary<Attendee, int> _attendeeToIndex = new Dictionary<Attendee, int>();
+        #endregion
+
+        #region Hacks for Manual Placement
+        private Rectangle _stageOverlayRect;
         #endregion
 
         private Solution _currentSolution;
@@ -70,10 +76,9 @@ namespace ICFP2023
             SettingsControl.Settings = settings;
 
             _allProblems = new ProblemCatalog();
-            var idToNames = _allProblems.Names.ToDictionary(name => int.Parse(name.Substring(name.IndexOf('-'))), name => name);
+            var idToNames = _allProblems.Names.ToDictionary(name => int.Parse(name.Substring(name.IndexOf('-') + 1)), name => name);
             List<int> ids = idToNames.Keys.ToList();
             ids.Sort();
-            ids.Reverse();
             List<string> sortedNames = new();
             foreach (int idx in ids)
             {
@@ -162,6 +167,15 @@ namespace ICFP2023
             Canvas.SetBottom(stage, problem.StageBottomLeft.Y);
             Canvas.SetLeft(stage, problem.StageBottomLeft.X);
             BaseRender.Children.Add(stage);
+
+            // Add a hack control that's the size of the stage for hit-detection on the stage
+            _stageOverlayRect = new Rectangle();
+            _stageOverlayRect.Width = _currentProblem.StageWidth - 10;
+            _stageOverlayRect.Height = _currentProblem.StageHeight - 10;
+            _stageOverlayRect.Fill = TransparentBrush;
+            Canvas.SetTop(_stageOverlayRect, _currentProblem.RoomHeight - _currentProblem.StageTop + 5); // Add the no-touching zone.
+            Canvas.SetLeft(_stageOverlayRect, _currentProblem.StageLeft + 5);
+            MusicianRender.Children.Add(_stageOverlayRect);
 
             // Do not place the centers of your musician dots between this thing and the stage
             Rectangle innerStage = new Rectangle();
@@ -354,6 +368,9 @@ namespace ICFP2023
             _musicianShapeToMusician.Clear();
             _musicianToShape.Clear();
 
+            // Add a hack control that's the size of the stage for hit-detection
+            MusicianRender.Children.Add(_stageOverlayRect);
+
             long minEffect = -1;
             long maxEffect = 1;
             // Compute min/max for gradient purposes
@@ -485,19 +502,7 @@ namespace ICFP2023
 
         private void ManualMove_OnMouseLeftButtonDown(object sender, MouseButtonEventArgs e)
         {
-            WinPoint cursorPosition = e.GetPosition(ZoomArea);
-            // Ignore stuff outside of the zoom area's bounds
-            if (!IsInZoomArea(e))
-            {
-                return;
-            }
-            
-        }
-
-        private bool IsInZoomArea(MouseButtonEventArgs e)
-        {
-            WinPoint cursorPosition = e.GetPosition(ZoomArea);
-            return !(cursorPosition.X < 0 || cursorPosition.X > ZoomArea.ActualWidth || cursorPosition.Y < 0 || cursorPosition.Y > ZoomArea.ActualHeight);
+            WinPoint cursorPosition = e.GetPosition(_stageOverlayRect);
         }
 
         internal void SetMusicianColor(int index, string color)
