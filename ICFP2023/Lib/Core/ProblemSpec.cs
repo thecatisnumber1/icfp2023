@@ -10,10 +10,20 @@ using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ICFP2023
 {
+    [Flags]
+    public enum ProblemExtensions {
+        None = 0, // Lightning round
+        Pillars = 1, // Extension 1
+        PlayingTogether = 2, // Extension 2
+    }
+
     public class ProblemSpec
     {
         [JsonIgnore]
         public string ProblemName { get; private set; }
+
+        [JsonIgnore]
+        public int ProblemNumber => int.Parse(ProblemName.Substring(ProblemName.IndexOf('-')));
 
         [JsonProperty("room_width")]
         public double RoomWidth { get; init; }
@@ -54,6 +64,11 @@ namespace ICFP2023
 
         [JsonProperty("pillars")]
         public List<Pillar> Pillars { get; init; }
+
+        // 1 through 55 = Lightning round. 56 through 90 = Pillars + Playing Together
+        public ProblemExtensions Extensions => ProblemNumber < 56 ? ProblemExtensions.None : (ProblemExtensions.Pillars | ProblemExtensions.PlayingTogether);
+
+        public bool UsePlayingTogetherScoring => Extensions.HasFlag(ProblemExtensions.PlayingTogether);
 
         public ProblemSpec(
             double roomWidth,
