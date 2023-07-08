@@ -231,7 +231,6 @@ namespace ICFP2023
             var adapter = new UIAdapterImpl(this);
 
             // This should probably happen *after* the task runs
-            ResetProblem(); // Wipe all state.
 
             RunTask(() =>
             {
@@ -332,7 +331,6 @@ namespace ICFP2023
                 var brush = new SolidColorBrush(MagicGradient[index]);
                 ellipse.Fill = brush; // More negative = more red. More positive = more green.
 
-                //ellipse.Opacity = 0.5;
                 Canvas.SetTop(ellipse, _currentProblem.RoomHeight - p.Y - PersonSizePx / 2);
                 Canvas.SetLeft(ellipse, p.X - PersonSizePx / 2);
                 ellipse.MouseLeftButtonDown += MusicianBubble_MouseDown;
