@@ -24,8 +24,8 @@ namespace ICFP2023
         {
             InitializeComponent();
 
-            Focusable = true;
-            GotFocus += (sender, e) => InputBox.Focus();
+            //Focusable = true;
+            //GotFocus += (sender, e) => InputBox.Focus();
 
             messages = new ConcurrentQueue<OutMessage>();
             Out = new QueueWriter(messages, Brushes.White, UpdateText);
