@@ -27,7 +27,7 @@ namespace ICFP2023
         // Index of musician to the list of scores for each attendee
         private Dictionary<int, List<long>> MusicianScoreCache;
 
-        // Index of the musician to the list of attendees that are blocked from that perspective
+        // Position of the musician to the list of attendees that are blocked from that perspective
         private Dictionary<Point, HashSet<int>> MusicianBlockedCache;
 
         public Solution(ProblemSpec problem)
@@ -116,6 +116,8 @@ namespace ICFP2023
             }
         }
 
+        // If you want to actually use anything this thing caches, you'd better call this first.
+        // Any changes (calls to SetLocation) will also require this to be re-called first.
         public long InitializeScore()
         {
             ScoreCache = 0;
@@ -156,6 +158,11 @@ namespace ICFP2023
             }
 
             return ScoreCache;
+        }
+
+        public long GetScoreForMusician(int musicianIndex)
+        {
+            return MusicianScoreCache[musicianIndex].Sum();
         }
 
         // Assumes no blocking!
