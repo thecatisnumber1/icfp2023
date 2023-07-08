@@ -1,19 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Controls;
-using System.Windows.Data;
-using System.Windows.Documents;
 using System.Windows.Input;
 using System.Windows.Media;
-using System.Windows.Media.Imaging;
-using System.Windows.Navigation;
 using System.Windows.Shapes;
-using static ICFP2023.ProblemSpec;
 using WinPoint = System.Windows.Point;
 
 namespace ICFP2023
@@ -45,7 +39,7 @@ namespace ICFP2023
 
         private static Color GoodScoreColor = Colors.Green;
         private static Color BadScoreColor = Colors.Red;
-        private static List<Color> MagicGradient = new List<Color>();
+        private static List<SolidColorBrush> MagicGradient = new List<SolidColorBrush>();
         private const int MagicGradientSteps = 1024;
         #endregion
 
@@ -53,11 +47,12 @@ namespace ICFP2023
         private Dictionary<Shape, (Musician Musician, SolidColorBrush FillBrush)> _musicianShapeToMusician = new Dictionary<Shape, (Musician Musician, SolidColorBrush FillBrush)>();
         private Dictionary<Musician, Shape> _musicianToShape = new Dictionary<Musician, Shape>();
 
-        private Dictionary<Shape, Attendee> _attendeeShapeToAttendee = new Dictionary<Shape, Attendee>();
+        private Dictionary<Shape, (Attendee Attendee, SolidColorBrush OriginalColor)> _attendeeShapeToAttendee = new Dictionary<Shape, (Attendee Attendee, SolidColorBrush OriginalColor)>();
         private Dictionary<Attendee, Shape> _attendeeToShape = new Dictionary<Attendee, Shape>();
         #endregion
 
         private Solution _currentSolution;
+        private AudienceColorizers.Colorizer _currentAudienceColorizer;
 
         public MainWindow()
         {
@@ -76,6 +71,24 @@ namespace ICFP2023
             string[] colorizerList = AudienceColorizers.Names();
             ColorizerSelector.ItemsSource = colorizerList;
 
+            // Initialize the magic gradient before things can try to use it
+            int size = MagicGradientSteps / 2;
+            for (int i = 0; i < size; i++)
+            {
+                var rAverage = (byte)(BadScoreColor.R + (byte)((Colors.White.R - BadScoreColor.R) * i / size));
+                var gAverage = (byte)(BadScoreColor.G + (byte)((Colors.White.G - BadScoreColor.G) * i / size));
+                var bAverage = (byte)(BadScoreColor.B + (byte)((Colors.White.B - BadScoreColor.B) * i / size));
+                MagicGradient.Add(new SolidColorBrush(Color.FromArgb(255, rAverage, gAverage, bAverage)));
+            }
+
+            for (int i = 0; i < size; i++)
+            {
+                var rAverage = (byte)(Colors.White.R + (byte)((GoodScoreColor.R - Colors.White.R) * i / size));
+                var gAverage = (byte)(Colors.White.G + (byte)((GoodScoreColor.G - Colors.White.G) * i / size));
+                var bAverage = (byte)(Colors.White.B + (byte)((GoodScoreColor.B - Colors.White.B) * i / size));
+                MagicGradient.Add(new SolidColorBrush(Color.FromArgb(255, rAverage, gAverage, bAverage)));
+            }
+
             // Have some default selected
             if (ProblemSelector.SelectedIndex < 0)
             {
@@ -85,28 +98,6 @@ namespace ICFP2023
             if (SolverSelector.SelectedIndex < 0)
             {
                 SolverSelector.SelectedIndex = 0;
-            }
-
-            if (ColorizerSelector.SelectedIndex < 0)
-            {
-                ColorizerSelector.SelectedIndex = 0;
-            }
-
-            int size = MagicGradientSteps / 2;
-            for (int i = 0; i < size; i++)
-            {
-                var rAverage = (byte)(BadScoreColor.R + (byte)((Colors.White.R - BadScoreColor.R) * i / size));
-                var gAverage = (byte)(BadScoreColor.G + (byte)((Colors.White.G - BadScoreColor.G) * i / size));
-                var bAverage = (byte)(BadScoreColor.B + (byte)((Colors.White.B - BadScoreColor.B) * i / size));
-                MagicGradient.Add(Color.FromArgb(255, rAverage, gAverage, bAverage));
-            }
-
-            for (int i = 0; i < size; i++)
-            {
-                var rAverage = (byte)(Colors.White.R + (byte)((GoodScoreColor.R - Colors.White.R) * i / size));
-                var gAverage = (byte)(Colors.White.G + (byte)((GoodScoreColor.G - Colors.White.G) * i / size));
-                var bAverage = (byte)(Colors.White.B + (byte)((GoodScoreColor.B - Colors.White.B) * i / size));
-                MagicGradient.Add(Color.FromArgb(255, rAverage, gAverage, bAverage));
             }
         }
 
@@ -173,18 +164,38 @@ namespace ICFP2023
             double maxAttendeeY = 0;
 
             // Attendees
+            // Compute gradient values
+            Dictionary<Attendee, double> evaluatedAttendees;
+            if (_currentAudienceColorizer != null)
+            {
+                evaluatedAttendees = _currentAudienceColorizer.Invoke(_currentProblem);
+            } else
+            {
+                evaluatedAttendees = _currentProblem.Attendees.ToDictionary(a => a, _ => 0d);
+            }
+
+            double audienceMin = double.MaxValue;
+            double audienceMax = double.MinValue;
+
+            foreach (var kvp in evaluatedAttendees)
+            {
+                audienceMin = Math.Min(audienceMin, kvp.Value);
+                audienceMax = Math.Max(audienceMax, kvp.Value);
+            }
+
             foreach (Attendee a in problem.Attendees)
             {
                 Ellipse ellipse = new Ellipse();
                 ellipse.Width = PersonSizePx;
                 ellipse.Height = PersonSizePx;
                 ellipse.Stroke = UnselectedAttendeeBorderBrush;
-                ellipse.Fill = UnselectedAttendeeFillBrush;
                 Canvas.SetTop(ellipse, problem.RoomHeight - a.Location.Y - PersonSizePx / 2);
                 Canvas.SetLeft(ellipse, a.Location.X - PersonSizePx / 2);
                 ellipse.ToolTip = string.Join(", ", a.Tastes);
                 ellipse.MouseLeftButtonDown += AttendeeBubble_MouseDown;
-                _attendeeShapeToAttendee.Add(ellipse, a);
+                SolidColorBrush originalBrush = GetBrushFromMagicGradient(evaluatedAttendees[a], audienceMin, audienceMax);
+                ellipse.Fill = originalBrush;
+                _attendeeShapeToAttendee.Add(ellipse, (a, originalBrush));
                 _attendeeToShape.Add(a, ellipse);
 
                 BaseRender.Children.Add(ellipse);
@@ -320,24 +331,10 @@ namespace ICFP2023
                 ellipse.Height = PersonSizePx;
                 ellipse.Stroke = BlackBrush;
 
-                SolidColorBrush fillBrush;
                 long effect = _currentSolution.GetScoreForMusician(i);
                 ellipse.ToolTip = effect.ToString();
 
-                int index = 0;
-                int half = MagicGradientSteps / 2;
-                if (effect == 0) {
-                    index = half;
-                }
-                else if (effect < 0)
-                {
-                    index = half - (int)((double)effect / minEffect * half);
-                }
-                else
-                {
-                    index = half + (int)((double)effect / maxEffect * half) - 1;
-                }
-                var brush = new SolidColorBrush(MagicGradient[index]);
+                SolidColorBrush brush = GetBrushFromMagicGradient(effect, minEffect, maxEffect);
                 ellipse.Fill = brush; // More negative = more red. More positive = more green.
 
                 Canvas.SetTop(ellipse, _currentProblem.RoomHeight - p.Y - PersonSizePx / 2);
@@ -349,6 +346,25 @@ namespace ICFP2023
 
                 MusicianRender.Children.Add(ellipse);
             }
+        }
+
+        private SolidColorBrush GetBrushFromMagicGradient(double val, double minVal, double maxVal)
+        {
+            int index;
+            int half = MagicGradientSteps / 2;
+            if (val == 0)
+            {
+                index = half;
+            }
+            else if (val < 0)
+            {
+                index = half - (int)(val / minVal * half);
+            }
+            else
+            {
+                index = half + (int)(val / maxVal * half) - 1;
+            }
+            return MagicGradient[index];
         }
 
         private void MusicianBubble_MouseDown(object sender, MouseButtonEventArgs e)
@@ -397,7 +413,7 @@ namespace ICFP2023
             attendeeBubble.Fill = SelectedPersonFillBrush;
 
             // Highlight the musicians they can hear
-            Attendee attendee = _attendeeShapeToAttendee[attendeeBubble];
+            Attendee attendee = _attendeeShapeToAttendee[attendeeBubble].Attendee;
             Point p = attendee.Location;
 
             List<Musician> allMusicians = _musicianShapeToMusician.Values.Select(x => x.Musician).ToList();
@@ -430,7 +446,7 @@ namespace ICFP2023
             foreach (Shape attendeeBubble in _attendeeShapeToAttendee.Keys)
             {
                 attendeeBubble.Stroke = UnselectedAttendeeBorderBrush;
-                attendeeBubble.Fill = UnselectedAttendeeFillBrush;
+                attendeeBubble.Fill = _attendeeShapeToAttendee[attendeeBubble].OriginalColor;
             }
 
             foreach (var musician in _musicianShapeToMusician)
@@ -484,7 +500,30 @@ namespace ICFP2023
 
         private void ColorizerSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            _currentAudienceColorizer = AudienceColorizers.GetColorizer(ColorizerSelector.SelectedItem.ToString());
+            // Re-colorize anything we need to. This will hose highlighted stuff
 
+            // TODO: Refactor
+            Dictionary<Attendee, double> evaluatedAttendees = _currentAudienceColorizer.Invoke(_currentProblem);
+
+            double audienceMin = double.MaxValue;
+            double audienceMax = double.MinValue;
+
+            foreach (var kvp in evaluatedAttendees)
+            {
+                audienceMin = Math.Min(audienceMin, kvp.Value);
+                audienceMax = Math.Max(audienceMax, kvp.Value);
+            }
+
+            foreach (var kvp in _attendeeShapeToAttendee)
+            {
+                Shape s = kvp.Key;
+                Attendee a = kvp.Value.Attendee;
+
+                SolidColorBrush brush = GetBrushFromMagicGradient(evaluatedAttendees[a], audienceMin, audienceMax);
+                s.Fill = brush;
+                _attendeeShapeToAttendee[s] = (a, brush);
+            }
         }
     }
 }
