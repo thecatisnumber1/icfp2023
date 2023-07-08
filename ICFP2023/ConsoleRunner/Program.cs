@@ -36,14 +36,13 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            List<int> toDoList = new List<int> { 6 };
-            foreach (int i in toDoList)
+            for (int i = 56; i <= 90; i++)
             {
                 try
                 {
                     Console.WriteLine($"Solving problem {i}");
                     Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
-                    Solution best = EdgeClimber.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
+                    Solution best = GreedyPlacer.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
                     Console.WriteLine($"Best score: {best.ScoreCache}");
                     SubmitSolution(best, i).Wait();
                 }

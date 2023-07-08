@@ -34,6 +34,8 @@ namespace ICFP2023
         // Position of the musician to the list of attendees that are blocked from that perspective
         private Dictionary<Point, HashSet<int>> MusicianBlockedCache;
 
+        private Dictionary<int, List<long>> MusicianDistanceScoreCache;
+
         private OcclusionFinder occlusionFinder;
 
         public Solution(ProblemSpec problem)
@@ -48,12 +50,18 @@ namespace ICFP2023
             this.occlusionFinder = new(this);
         }
 
-        private Solution(ProblemSpec problem, List<Point> placements, Dictionary<int, List<long>> musicianScoreCache, Dictionary<Point, HashSet<int>> musicianBlockedCache, long scoreCache)
+        private Solution(ProblemSpec problem,
+            List<Point> placements,
+            Dictionary<int, List<long>> musicianScoreCache,
+            Dictionary<int, List<long>> musicianDistanceScoreCache,
+            Dictionary<Point, HashSet<int>> musicianBlockedCache,
+            long scoreCache)
         {
             Problem = problem;
             this.placements = placements;
             MusicianScoreCache = musicianScoreCache;
             MusicianBlockedCache = musicianBlockedCache;
+            MusicianDistanceScoreCache = musicianDistanceScoreCache;
             ScoreCache = scoreCache;
 
             this.occlusionFinder = new(this);
@@ -163,8 +171,8 @@ namespace ICFP2023
 
         public long SupplyGradientToUI(int musicianIndex)
         {
-            //return Problem.Musicians[musicianIndex].Instrument;
-            return MusicianScoreCache[musicianIndex].Sum();
+            return Problem.Musicians[musicianIndex].Instrument;
+            //return MusicianScoreCache[musicianIndex].Sum();
         }
 
         // Assumes no blocking!
