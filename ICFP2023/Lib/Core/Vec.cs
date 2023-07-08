@@ -19,7 +19,7 @@ namespace ICFP2023
         public static readonly Vec ZERO = new(0, 0);
         public static readonly Vec WEST = new(-1, 0);
         public static readonly Vec EAST = -WEST;
-        public static readonly Vec NORTH = new(0, -1);
+        public static readonly Vec NORTH = new(0, 1);
         public static readonly Vec SOUTH = -NORTH;
 
         public static readonly Vec[] DIRECTIONS = new Vec[] { NORTH, EAST, SOUTH, WEST };
@@ -83,16 +83,6 @@ namespace ICFP2023
         public readonly double Magnitude => Math.Sqrt(MagnitudeSq);
 
         public readonly double Manhattan => Math.Abs(X) + Math.Abs(Y);
-
-        public Vec RotateClockwise()
-        {
-            return new Vec(-Y, X);
-        }
-
-        public Vec RotateCounterClockwise()
-        {
-            return new Vec(Y, -X);
-        }
 
         public double DotProduct(Vec b)
         {

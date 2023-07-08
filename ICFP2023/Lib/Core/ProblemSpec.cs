@@ -3,6 +3,7 @@ using Newtonsoft.Json.Linq;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Runtime.InteropServices.JavaScript.JSType;
@@ -29,6 +30,20 @@ namespace ICFP2023
         [JsonProperty("stage_bottom_left")]
         [JsonConverter(typeof(PointConverter))]
         public Point StageBottomLeft { get; init; }
+
+        public Point StageBottomRight => StageBottomLeft + StageWidth * Vec.EAST;
+
+        public Point StageTopLeft => StageBottomLeft + StageHeight * Vec.NORTH;
+
+        public Point StageTopRight => StageBottomLeft + StageWidth * Vec.EAST + StageHeight * Vec.NORTH;
+
+        public double StageBottom => StageBottomLeft.Y;
+
+        public double StageTop => StageTopLeft.Y;
+
+        public double StageLeft => StageBottomLeft.X;
+
+        public double StageRight => StageBottomRight.X;
 
         [JsonProperty("musicians")]
         [JsonConverter(typeof(MusicianConverter))]

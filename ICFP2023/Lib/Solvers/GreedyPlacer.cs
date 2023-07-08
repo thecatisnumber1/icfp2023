@@ -17,17 +17,20 @@ namespace ICFP2023
             return AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 45000, 1000000);
         }
 
+        // Deal with vuvuzelas later
+        // Also with picking better corners
         public static void Place(Solution solution, UIAdapter ui)
         {
-            HashSet<Point> gridPoints = new HashSet<Point>(Utils.GridPoints(solution.Problem));
+            HashSet<Point> edgePoints = new HashSet<Point>(Utils.EdgePoints(solution.Problem, solution.Problem.StageTopRight));
+            HashSet<Point> backupGridPoints = new HashSet<Point>(Utils.SmallerGridPoints(solution.Problem));
             List<Musician> sortedMusicians =
-                solution.Problem.Musicians.OrderByDescending(m => ScoreMusician(solution.Problem, m, gridPoints.First())).ToList();
+                solution.Problem.Musicians.OrderByDescending(m => ScoreMusician(solution.Problem, m, edgePoints.First())).ToList();
 
             foreach (Musician m in sortedMusicians)
             {
                 long bestScore = long.MinValue;
                 Point bestPoint = Point.ORIGIN;
-                foreach (Point p in gridPoints)
+                foreach (Point p in edgePoints)
                 {
                     long score = ScoreMusician(solution.Problem, m, p);
                     if (score > bestScore)
@@ -39,7 +42,12 @@ namespace ICFP2023
 
                 solution.SetPlacement(m, bestPoint);
                 ui.Render(solution);
-                gridPoints.Remove(bestPoint);
+                edgePoints.Remove(bestPoint);
+
+                if (edgePoints.Count == 0)
+                {
+                    edgePoints = backupGridPoints;
+                }
             }
         }
 
