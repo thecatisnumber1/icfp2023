@@ -34,7 +34,7 @@
 
         <Viewbox Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Left" Grid.Column="0">
             <local:ZoomBorder x:Name="ZoomArea">
-                <Grid>
+                <Grid x:Name="ZoomGrid">
                     <Canvas x:Name="BaseRender"/>
                     <!-- MusicianRender only shows musicians and is where you are able to place musicians -->
                     <Canvas x:Name="MusicianRender" MouseLeftButtonDown="ManualMove_OnMouseLeftButtonDown" />

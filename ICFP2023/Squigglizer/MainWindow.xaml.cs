@@ -36,15 +36,17 @@ namespace ICFP2023
         private static SolidColorBrush UnselectedAttendeeBorderBrush = new SolidColorBrush(Colors.Red);
         private static SolidColorBrush UnselectedAttendeeFillBrush = new SolidColorBrush(Colors.Salmon);
 
-        private static SolidColorBrush UnselectedMusicianBorderBrush = new SolidColorBrush(Colors.Blue);
-        private static SolidColorBrush UnselectedMusicianFillBrush = new SolidColorBrush(Colors.LightBlue);
-
-        private static SolidColorBrush MusicianNoTouchingZoneBorderBrush = new SolidColorBrush(Colors.Purple);
-        private static SolidColorBrush MusicianNoTouchingZoneFillBrush = new SolidColorBrush(Colors.Magenta);
+        // private static SolidColorBrush UnselectedMusicianBorderBrush = new SolidColorBrush(Colors.Blue);
+        // private static SolidColorBrush UnselectedMusicianFillBrush = new SolidColorBrush(Colors.LightBlue);
+        //
+        // private static SolidColorBrush MusicianNoTouchingZoneBorderBrush = new SolidColorBrush(Colors.Purple);
+        // private static SolidColorBrush MusicianNoTouchingZoneFillBrush = new SolidColorBrush(Colors.Magenta);
 
         private static SolidColorBrush SelectedPersonBorderBrush = new SolidColorBrush(Colors.Green);
         private static SolidColorBrush SelectedPersonFillBrush = new SolidColorBrush(Colors.LightGreen);
 
+        private static Color GoodScoreColor = Colors.Green;
+        private static Color BadScoreColor = Colors.Red;
         private static List<Color> MagicGradient = new List<Color>();
         private const int MagicGradientSteps = 1024;
         #endregion
@@ -87,17 +89,17 @@ namespace ICFP2023
             int size = MagicGradientSteps / 2;
             for (int i = 0; i < size; i++)
             {
-                var rAverage = (byte)(Colors.Red.R + (byte)((Colors.White.R - Colors.Red.R) * i / size));
-                var gAverage = (byte)(Colors.Red.G + (byte)((Colors.White.G - Colors.Red.G) * i / size));
-                var bAverage = (byte)(Colors.Red.B + (byte)((Colors.White.B - Colors.Red.B) * i / size));
+                var rAverage = (byte)(BadScoreColor.R + (byte)((Colors.White.R - BadScoreColor.R) * i / size));
+                var gAverage = (byte)(BadScoreColor.G + (byte)((Colors.White.G - BadScoreColor.G) * i / size));
+                var bAverage = (byte)(BadScoreColor.B + (byte)((Colors.White.B - BadScoreColor.B) * i / size));
                 MagicGradient.Add(Color.FromArgb(255, rAverage, gAverage, bAverage));
             }
 
             for (int i = 0; i < size; i++)
             {
-                var rAverage = (byte)(Colors.White.R + (byte)((Colors.Green.R - Colors.White.R) * i / size));
-                var gAverage = (byte)(Colors.White.G + (byte)((Colors.Green.G - Colors.White.G) * i / size));
-                var bAverage = (byte)(Colors.White.B + (byte)((Colors.Green.B - Colors.White.B) * i / size));
+                var rAverage = (byte)(Colors.White.R + (byte)((GoodScoreColor.R - Colors.White.R) * i / size));
+                var gAverage = (byte)(Colors.White.G + (byte)((GoodScoreColor.G - Colors.White.G) * i / size));
+                var bAverage = (byte)(Colors.White.B + (byte)((GoodScoreColor.B - Colors.White.B) * i / size));
                 MagicGradient.Add(Color.FromArgb(255, rAverage, gAverage, bAverage));
             }
         }
@@ -149,6 +151,11 @@ namespace ICFP2023
             Canvas.SetLeft(stage, problem.StageBottomLeft.X);
             BaseRender.Children.Add(stage);
 
+            double minAttendeeX = problem.RoomWidth;
+            double minAttendeeY = problem.RoomHeight;
+            double maxAttendeeX = 0;
+            double maxAttendeeY = 0;
+
             // Attendees
             foreach (Attendee a in problem.Attendees)
             {
@@ -159,12 +166,41 @@ namespace ICFP2023
                 ellipse.Fill = UnselectedAttendeeFillBrush;
                 Canvas.SetTop(ellipse, problem.RoomHeight - a.Location.Y - PersonSizePx / 2);
                 Canvas.SetLeft(ellipse, a.Location.X - PersonSizePx / 2);
+                ellipse.ToolTip = string.Join(", ", a.Tastes);
                 ellipse.MouseLeftButtonDown += AttendeeBubble_MouseDown;
                 _attendeeShapeToAttendee.Add(ellipse, a);
                 _attendeeToShape.Add(a, ellipse);
 
                 BaseRender.Children.Add(ellipse);
+
+                // Do some stuff for figuring out initial transform.
+                minAttendeeX = Math.Min(minAttendeeX, a.Location.X);
+                maxAttendeeX = Math.Max(maxAttendeeX, a.Location.X);
+                minAttendeeY = Math.Min(minAttendeeY, a.Location.Y);
+                maxAttendeeY = Math.Max(maxAttendeeY, a.Location.Y);
             }
+
+            // Account for stage maybe not with the attendees for initial transform.
+            minAttendeeX = Math.Min(minAttendeeX, problem.StageBottomLeft.X);
+            minAttendeeY = Math.Min(minAttendeeY, problem.StageBottomLeft.Y);
+            maxAttendeeX = Math.Max(maxAttendeeX, problem.StageBottomLeft.X + problem.StageWidth);
+            maxAttendeeY = Math.Max(maxAttendeeY, problem.StageBottomLeft.Y + problem.StageHeight);
+
+            // Now try to transform stuff. I haaaate math.
+            // Ratio of width and height for scale transform
+            double widthRatio = problem.RoomWidth / (maxAttendeeX - minAttendeeX);
+            double heightRatio = problem.RoomHeight / (maxAttendeeY - minAttendeeY);
+            double scaleRatio = Math.Min(widthRatio, heightRatio);
+
+            // Apply transform.
+            var scale = (ScaleTransform)((TransformGroup)ZoomGrid.RenderTransform).Children.First(tr => tr is ScaleTransform);
+            var translate = (TranslateTransform)((TransformGroup)ZoomGrid.RenderTransform).Children.First(tr => tr is TranslateTransform);
+
+            translate.X = minAttendeeX * scaleRatio;
+            translate.Y = (-(problem.RoomHeight - maxAttendeeY) + 1) * scaleRatio;
+
+            scale.ScaleX = scaleRatio;
+            scale.ScaleY = scaleRatio;
         }
 
         private void ResetProblem()
