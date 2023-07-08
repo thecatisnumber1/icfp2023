@@ -214,6 +214,11 @@ namespace ICFP2023
 
         private bool IsMusicianBlocked(int attendeeIndex, int musicianIndex)
         {
+            if (MusicianBlockedCache == null)
+            {
+                return false;
+            }
+
             return MusicianBlockedCache[placements[musicianIndex]].Contains(attendeeIndex);
         }
 
