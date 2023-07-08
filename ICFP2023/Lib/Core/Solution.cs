@@ -80,10 +80,13 @@ namespace ICFP2023
 
         public void Swap(int m0, int m1)
         {
+            var m0ScoreCache = MusicianScoreCache[m0];
+            var m1ScoreCache = MusicianScoreCache[m1];
+
             for (int i = 0; i < Problem.Attendees.Count; i++)
             {
-                ScoreCache -= MusicianScoreCache[m0][i];
-                ScoreCache -= MusicianScoreCache[m1][i];
+                ScoreCache -= m0ScoreCache[i];
+                ScoreCache -= m1ScoreCache[i];
             }
 
             for (int i = 0; i < Problem.Musicians.Count; i++)
@@ -126,20 +129,20 @@ namespace ICFP2023
 
             for (int i = 0; i < Problem.Attendees.Count; i++)
             {
-                MusicianScoreCache[m0][i] = 0;
-                MusicianScoreCache[m1][i] = 0;
+                m0ScoreCache[i] = 0;
+                m1ScoreCache[i] = 0;
                 if (!IsMusicianBlocked(i, m0))
                 {
-                    MusicianScoreCache[m0][i] = PairScore(m0, i); ;
+                    m0ScoreCache[i] = PairScore(m0, i); ;
                 }
 
                 if (!IsMusicianBlocked(i, m1))
                 {
-                    MusicianScoreCache[m1][i] = PairScore(m1, i); ;
+                    m1ScoreCache[i] = PairScore(m1, i); ;
                 }
 
-                ScoreCache += MusicianScoreCache[m0][i];
-                ScoreCache += MusicianScoreCache[m1][i];
+                ScoreCache += m0ScoreCache[i];
+                ScoreCache += m1ScoreCache[i];
             }
         }
 
