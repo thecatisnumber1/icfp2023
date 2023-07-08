@@ -16,6 +16,12 @@ namespace ICFP2023
             initialSolution.InitializeScore();
             Console.WriteLine($"Finsihed initializing score: {initialSolution.ScoreCache}");
 
+            HashSet<int> instruments = new HashSet<int>(initialSolution.Problem.Musicians.Select(x => x.Instrument));
+            if (instruments.Count <= 1)
+            {
+                return initialSolution;
+            }
+
             int logDelayMs = 200;
             int lastLogTime = Environment.TickCount;
             double accepted = 0;
@@ -202,7 +208,7 @@ namespace ICFP2023
             {
                 if (i < gridPoints.Count)
                 {
-                    solution.Placements[i] = gridPoints[i];
+                    solution.SetPlacement(solution.Problem.Musicians[i], gridPoints[i]);
                 }
                 else
                 {
@@ -221,9 +227,9 @@ namespace ICFP2023
             {
                 do
                 {
-                    solution.Placements[i] = new Point(
+                    solution.SetPlacement(solution.Problem.Musicians[i], new Point(
                         solution.Problem.StageBottomLeft.X + edgeDistance + random.NextDouble() * (solution.Problem.StageWidth - 2 * edgeDistance),
-                        solution.Problem.StageBottomLeft.Y + edgeDistance + random.NextDouble() * (solution.Problem.StageHeight - 2 * edgeDistance));
+                        solution.Problem.StageBottomLeft.Y + edgeDistance + random.NextDouble() * (solution.Problem.StageHeight - 2 * edgeDistance)));
                 }
                 while (IsTooClose(solution, i));
             }

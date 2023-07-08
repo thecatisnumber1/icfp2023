@@ -47,9 +47,9 @@ namespace Tests
         public void TestWriteSolution()
         {
             var solution = new Solution(ProblemSpec.ReadJson(PROBLEM));
-            solution.Placements[0] = new(590.0, 10.0);
-            solution.Placements[1] = new(1100.0, 100.0);
-            solution.Placements[2] = new(1100.0, 150.0);
+            solution.SetPlacement(solution.Problem.Musicians[0], new(590.0, 10.0));
+            solution.SetPlacement(solution.Problem.Musicians[1], new(1100.0, 100.0));
+            solution.SetPlacement(solution.Problem.Musicians[2], new(1100.0, 150.0));
             string json = solution.WriteJson();
 
             Assert.AreEqual(SOLUTION.Replace(" ", "").Replace("\r", "").Replace("\n", ""), json);
@@ -59,9 +59,9 @@ namespace Tests
         public void TestReadSolution()
         {
             var expected = new Solution(ProblemSpec.ReadJson(PROBLEM));
-            expected.Placements[0] = new(590.0, 10.0);
-            expected.Placements[1] = new(1100.0, 100.0);
-            expected.Placements[2] = new(1100.0, 150.0);
+            expected.SetPlacement(expected.Problem.Musicians[0], new(590.0, 10.0));
+            expected.SetPlacement(expected.Problem.Musicians[1], new(1100.0, 100.0));
+            expected.SetPlacement(expected.Problem.Musicians[2], new(1100.0, 150.0));
 
             var solution = Solution.ReadJson(SOLUTION);
 
