@@ -36,13 +36,13 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            for (int i = 1; i <= 55; i++)
+            for (int i = 12; i <= 12; i++)
             {
                 try
                 {
                     Console.WriteLine($"Solving problem {i}");
                     Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
-                    Solution best = BestSolveOptimizer.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
+                    Solution best = EdgeClimber.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
                     Console.WriteLine($"Best score: {best.ScoreCache}");
                     SubmitSolution(best, i).Wait();
                 }

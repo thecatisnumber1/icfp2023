@@ -50,6 +50,7 @@ namespace ICFP2023
             bool foundImprovement = true;
             while (foundImprovement)
             {
+                foundImprovement = false;
                 for (int i = 0; i < edgePoints.Count; i++)
                 {
                     for (int j = i + 1; j < edgePoints.Count; j++)
@@ -88,6 +89,11 @@ namespace ICFP2023
                             {
                                 solution.SetPlacement(solution.Problem.Musicians[mIndex], source);
                                 solution.InitializeScore();
+
+                                if (oldScore != solution.ScoreCache)
+                                {
+                                    ;
+                                }
                             }
 
                             continue;
