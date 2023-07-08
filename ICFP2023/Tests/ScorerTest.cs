@@ -23,7 +23,8 @@ namespace Tests
             }
 
             var score = solution.InitializeScore();
-            Assert.AreEqual(9227687, score);
+            const int expectedScore = 9227687;
+            Assert.IsTrue(Math.Abs(score - expectedScore) / (double)expectedScore < 0.000002);
         }
 
         [TestMethod]

@@ -1,27 +1,16 @@
-﻿using Newtonsoft.Json;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics.Metrics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 
-namespace ICFP2023
+namespace ICFP2023;
+
+public sealed record class Attendee(int Index, Point Location, List<double> Tastes)
 {
-    public class Attendee
+    public bool Equals(Attendee? other)
     {
-        public Point Location { get; init; }
-        public List<double> Tastes { get; init; }
+        return other?.Index == Index;
+    }
 
-        public Attendee(double x, double y, List<double> Tastes)
-        {
-            this.Location = new(x, y);
-            this.Tastes = Tastes;
-        }
-
-        public override bool Equals(object other)
-        {
-            return other is Attendee && Location.Equals(((Attendee)other).Location) && Tastes.SequenceEqual(((Attendee)other).Tastes);
-        }
+    public override int GetHashCode()
+    {
+        return Index;
     }
 }

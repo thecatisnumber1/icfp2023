@@ -41,10 +41,17 @@ namespace Tests
             Assert.AreEqual(new Musician(0, 0), spec.Musicians[0]);
             Assert.AreEqual(new Musician(1, 1), spec.Musicians[1]);
             Assert.AreEqual(new Musician(2, 0), spec.Musicians[2]);
-            Assert.AreEqual(new Attendee(100.0, 500.0, new double[] { 1000.0, -1000.0 }.ToList()), spec.Attendees[0]);
-            Assert.AreEqual(new Attendee(200.0, 1000.0, new double[] { 200.0, 200.0 }.ToList()), spec.Attendees[1]);
-            Assert.AreEqual(new Attendee(1100.0, 800.0, new double[] { 800.0, 1500.0 }.ToList()), spec.Attendees[2]);
-            Assert.AreEqual(new Pillar(new(500.0, 1000.0), 5.0), spec.Pillars[0]);
+            AreEqual(new Attendee(0, new(100.0, 500.0), new double[] { 1000.0, -1000.0 }.ToList()), spec.Attendees[0]);
+            AreEqual(new Attendee(1, new(200.0, 1000.0), new double[] { 200.0, 200.0 }.ToList()), spec.Attendees[1]);
+            AreEqual(new Attendee(2, new(1100.0, 800.0), new double[] { 800.0, 1500.0 }.ToList()), spec.Attendees[2]);
+            Assert.AreEqual(new Pillar(0, new(500.0, 1000.0), 5.0), spec.Pillars[0]);
+        }
+
+        private void AreEqual(Attendee expected, Attendee actual)
+        {
+            Assert.AreEqual(expected.Index, actual.Index);
+            Assert.AreEqual(expected.Location, actual.Location);
+            Assert.IsTrue(expected.Tastes.SequenceEqual(actual.Tastes));
         }
 
         [TestMethod]

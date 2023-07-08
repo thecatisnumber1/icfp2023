@@ -33,7 +33,7 @@
         {
             // The sample problem has a pillar that doesn't block anyone.
             // Add one that blocks musician 0 from attendee 0.
-            Pillar pillar = new(new(100.0, 300.0), 21.0);
+            Pillar pillar = new(1, new(100.0, 300.0), 21.0);
             var prob = ProblemSpec.ReadJson(ProblemSpecTest.PROBLEM);
             prob.Pillars.Add(pillar);
 
@@ -63,7 +63,7 @@
         {
             // Add a pillar where the line intersects the pillar at one point,
             // which should NOT block.
-            Pillar pillar = new(new(79.0, 300.0), 21.0);
+            Pillar pillar = new(1, new(79.0, 300.0), 21.0);
             var prob = ProblemSpec.ReadJson(ProblemSpecTest.PROBLEM);
             prob.Pillars.Add(pillar);
 
@@ -93,7 +93,7 @@
         {
             // Add a pillar where the line intersects almost at the edge of
             // the pillar, but still at more than one point.
-            Pillar pillar = new(new(79.1, 300.0), 21.0);
+            Pillar pillar = new(1, new(79.1, 300.0), 21.0);
             var prob = ProblemSpec.ReadJson(ProblemSpecTest.PROBLEM);
             prob.Pillars.Add(pillar);
 
@@ -122,7 +122,7 @@
         public void TestOcclusionPillarOnEdge()
         {
             // Add a pillar on the edge of the room
-            Pillar pillar = new(new(0, 300.0), 21.0);
+            Pillar pillar = new(1,new(0, 300.0), 21.0);
             var prob = ProblemSpec.ReadJson(ProblemSpecTest.PROBLEM);
             prob.Pillars.Add(pillar);
 

@@ -17,29 +17,19 @@ namespace ICFP2023
         PlayingTogether = 2, // Extension 2
     }
 
-    public class ProblemSpec
+    public record class ProblemSpec(
+        double RoomWidth,
+        double RoomHeight,
+        double StageWidth,
+        double StageHeight,
+        Point StageBottomLeft,
+        List<Musician> Musicians,
+        List<Attendee> Attendees,
+        List<Pillar> Pillars
+    )
     {
-        [JsonIgnore]
         public string ProblemName { get; private set; }
-
-        [JsonIgnore]
         public int ProblemNumber => int.Parse(ProblemName.Substring(ProblemName.IndexOf('-')));
-
-        [JsonProperty("room_width")]
-        public double RoomWidth { get; init; }
-
-        [JsonProperty("room_height")]
-        public double RoomHeight { get; init; }
-
-        [JsonProperty("stage_width")]
-        public double StageWidth { get; init; }
-
-        [JsonProperty("stage_height")]
-        public double StageHeight { get; init; }
-
-        [JsonProperty("stage_bottom_left")]
-        [JsonConverter(typeof(PointConverter))]
-        public Point StageBottomLeft { get; init; }
 
         public Point StageBottomRight => StageBottomLeft + StageWidth * Vec.EAST;
 
@@ -55,40 +45,10 @@ namespace ICFP2023
 
         public double StageRight => StageBottomRight.X;
 
-        [JsonProperty("musicians")]
-        [JsonConverter(typeof(MusicianConverter))]
-        public List<Musician> Musicians { get; init; }
-
-        [JsonProperty("attendees")]
-        public List<Attendee> Attendees { get; init; }
-
-        [JsonProperty("pillars")]
-        public List<Pillar> Pillars { get; init; }
-
         // 1 through 55 = Lightning round. 56 through 90 = Pillars + Playing Together
         public ProblemExtensions Extensions => ProblemNumber < 56 ? ProblemExtensions.None : (ProblemExtensions.Pillars | ProblemExtensions.PlayingTogether);
 
         public bool UsePlayingTogetherScoring => Extensions.HasFlag(ProblemExtensions.PlayingTogether);
-
-        public ProblemSpec(
-            double roomWidth,
-            double roomHeight,
-            double stageWidth,
-            double stageHeight,
-            Point stageBottomLeft,
-            List<Musician> musicians,
-            List<Attendee> attendees,
-            List<Pillar> pillars)
-        {
-            RoomWidth = roomWidth;
-            RoomHeight = roomHeight;
-            StageWidth = stageWidth;
-            StageHeight = stageHeight;
-            StageBottomLeft = stageBottomLeft;
-            Musicians = musicians;
-            Attendees = attendees;
-            Pillars = pillars;
-        }
 
         // Usually problems are numbered but sometimes folks add their own test problems so this takes a string.
         public static ProblemSpec Read(string problemName)
@@ -101,7 +61,40 @@ namespace ICFP2023
 
         public static ProblemSpec ReadJson(string problemJson)
         {
-            return JsonConvert.DeserializeObject<ProblemSpec>(problemJson);
+            var raw = JsonConvert.DeserializeObject<RawProblem>(problemJson);
+
+            List<Musician> musicians = new();
+            List<Attendee> attendees = new();
+            List<Pillar> pillars = new();
+
+            int mi = 0;
+            foreach (var instrument in raw.musicians)
+            {
+                musicians.Add(new(mi++, instrument));
+            }
+
+            int ai = 0;
+            foreach (var attendee in raw.attendees)
+            {
+                attendees.Add(new(ai++, new(attendee.x, attendee.y), attendee.tastes.ToList()));
+            }
+
+            int pi = 0;
+            foreach (var pillar in raw.pillars)
+            {
+                pillars.Add(new(pi++, new(pillar.center[0], pillar.center[1]), pillar.radius));
+            }
+
+            return new(
+                raw.room_width,
+                raw.room_height,
+                raw.stage_width,
+                raw.stage_height,
+                new(raw.stage_bottom_left[0], raw.stage_bottom_left[1]),
+                musicians,
+                attendees,
+                pillars
+            );
         }
 
         public long PairScore(int musicianIndex, int attendeeIndex, Point location)
@@ -110,34 +103,26 @@ namespace ICFP2023
                 Attendees[attendeeIndex].Location.DistSq(location));
         }
 
-        private class PointConverter : JsonConverter<Point>
-        {
-            public override Point ReadJson(JsonReader reader, Type objectType, Point existingValue, bool hasExistingValue, JsonSerializer serializer)
-            {
-                var array = JArray.Load(reader);
-                return new Point(array[0].Value<double>(), array[1].Value<double>());
-            }
+        private record class RawProblem(
+            double room_width,
+            double room_height,
+            double stage_width,
+            double stage_height,
+            double[] stage_bottom_left,
+            int[] musicians,
+            RawAttendee[] attendees,
+            RawPillar[] pillars
+        );
 
-            public override void WriteJson(JsonWriter writer, Point value, JsonSerializer serializer)
-            {
-                throw new NotImplementedException();
-            }
-        }
+        private record class RawAttendee(
+            double x,
+            double y,
+            double[] tastes
+        );
 
-        private class MusicianConverter : JsonConverter<List<Musician>>
-        {
-            public override List<Musician> ReadJson(JsonReader reader, Type objectType, List<Musician> existingValue, bool hasExistingValue, JsonSerializer serializer)
-            {
-                var array = JArray.Load(reader);
-                return array.Select((a, i) => new Musician(i, a.Value<int>())).ToList();
-            }
-
-            public override void WriteJson(JsonWriter writer, List<Musician> value, JsonSerializer serializer)
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        
+        private record class RawPillar(
+            double[] center,
+            double radius
+        );
     }
 }
