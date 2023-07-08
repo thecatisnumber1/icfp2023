@@ -92,12 +92,12 @@ namespace ICFP2023
             {
                 MusicianScoreCache[m0][i] = 0;
                 MusicianScoreCache[m1][i] = 0;
-                if (!MusicianBlockedCache[Placements[m0]].Contains(i))
+                if (!IsMusicianBlocked(i, m0))
                 {
                     MusicianScoreCache[m0][i] = PairScore(m0, i); ;
                 }
 
-                if (!MusicianBlockedCache[Placements[m1]].Contains(i))
+                if (!IsMusicianBlocked(i, m1))
                 {
                     MusicianScoreCache[m1][i] = PairScore(m1, i); ;
                 }
@@ -209,7 +209,12 @@ namespace ICFP2023
 
         public bool IsMusicianBlocked(int attendeeIndex, Musician musician)
         {
-            return MusicianBlockedCache[GetPlacement(musician)].Contains(attendeeIndex);
+            return IsMusicianBlocked(attendeeIndex, musician.Index);
+        }
+
+        private bool IsMusicianBlocked(int attendeeIndex, int musicianIndex)
+        {
+            return MusicianBlockedCache[placements[musicianIndex]].Contains(attendeeIndex);
         }
 
         public bool IsMusicianBlocked(Point attendee, Musician musician, Musician blockingMusician)
