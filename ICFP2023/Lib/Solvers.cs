@@ -14,6 +14,7 @@ namespace ICFP2023
         private static Dictionary<string, Solver> solvers = new()
         {
             ["Squiggles"] = SquigglesSolver.Solve,
+            ["GreedyPlacer"] = GreedyPlacer.Solve,
         };
 
         public static Solver GetSolver(string algorithm)

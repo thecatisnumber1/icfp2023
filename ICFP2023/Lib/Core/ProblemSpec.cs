@@ -69,6 +69,12 @@ namespace ICFP2023
             return JsonConvert.DeserializeObject<ProblemSpec>(problemJson);
         }
 
+        public long PairScore(int musicianIndex, int attendeeIndex, Point location)
+        {
+            return (long)Math.Ceiling(1000000 * Attendees[attendeeIndex].Tastes[Musicians[musicianIndex].Instrument] /
+                Attendees[attendeeIndex].Location.DistSq(location));
+        }
+
         private class PointConverter : JsonConverter<Point>
         {
             public override Point ReadJson(JsonReader reader, Type objectType, Point existingValue, bool hasExistingValue, JsonSerializer serializer)

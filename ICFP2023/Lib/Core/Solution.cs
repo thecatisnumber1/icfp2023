@@ -163,10 +163,9 @@ namespace ICFP2023
         }
 
         // Assumes no blocking!
-        private long PairScore(int musicianIndex, int attendeeIndex)
+        public long PairScore(int musicianIndex, int attendeeIndex)
         {
-            return (long)Math.Ceiling(1000000 * Problem.Attendees[attendeeIndex].Tastes[Problem.Musicians[musicianIndex].Instrument] /
-                Problem.Attendees[attendeeIndex].Location.DistSq(Placements[musicianIndex]));
+            return Problem.PairScore(musicianIndex, attendeeIndex, Placements[musicianIndex]);
         }
 
         public bool IsValid()
