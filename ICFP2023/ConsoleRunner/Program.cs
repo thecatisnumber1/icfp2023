@@ -42,11 +42,16 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            for (int i = 1; i <= 90; i++)
+            List<int> toDoList = new List<int> { 43 };
+            // foreach (int i in toDoList)
+            // for (int i = 1; i <= 90; i++)
+            // for (var i = 56; i <= 90; i++)
+            Parallel.ForEach(toDoList, i =>
+            // Parallel.For(1, 90, i =>
             {
-                try
-                {
-                    Console.WriteLine($"Solving problem {i}");
+                // try
+                // {
+                    // Console.WriteLine($"Solving problem {i}");
                     Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
 
                     // Call desired AI and then pass the result from it to HillClimber for optimization.
@@ -79,56 +84,59 @@ namespace ICFP2023
                     // Console.WriteLine($"Best score: {best.ScoreCache}");
                     // SubmitSolution(best, i).Wait();
                     // solution.Problem.LoadMetaData();
+                    Solution best = BadAnnealingSolver.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
+                    Console.WriteLine($"Best score: {best.ScoreCache}");
+                    // // SubmitSolution(best, i).Wait();
 
-                    long[,,] power;
-                    string filename = "heatmap-" + i + ".json";
-                    if (File.Exists(filename))
-                    {
-                        // Read from file
-                        string jsonData = File.ReadAllText(filename);
-                        power = JsonConvert.DeserializeObject<long[,,]>(jsonData);
-                    }
-                    else
-                    {
-                        // Compute and write to file
-                        power = solution.PrecomputeStagePower();
-                        File.WriteAllText(filename, JsonConvert.SerializeObject(power));
-                    }
+                    // long[,,] power;
+                    // string filename = "heatmap-" + i + ".json";
+                    // if (File.Exists(filename))
+                    // {
+                    //     // Read from file
+                    //     string jsonData = File.ReadAllText(filename);
+                    //     power = JsonConvert.DeserializeObject<long[,,]>(jsonData);
+                    // }
+                    // else
+                    // {
+                    //     // Compute and write to file
+                    //     power = solution.PrecomputeStagePower();
+                    //     File.WriteAllText(filename, JsonConvert.SerializeObject(power));
+                    // }
 
-                    long[,,] gradients;
-                    string gradientPath = $"gradients-{i}.json";
-                    if (File.Exists(gradientPath)) {
-                        // Read from file
-                        string jsonData = File.ReadAllText(gradientPath);
-                        gradients = JsonConvert.DeserializeObject<long[,,]>(jsonData);
+                    // long[,,] gradients;
+                    // string gradientPath = $"gradients-{i}.json";
+                    // if (File.Exists(gradientPath)) {
+                    //     // Read from file
+                    //     string jsonData = File.ReadAllText(gradientPath);
+                    //     gradients = JsonConvert.DeserializeObject<long[,,]>(jsonData);
 
-                    } else {
-                        Console.WriteLine($"Computing gradients for problem {i}");
-                        gradients = Solution.ComputeGradients(power);
+                    // } else {
+                    //     Console.WriteLine($"Computing gradients for problem {i}");
+                    //     gradients = Solution.ComputeGradients(power);
 
-                        Console.WriteLine($"Writing gradients for problem {i}");
-                        File.WriteAllText(gradientPath, JsonConvert.SerializeObject(gradients));
-                    }
+                    //     Console.WriteLine($"Writing gradients for problem {i}");
+                    //     File.WriteAllText(gradientPath, JsonConvert.SerializeObject(gradients));
+                    // }
 
-                    int[,] strongest;
-                    string strongestPath = $"strongest-{i}.json";
-                    if (File.Exists(strongestPath))
-                    {
-                        // Read from file
-                        string jsonData = File.ReadAllText(strongestPath);
-                        strongest = JsonConvert.DeserializeObject<int[,]>(jsonData);
+                    // int[,] strongest;
+                    // string strongestPath = $"strongest-{i}.json";
+                    // if (File.Exists(strongestPath))
+                    // {
+                    //     // Read from file
+                    //     string jsonData = File.ReadAllText(strongestPath);
+                    //     strongest = JsonConvert.DeserializeObject<int[,]>(jsonData);
 
-                    }
-                    else
-                    {
-                        Console.WriteLine($"Computing strongest for problem {i}");
-                        strongest = solution.Problem.StrongestAttendees();
+                    // }
+                    // else
+                    // {
+                    //     Console.WriteLine($"Computing strongest for problem {i}");
+                    //     strongest = solution.Problem.StrongestAttendees();
 
-                        Console.WriteLine($"Writing strongest for problem {i}");
-                        File.WriteAllText(strongestPath, JsonConvert.SerializeObject(strongest));
-                    }
+                    //     Console.WriteLine($"Writing strongest for problem {i}");
+                    //     File.WriteAllText(strongestPath, JsonConvert.SerializeObject(strongest));
+                    // }
 
-                    // for (var j = 0; j < gradients.GetLength(0); j++) {
+                    // for (var j = 0; j < power.GetLength(0); j++) {
                     //     Heatmap(power, j, "power-" + i + "-" + j + ".png");
                     // }
                     // for (var j = 0; j < gradients.GetLength(0); j++)
@@ -140,14 +148,13 @@ namespace ICFP2023
                     // Solution best = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 60000, 1000000);
                     // Console.WriteLine($"Best score: {best.ScoreCache}");
                     // SubmitSolution(best, i).Wait();
-                }
-                catch (Exception e)
-                {
-                    Console.WriteLine($"Error on problem {i}: {e.Message}");
-                    // break;
-                }
-            }
-            // });
+                // }
+                // catch (Exception e)
+                // {
+                //     Console.WriteLine($"Error on problem {i}: {e.Message}");
+                // }
+            // }
+            });
         }
 
         static void Heatmap(long[,,] power, int inst, string filename)

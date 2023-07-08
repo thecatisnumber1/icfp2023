@@ -15,8 +15,9 @@ namespace ICFP2023
             problem.LoadMetaData();
 
             Solution solution = new Solution(problem, Point.INVALID);
-
             InitialPlacement(solution, problem);
+
+            solution.InitializeScore();
             solution.NScoreFull();
             Console.Error.WriteLine($"Starting score {solution.NScoreCacheTotal}");
 

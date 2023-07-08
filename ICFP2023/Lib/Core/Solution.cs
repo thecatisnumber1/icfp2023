@@ -52,6 +52,7 @@ namespace ICFP2023
 
             WhosThere = new Dictionary<Point, Musician>();
             NScoreCache = new long[problem.Musicians.Count];
+            NScoreCacheTotal = 0;
         }
 
         private Solution(ProblemSpec problem,
@@ -59,7 +60,9 @@ namespace ICFP2023
             Dictionary<int, List<long>> musicianScoreCache,
             Dictionary<int, double> musicianDistanceScoreCache,
             Dictionary<Point, HashSet<int>> musicianUnblockedCache,
-            long scoreCache)
+            long scoreCache,
+            long[] nScoreCache,
+            long nScoreCacheTotal)
         {
             Problem = problem;
             this.placements = placements;
@@ -79,7 +82,8 @@ namespace ICFP2023
             foreach (var musician in problem.Musicians) {
                 WhosThere.Add(placements[musician.Index], musician);
             }
-            NScoreCache = new long[problem.Musicians.Count];
+            NScoreCache = nScoreCache;
+            NScoreCacheTotal = nScoreCacheTotal;
         }
 
         public Point GetPlacement(Musician musician)
@@ -248,7 +252,15 @@ namespace ICFP2023
                 distanceCacheCopy.Add(kvp.Key, kvp.Value);
             }
 
-            return new Solution(Problem, new List<Point>(Placements), cacheCopy, distanceCacheCopy, MusicianUnblockedCache, ScoreCache);
+            return new Solution(
+                Problem,
+                new List<Point>(Placements),
+                cacheCopy,
+                distanceCacheCopy,
+                MusicianUnblockedCache,
+                ScoreCache,
+                (long[])NScoreCache.Clone(),
+                NScoreCacheTotal);
         }
 
         private void ResetCaches()
@@ -505,13 +517,14 @@ namespace ICFP2023
             return NScoreCacheTotal;
         }
 
-        public long NScoreWithCache(List<Musician> updates=null, int n=10, bool occlusion=true)
+        public long NScoreWithCache(int updateMusician = -1, int n=10, bool occlusion=true)
         {
-            foreach (var m in updates) {
-                NScoreCacheTotal -= NScoreCache[m.Index];
-                NScoreCache[m.Index] = NScoreMusician(m, n, occlusion);
-                NScoreCacheTotal += NScoreCache[m.Index];
-            }
+            if (updateMusician < 0) return NScoreCacheTotal;
+
+            Musician musician = Problem.Musicians[updateMusician];
+            NScoreCacheTotal -= NScoreCache[updateMusician];
+            NScoreCache[updateMusician] = NScoreMusician(musician, n, occlusion);
+            NScoreCacheTotal += NScoreCache[updateMusician];
 
             return NScoreCacheTotal;
         }
