@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
@@ -14,7 +15,6 @@ namespace ICFP2023
         private long _rendering = 0;
         private Task _renderPump;
         private Solution _nextSolution;
-
 
         public UIAdapterImpl(MainWindow ui, CancellationToken cancellationToken)
         {
@@ -35,10 +35,7 @@ namespace ICFP2023
                     // We can do stuff
                     _ui.Dispatcher.BeginInvoke(() =>
                     {
-                        Solution toRender;
-                        int score;
-                        int totalCost;
-                        toRender = Interlocked.Exchange(ref _nextSolution, null);
+                        Solution toRender = Interlocked.Exchange(ref _nextSolution, null);
 
                         if (toRender != null)
                         {
@@ -60,19 +57,37 @@ namespace ICFP2023
 
         public bool ShouldHalt()
         {
-            return false;
+            return _cancellationToken.IsCancellationRequested;
         }
 
         public void SetMusicianColor(int index, string color)
         {
+            // Lazy hack to make sure things have rendered
+            Task.Delay(20).Wait();
+            _ui.Dispatcher.BeginInvoke(() =>
+            {
+                _ui.SetMusicianColor(index, color);
+            });
         }
 
         public void ClearAllColors()
         {
+            // Lazy hack to make sure things have rendered
+            Task.Delay(20).Wait();
+            _ui.Dispatcher.BeginInvoke(() =>
+            {
+                _ui.ClearAllColors();
+            });
         }
 
         public void ClearMusicianColor(int index)
         {
+            // Lazy hack to make sure things have rendered
+            Task.Delay(20).Wait();
+            _ui.Dispatcher.BeginInvoke(() =>
+            {
+                _ui.ClearMusicianColor(index);
+            });
         }
     }
 }

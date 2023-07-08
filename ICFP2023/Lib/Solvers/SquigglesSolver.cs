@@ -29,6 +29,7 @@
 
             DonePlacing:
             ui.Render(sol);
+            ui.SetMusicianColor(0, "Red");
 
             return null;
         }

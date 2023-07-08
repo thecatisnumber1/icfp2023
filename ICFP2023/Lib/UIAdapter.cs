@@ -16,7 +16,6 @@ namespace ICFP2023
 
         void ClearMusicianColor(int index);
 
-
         bool ShouldHalt();
     }
 }

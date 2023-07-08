@@ -39,9 +39,6 @@ namespace ICFP2023
 
         // private static SolidColorBrush UnselectedMusicianBorderBrush = new SolidColorBrush(Colors.Blue);
         // private static SolidColorBrush UnselectedMusicianFillBrush = new SolidColorBrush(Colors.LightBlue);
-        //
-        // private static SolidColorBrush MusicianNoTouchingZoneBorderBrush = new SolidColorBrush(Colors.Purple);
-        // private static SolidColorBrush MusicianNoTouchingZoneFillBrush = new SolidColorBrush(Colors.Magenta);
 
         private static SolidColorBrush SelectedPersonBorderBrush = new SolidColorBrush(Colors.Green);
         private static SolidColorBrush SelectedPersonFillBrush = new SolidColorBrush(Colors.LightGreen);
@@ -151,6 +148,16 @@ namespace ICFP2023
             Canvas.SetBottom(stage, problem.StageBottomLeft.Y);
             Canvas.SetLeft(stage, problem.StageBottomLeft.X);
             BaseRender.Children.Add(stage);
+
+            // Do not place the centers of your musician dots between this thing and the stage
+            Rectangle innerStage = new Rectangle();
+            innerStage.Width = problem.StageWidth - 10.0;
+            innerStage.Height = problem.StageHeight - 10.0;
+            innerStage.Stroke = new SolidColorBrush(Colors.Blue);
+            innerStage.Fill = new SolidColorBrush(Colors.Transparent);
+            Canvas.SetBottom(innerStage, problem.StageBottomLeft.Y + 5);
+            Canvas.SetLeft(innerStage, problem.StageBottomLeft.X + 5);
+            BaseRender.Children.Add(innerStage);
 
             double minAttendeeX = problem.RoomWidth;
             double minAttendeeY = problem.RoomHeight;
@@ -299,17 +306,6 @@ namespace ICFP2023
             {
                 Point p = solution.Placements[i];
 
-                // Blocking zone
-                // var ellipse = new Ellipse();
-                // ellipse.Width = 10;
-                // ellipse.Height = 10;
-                // ellipse.Stroke = MusicianNoTouchingZoneBorderBrush;
-                // ellipse.Fill = MusicianNoTouchingZoneFillBrush;
-                // Canvas.SetTop(ellipse, _currentProblem.RoomHeight - p.Y - 5);
-                // Canvas.SetLeft(ellipse, p.X - 5);
-                // 
-                // MusicianRender.Children.Add(ellipse);
-
                 // Actual musician
                 var ellipse = new Ellipse();
                 ellipse.Width = PersonSizePx;
@@ -452,6 +448,30 @@ namespace ICFP2023
         {
             WinPoint cursorPosition = e.GetPosition(ZoomArea);
             return !(cursorPosition.X < 0 || cursorPosition.X > ZoomArea.ActualWidth || cursorPosition.Y < 0 || cursorPosition.Y > ZoomArea.ActualHeight);
+        }
+
+        internal void SetMusicianColor(int index, string color)
+        {
+            Musician m = _currentSolution.Problem.Musicians[index];
+            Shape s = _musicianToShape[m];
+            var brush = new SolidColorBrush((Color)ColorConverter.ConvertFromString(color));
+
+            s.Fill = brush;
+            _musicianShapeToMusician[s] = (m, brush); // This may have to change. Score heatmap data is lost.
+        }
+
+        internal void ClearMusicianColor(int index)
+        {
+            SetMusicianColor(index, "White"); // This is insanely inefficient instead of using a const brush.
+        }
+
+        internal void ClearAllColors()
+        {
+            // Doesn't actually line up, but this we're clearing everything so who cares.
+            for (int i = 0; i < _currentSolution.Problem.Musicians.Count; i++)
+            {
+                ClearMusicianColor(i);
+            }
         }
     }
 }
