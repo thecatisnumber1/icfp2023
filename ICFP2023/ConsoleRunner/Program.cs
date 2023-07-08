@@ -36,7 +36,7 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            List<int> toDoList = new List<int> { 12, 6 };
+            List<int> toDoList = new List<int> { 6 };
             foreach (int i in toDoList)
             {
                 try

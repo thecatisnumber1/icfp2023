@@ -107,7 +107,6 @@ namespace ICFP2023
             }
         }
 
-        // TODO: Totally busted if you need the OcclusionFinder
         public Solution Copy()
         {
             Dictionary<int, List<long>> cacheCopy = new Dictionary<int, List<long>>();
@@ -164,8 +163,8 @@ namespace ICFP2023
 
         public long SupplyGradientToUI(int musicianIndex)
         {
-            return Problem.Musicians[musicianIndex].Instrument;
-            //return MusicianScoreCache[musicianIndex].Sum();
+            //return Problem.Musicians[musicianIndex].Instrument;
+            return MusicianScoreCache[musicianIndex].Sum();
         }
 
         // Assumes no blocking!
