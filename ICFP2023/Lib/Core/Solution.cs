@@ -80,6 +80,15 @@ namespace ICFP2023
 
         public void Swap(int m0, int m1)
         {
+            int instrument0 = Problem.Musicians[m0].Instrument;
+            int instrument1 = Problem.Musicians[m1].Instrument;
+
+            if (instrument0 == instrument1)
+            {
+                // Effectively a noop
+                return;
+            }
+
             var m0ScoreCache = MusicianScoreCache[m0];
             var m1ScoreCache = MusicianScoreCache[m1];
 
@@ -89,56 +98,76 @@ namespace ICFP2023
                 ScoreCache -= m1ScoreCache[i];
             }
 
-            for (int i = 0; i < Problem.Musicians.Count; i++)
-            {
-                if (i != m0 && Problem.Musicians[i].Instrument == Problem.Musicians[m0].Instrument)
-                {
-                    double dist = Placements[m0].Dist(Placements[i]);
-                    MusicianDistanceScoreCache[m0] -= 1 / dist;
-                    MusicianDistanceScoreCache[i] -= 1 / dist;
-                }
+            List<int> instrument0Musicians = new();
+            List<int> instrument1Musicians = new();
 
-                if (i != m1 && Problem.Musicians[i].Instrument == Problem.Musicians[m1].Instrument)
+            foreach (var musician in Problem.Musicians)
+            {
+                if (musician.Instrument == instrument0 && musician.Index != m0)
                 {
-                    double dist = Placements[m1].Dist(Placements[i]);
-                    MusicianDistanceScoreCache[m1] -= 1 / dist;
-                    MusicianDistanceScoreCache[i] -= 1 / dist;
+                    instrument0Musicians.Add(musician.Index);
+                }
+                else if (musician.Instrument == instrument1 && musician.Index != m1)
+                {
+                    instrument1Musicians.Add(musician.Index);
                 }
             }
 
-            var temp = Placements[m0];
-            placements[m0] = Placements[m1];
-            placements[m1] = temp;
-
-            for (int i = 0; i < Problem.Musicians.Count; i++)
+            Point m0Placement = Placements[m0];
+            double m0DistScoreCache = MusicianDistanceScoreCache[m0];
+            foreach (var mi in instrument0Musicians)
             {
-                if (i != m0 && Problem.Musicians[i].Instrument == Problem.Musicians[m0].Instrument)
-                {
-                    double dist = Placements[m0].Dist(Placements[i]);
-                    MusicianDistanceScoreCache[m0] += 1 / dist;
-                    MusicianDistanceScoreCache[i] += 1 / dist;
-                }
-
-                if (i != m1 && Problem.Musicians[i].Instrument == Problem.Musicians[m1].Instrument)
-                {
-                    double dist = Placements[m1].Dist(Placements[i]);
-                    MusicianDistanceScoreCache[m1] += 1 / dist;
-                    MusicianDistanceScoreCache[i] += 1 / dist;
-                }
+                double dist = m0Placement.Dist(Placements[mi]);
+                m0DistScoreCache -= 1 / dist;
+                MusicianDistanceScoreCache[mi] -= 1 / dist;
             }
+
+            Point m1Placement = Placements[m1];
+            double m1DistScoreCache = MusicianDistanceScoreCache[m1];
+            foreach (var mi in instrument1Musicians)
+            {
+                double dist = m1Placement.Dist(Placements[mi]);
+                m1DistScoreCache -= 1 / dist;
+                MusicianDistanceScoreCache[mi] -= 1 / dist;
+            }
+
+            placements[m0] = m1Placement;
+            placements[m1] = m0Placement;
+            m0Placement = Placements[m0];
+            m1Placement = Placements[m1];
+
+            foreach (var mi in instrument0Musicians)
+            {
+                double dist = m0Placement.Dist(Placements[mi]);
+                m0DistScoreCache += 1 / dist;
+                MusicianDistanceScoreCache[mi] += 1 / dist;
+            }
+
+            foreach (var mi in instrument1Musicians)
+            {
+                double dist = m1Placement.Dist(Placements[mi]);
+                m1DistScoreCache += 1 / dist;
+                MusicianDistanceScoreCache[mi] += 1 / dist;
+            }
+
+            MusicianDistanceScoreCache[m0] = m0DistScoreCache;
+            MusicianDistanceScoreCache[m1] = m1DistScoreCache;
+
+            var m0BlockedCache = MusicianBlockedCache[placements[m0]];
+            var m1BlockedCache = MusicianBlockedCache[placements[m1]];
 
             for (int i = 0; i < Problem.Attendees.Count; i++)
             {
                 m0ScoreCache[i] = 0;
                 m1ScoreCache[i] = 0;
-                if (!IsMusicianBlocked(i, m0))
+                if (!m0BlockedCache.Contains(i))
                 {
-                    m0ScoreCache[i] = PairScore(m0, i); ;
+                    m0ScoreCache[i] = PairScore(m0, i);
                 }
 
-                if (!IsMusicianBlocked(i, m1))
+                if (!m1BlockedCache.Contains(i))
                 {
-                    m1ScoreCache[i] = PairScore(m1, i); ;
+                    m1ScoreCache[i] = PairScore(m1, i);
                 }
 
                 ScoreCache += m0ScoreCache[i];
