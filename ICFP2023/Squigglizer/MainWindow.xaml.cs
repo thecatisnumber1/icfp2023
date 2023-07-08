@@ -57,6 +57,9 @@ namespace ICFP2023
         private Solution _currentSolution;
         private AudienceColorizers.Colorizer _currentAudienceColorizer;
 
+        // Change this to false if you want to bound to audience + stage.
+        private bool AutoZoomToStage = true;
+
         public MainWindow()
         {
             InitializeComponent();
@@ -203,10 +206,13 @@ namespace ICFP2023
                 BaseRender.Children.Add(ellipse);
 
                 // Do some stuff for figuring out initial transform.
-                minAttendeeX = Math.Min(minAttendeeX, a.Location.X);
-                maxAttendeeX = Math.Max(maxAttendeeX, a.Location.X);
-                minAttendeeY = Math.Min(minAttendeeY, a.Location.Y);
-                maxAttendeeY = Math.Max(maxAttendeeY, a.Location.Y);
+                if (!AutoZoomToStage)
+                {
+                    minAttendeeX = Math.Min(minAttendeeX, a.Location.X);
+                    maxAttendeeX = Math.Max(maxAttendeeX, a.Location.X);
+                    minAttendeeY = Math.Min(minAttendeeY, a.Location.Y);
+                    maxAttendeeY = Math.Max(maxAttendeeY, a.Location.Y);
+                }
             }
 
             foreach (Pillar p in problem.Pillars)
@@ -224,22 +230,23 @@ namespace ICFP2023
             }
 
             // Account for stage maybe not with the attendees for initial transform.
-            minAttendeeX = Math.Min(minAttendeeX, problem.StageBottomLeft.X);
-            minAttendeeY = Math.Min(minAttendeeY, problem.StageBottomLeft.Y);
-            maxAttendeeX = Math.Max(maxAttendeeX, problem.StageBottomLeft.X + problem.StageWidth);
-            maxAttendeeY = Math.Max(maxAttendeeY, problem.StageBottomLeft.Y + problem.StageHeight);
+            double padding = AutoZoomToStage ? 100 : 0; // Make this zero if using the default zoom
+            minAttendeeX = Math.Min(minAttendeeX, Math.Max(problem.StageBottomLeft.X - padding, 0));
+            minAttendeeY = Math.Min(minAttendeeY, Math.Max(problem.StageBottomLeft.Y - padding, 0));
+            maxAttendeeX = Math.Max(maxAttendeeX, Math.Min(problem.StageBottomLeft.X + problem.StageWidth + padding, problem.RoomWidth));
+            maxAttendeeY = Math.Max(maxAttendeeY, Math.Min(problem.StageBottomLeft.Y + problem.StageHeight + padding, problem.RoomHeight));
 
             // Now try to transform stuff. I haaaate math.
             // Ratio of width and height for scale transform
             double widthRatio = problem.RoomWidth / (maxAttendeeX - minAttendeeX);
             double heightRatio = problem.RoomHeight / (maxAttendeeY - minAttendeeY);
-            double scaleRatio = Math.Min(widthRatio, heightRatio);
+            double scaleRatio = Math.Max(widthRatio, heightRatio);
 
             // Apply transform.
             var scale = (ScaleTransform)((TransformGroup)ZoomGrid.RenderTransform).Children.First(tr => tr is ScaleTransform);
             var translate = (TranslateTransform)((TransformGroup)ZoomGrid.RenderTransform).Children.First(tr => tr is TranslateTransform);
 
-            translate.X = minAttendeeX * scaleRatio;
+            translate.X = -minAttendeeX * scaleRatio;
             translate.Y = (-(problem.RoomHeight - maxAttendeeY) + 1) * scaleRatio;
 
             scale.ScaleX = scaleRatio;
