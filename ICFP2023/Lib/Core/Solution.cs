@@ -30,6 +30,8 @@ namespace ICFP2023
         // Position of the musician to the list of attendees that are blocked from that perspective
         private Dictionary<Point, HashSet<int>> MusicianBlockedCache;
 
+        private readonly OcclusionFinder occlusionFinder;
+
         public Solution(ProblemSpec problem)
         {
             this.Problem = problem;
@@ -38,6 +40,8 @@ namespace ICFP2023
             {
                 Placements.Add(Point.ORIGIN);
             }
+
+            this.occlusionFinder = new(this);
         }
 
         private Solution(ProblemSpec problem, List<Point> placements, Dictionary<int, List<long>> musicianScoreCache, Dictionary<Point, HashSet<int>> musicianBlockedCache, long scoreCache)
@@ -47,6 +51,13 @@ namespace ICFP2023
             MusicianScoreCache = musicianScoreCache;
             MusicianBlockedCache = musicianBlockedCache;
             ScoreCache = scoreCache;
+
+            this.occlusionFinder = new(this);
+
+            foreach (var musician in problem.Musicians)
+            {
+                occlusionFinder.OnPlacementChanged(musician, Point.ORIGIN);
+            }
         }
 
         public Point GetPlacement(Musician musician)
@@ -56,7 +67,9 @@ namespace ICFP2023
 
         public void SetPlacement(Musician musician, Point loc)
         {
+            var oldLoc = Placements[musician.Index];
             Placements[musician.Index] = loc;
+            occlusionFinder.OnPlacementChanged(musician, oldLoc);
         }
 
         public void Swap(int m0, int m1)
@@ -129,25 +142,9 @@ namespace ICFP2023
                 {
                     var attendee = Problem.Attendees[attendeeIndex];
 
-                    // Determine if blocked
-                    bool blocked = false;
-                    foreach (var blockingMusician in Problem.Musicians)
+                    if (occlusionFinder.IsMusicianBlocked(musician, attendee))
                     {
-                        if (blockingMusician == musician)
-                        {
-                            continue;
-                        }
-
-                        if (IsMusicianBlocked(attendee.Location, musician, blockingMusician))
-                        {
-                            blocked = true;
-                            MusicianBlockedCache[Placements[musicianIndex]].Add(attendeeIndex);
-                            break;
-                        }
-                    }
-
-                    if (blocked)
-                    {
+                        MusicianBlockedCache[Placements[musicianIndex]].Add(attendeeIndex);
                         continue;
                     }
 

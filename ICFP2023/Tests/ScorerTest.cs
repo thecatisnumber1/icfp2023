@@ -41,7 +41,32 @@ namespace Tests
 
             var score = solution.InitializeScore();
             Assert.AreEqual(5343, score);
-            
+
+        }
+
+        [TestMethod]
+        public void TestScorerBlocking()
+        {
+            var prob = ProblemSpec.ReadJson(ProblemSpecTest.PROBLEM);
+            var solution = new Solution(prob);
+            solution.SetPlacement(prob.Musicians[0], new(590.0, 10.0));
+            solution.SetPlacement(prob.Musicians[1], new(1100.0, 100.0));
+            solution.SetPlacement(prob.Musicians[2], new(1100.0, 150.0));
+
+            var scorer = new OcclusionFinder(solution);
+            scorer.OnPlacementChanged(prob.Musicians[0], Point.ORIGIN);
+            scorer.OnPlacementChanged(prob.Musicians[1], Point.ORIGIN);
+            scorer.OnPlacementChanged(prob.Musicians[2], Point.ORIGIN);
+
+            Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[0], prob.Attendees[0]));
+            Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[0], prob.Attendees[1]));
+            Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[0], prob.Attendees[2]));
+            Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[1], prob.Attendees[0]));
+            Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[1], prob.Attendees[1]));
+            Assert.IsTrue(scorer.IsMusicianBlocked(prob.Musicians[1], prob.Attendees[2]));
+            Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[2], prob.Attendees[0]));
+            Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[2], prob.Attendees[1]));
+            Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[2], prob.Attendees[2]));
         }
     }
 }
