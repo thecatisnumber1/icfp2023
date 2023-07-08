@@ -2,7 +2,7 @@
 {
     public class SquigglesSolver
     {
-        public static void Solve(ProblemSpec problem, SharedSettings settings, UIAdapter ui)
+        public static Solution Solve(ProblemSpec problem, SharedSettings settings, UIAdapter ui)
         {
             Solution sol = new Solution(problem);
 
@@ -29,6 +29,8 @@
 
             DonePlacing:
             ui.Render(sol);
+
+            return null;
         }
     }
 }

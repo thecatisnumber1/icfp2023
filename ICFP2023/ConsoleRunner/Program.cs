@@ -8,6 +8,30 @@ using System.Diagnostics;
 
 namespace ICFP2023
 {
+    class DoNothingUIAdapter : UIAdapter
+    {
+        public void ClearAllColors()
+        {
+        }
+
+        public void ClearMusicianColor(int index)
+        {
+        }
+
+        public void Render(Solution solution)
+        {
+        }
+
+        public void SetMusicianColor(int index, string color)
+        {
+        }
+
+        public bool ShouldHalt()
+        {
+            return false;
+        }
+    }
+
     class Program
     {
         static void Main(string[] args)
@@ -18,8 +42,7 @@ namespace ICFP2023
                 {
                     Console.WriteLine($"Solving problem {i}");
                     Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
-                    AnnealingSolver.GridBasedStartingState(solution);
-                    Solution best = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 60000, 1000000);
+                    Solution best = GreedyPlacer.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
                     Console.WriteLine($"Best score: {best.ScoreCache}");
                     SubmitSolution(best, i).Wait();
                 }

@@ -8,7 +8,7 @@ namespace ICFP2023
 {
     public class Solvers
     {
-        public delegate void Solver(ProblemSpec problem, SharedSettings settings, UIAdapter uiAdapter);
+        public delegate Solution Solver(ProblemSpec problem, SharedSettings settings, UIAdapter uiAdapter);
 
         // Put your solvers in here.
         private static Dictionary<string, Solver> solvers = new()

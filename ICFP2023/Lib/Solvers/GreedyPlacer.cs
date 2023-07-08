@@ -2,7 +2,6 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Security.Cryptography.X509Certificates;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -10,12 +9,12 @@ namespace ICFP2023
 {
     public class GreedyPlacer
     {
-        public static void Solve(ProblemSpec problem, SharedSettings settings, UIAdapter ui)
+        public static Solution Solve(ProblemSpec problem, SharedSettings settings, UIAdapter ui)
         {
             Solution solution = new Solution(problem);
             Place(solution, ui);
             ui.Render(solution);
-            AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 30000, 1000000);
+            return AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 45000, 1000000);
         }
 
         public static void Place(Solution solution, UIAdapter ui)

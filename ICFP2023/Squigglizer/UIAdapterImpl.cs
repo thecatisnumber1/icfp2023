@@ -62,5 +62,17 @@ namespace ICFP2023
         {
             return false;
         }
+
+        public void SetMusicianColor(int index, string color)
+        {
+        }
+
+        public void ClearAllColors()
+        {
+        }
+
+        public void ClearMusicianColor(int index)
+        {
+        }
     }
 }

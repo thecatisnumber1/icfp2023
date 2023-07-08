@@ -10,6 +10,13 @@ namespace ICFP2023
     {
         void Render(Solution solution);
 
+        void SetMusicianColor(int index, string color);
+
+        void ClearAllColors();
+
+        void ClearMusicianColor(int index);
+
+
         bool ShouldHalt();
     }
 }
