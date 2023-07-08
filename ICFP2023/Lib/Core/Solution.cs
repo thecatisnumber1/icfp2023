@@ -10,22 +10,15 @@ namespace ICFP2023
 {
     public class Solution
     {
-        [JsonIgnore]
         public ProblemSpec Problem { get; private set; }
-
-        [JsonIgnore]
         public IReadOnlyList<Point> Placements => placements;
-
-        [JsonProperty("placements")]
         private List<Point> placements;
 
-        [JsonConstructor]
         private Solution(List<Point> placements)
         {
             this.placements = placements;
         }
 
-        [JsonIgnore]
         public long ScoreCache { get; private set; }
 
         // Index of musician to the list of scores for each attendee
@@ -350,12 +343,15 @@ namespace ICFP2023
 
         public static Solution ReadJson(string solutionJson)
         {
-            return JsonConvert.DeserializeObject<Solution>(solutionJson);
+            var raw = JsonConvert.DeserializeObject<RawSolution>(solutionJson);
+            return new Solution(raw.placements.ToList());
         }
 
         public string WriteJson()
         {
-            return JsonConvert.SerializeObject(this);
+            return JsonConvert.SerializeObject(new RawSolution(placements.ToArray()));
         }
+
+        private record class RawSolution(Point[] placements);
     }
 }

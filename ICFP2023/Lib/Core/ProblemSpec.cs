@@ -30,10 +30,7 @@ namespace ICFP2023
     )
     {
         // Public for testing
-        [JsonIgnore]
         public string ProblemName { get; set; }
-
-        [JsonIgnore]
         public int ProblemNumber => int.Parse(ProblemName.Substring(ProblemName.IndexOf('-') + 1));
 
         public Point StageBottomRight => StageBottomLeft + StageWidth * Vec.EAST;
