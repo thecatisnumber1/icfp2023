@@ -70,7 +70,16 @@ namespace ICFP2023
             SettingsControl.Settings = settings;
 
             _allProblems = new ProblemCatalog();
-            ProblemSelector.ItemsSource = _allProblems.Names;
+            var idToNames = _allProblems.Names.ToDictionary(name => int.Parse(name.Substring(name.IndexOf('-'))), name => name);
+            List<int> ids = idToNames.Keys.ToList();
+            ids.Sort();
+            ids.Reverse();
+            List<string> sortedNames = new();
+            foreach (int idx in ids)
+            {
+                sortedNames.Add(idToNames[idx]);
+            }
+            ProblemSelector.ItemsSource = sortedNames;
 
             string[] solverList = Solvers.Names();
             SolverSelector.ItemsSource = solverList;
@@ -340,7 +349,6 @@ namespace ICFP2023
         internal void RenderSolution(Solution solution)
         {
             _currentSolution = solution;
-            //_ = _currentSolution.InitializeScore(); // Not doing anything with the total score for now.
 
             MusicianRender.Children.Clear();
             _musicianShapeToMusician.Clear();
