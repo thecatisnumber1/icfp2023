@@ -36,7 +36,7 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            for (int i = 23; i <= 55; i++)
+            for (int i = 1; i <= 55; i++)
             {
                 try
                 {

@@ -13,13 +13,15 @@ namespace ICFP2023
         [JsonIgnore]
         public ProblemSpec Problem { get; private set; }
 
+        public IReadOnlyList<Point> Placements => placements;
+
         [JsonProperty("placements")]
-        public List<Point> Placements { get; init; }
+        private List<Point> placements;
 
         [JsonConstructor]
         private Solution(List<Point> placements)
         {
-            this.Placements = placements;
+            this.placements = placements;
         }
 
         public long ScoreCache { get; private set; }
@@ -35,10 +37,10 @@ namespace ICFP2023
         public Solution(ProblemSpec problem)
         {
             this.Problem = problem;
-            Placements = new List<Point>();
+            placements = new List<Point>();
             for (int i = 0; i < problem.Musicians.Count; i++)
             {
-                Placements.Add(Point.ORIGIN);
+                placements.Add(Point.ORIGIN);
             }
 
             this.occlusionFinder = new(this);
@@ -47,7 +49,7 @@ namespace ICFP2023
         private Solution(ProblemSpec problem, List<Point> placements, Dictionary<int, List<long>> musicianScoreCache, Dictionary<Point, HashSet<int>> musicianBlockedCache, long scoreCache)
         {
             Problem = problem;
-            Placements = placements;
+            this.placements = placements;
             MusicianScoreCache = musicianScoreCache;
             MusicianBlockedCache = musicianBlockedCache;
             ScoreCache = scoreCache;
@@ -68,7 +70,7 @@ namespace ICFP2023
         public void SetPlacement(Musician musician, Point loc)
         {
             var oldLoc = Placements[musician.Index];
-            Placements[musician.Index] = loc;
+            placements[musician.Index] = loc;
             occlusionFinder.OnPlacementChanged(musician, oldLoc);
         }
 
@@ -81,8 +83,8 @@ namespace ICFP2023
             }
 
             var temp = Placements[m0];
-            Placements[m0] = Placements[m1];
-            Placements[m1] = temp;
+            placements[m0] = Placements[m1];
+            placements[m1] = temp;
 
             for (int i = 0; i < Problem.Attendees.Count; i++)
             {
