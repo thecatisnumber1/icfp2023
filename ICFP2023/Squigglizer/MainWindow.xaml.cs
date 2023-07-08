@@ -73,6 +73,9 @@ namespace ICFP2023
             string[] solverList = Solvers.Names();
             SolverSelector.ItemsSource = solverList;
 
+            string[] colorizerList = AudienceColorizers.Names();
+            ColorizerSelector.ItemsSource = colorizerList;
+
             // Have some default selected
             if (ProblemSelector.SelectedIndex < 0)
             {
@@ -82,6 +85,11 @@ namespace ICFP2023
             if (SolverSelector.SelectedIndex < 0)
             {
                 SolverSelector.SelectedIndex = 0;
+            }
+
+            if (ColorizerSelector.SelectedIndex < 0)
+            {
+                ColorizerSelector.SelectedIndex = 0;
             }
 
             int size = MagicGradientSteps / 2;
@@ -288,9 +296,9 @@ namespace ICFP2023
             _currentSolution = solution;
             //_ = _currentSolution.InitializeScore(); // Not doing anything with the total score for now.
 
+            MusicianRender.Children.Clear();
             _musicianShapeToMusician.Clear();
             _musicianToShape.Clear();
-            MusicianRender.Children.Clear();
 
             long minEffect = -1;
             long maxEffect = 1;
@@ -472,6 +480,11 @@ namespace ICFP2023
             {
                 ClearMusicianColor(i);
             }
+        }
+
+        private void ColorizerSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+
         }
     }
 }

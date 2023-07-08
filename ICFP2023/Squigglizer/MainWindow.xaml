@@ -28,6 +28,9 @@
             <!--<Button Content="Break" x:Name="SolverBreakButton" Click="SolverBreakButton_OnClick" IsEnabled="False" />-->
             <!--<Button Content="Resume" x:Name="SolverResumeButton" Click="SolverResumeButton_OnClick" IsEnabled="False" />-->
             <Separator />
+            <Label Content="Lars' Colorizer" HorizontalAlignment="Right"/>
+            <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Top" x:Name="ColorizerSelector" SelectionChanged="ColorizerSelector_OnSelectionChanged" />
+            <Separator />
             <local:SettingsControl x:Name="SettingsControl" />
         </StackPanel>
         <local:ConsoleControl x:Name="ConsoleControl" Grid.Column="0" Grid.Row="1" Panel.ZIndex="255"/>
