@@ -32,5 +32,5 @@ for id in bests:
     print(id)
     sub = bests[id]
     rez = requests.get('https://api.icfpcontest.com/submission', params={'submission_id': sub['_id']}, headers=headers).json()
-    sol = rez['Success']['contents']
+    sol = json.loads(rez['Success']['contents'])
     json.dump(sol, open('best-solves/problem-%d.json'%(id), 'w'), indent=4)
