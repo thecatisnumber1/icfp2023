@@ -39,12 +39,14 @@ namespace ICFP2023
                         int cx = px + i;
                         int cy = py + j;
 
-                        if (cells[cx, cy] == null)
-                        {
-                            cells[cx, cy] = new();
-                        }
+                        if (cx >= 0 && cx < width && cy >= 0 && cy < height) {
+                            if (cells[cx, cy] == null)
+                            {
+                                cells[cx, cy] = new();
+                            }
 
-                        cells[cx, cy].Pillars.Add(pillar);
+                            cells[cx, cy].Pillars.Add(pillar);
+                        }
                     }
                 }
             }

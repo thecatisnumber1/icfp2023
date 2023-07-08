@@ -117,5 +117,16 @@
             Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[2], prob.Attendees[1]));
             Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[2], prob.Attendees[2]));
         }
+
+        [TestMethod]
+        public void TestOcclusionPillarOnEdge()
+        {
+            // Add a pillar on the edge of the room
+            Pillar pillar = new(new(0, 300.0), 21.0);
+            var prob = ProblemSpec.ReadJson(ProblemSpecTest.PROBLEM);
+            prob.Pillars.Add(pillar);
+
+            new Solution(prob);
+        }
     }
 }
