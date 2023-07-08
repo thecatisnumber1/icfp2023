@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 
 namespace ICFP2023
 {
-    public readonly struct Point
+    public readonly struct Point : IEquatable<Point>
     {
         // TODO!!!!!!!!!
         // Make sure these names and types are appropriate for the the problem
@@ -20,6 +20,7 @@ namespace ICFP2023
         public readonly double Y;
 
         public static readonly Point ORIGIN = new(0, 0);
+        public static readonly Point INVALID = new(-1, -1);
 
         public Point(double x, double y)
         {
@@ -48,19 +49,19 @@ namespace ICFP2023
 
         public static bool operator !=(Point p1, Point p2) => !(p1 == p2);
 
-        public override bool Equals(object obj) => obj is Point p && this == p;
+        public override bool Equals(object obj)
+        {
+            return obj is Point other && Equals(other);
+        }
+
+        public bool Equals(Point other)
+        {
+            return X == other.X && Y == other.Y;
+        }
 
         public override int GetHashCode()
         {
-            unchecked // Overflow is fine, just wrap
-            {
-                int hash = 17;
-
-                hash = hash * 23 + X.GetHashCode();
-                hash = hash * 23 + Y.GetHashCode();
-
-                return hash;
-            }
+            return HashCode.Combine(X, Y);
         }
 
         public override string ToString() => $"({X}, {Y})";

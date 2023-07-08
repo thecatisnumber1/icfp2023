@@ -55,7 +55,7 @@ namespace ICFP2023
 
         public void OnPlacementChanged(Point newLoc, Point oldLoc)
         {
-            if (oldLoc != Point.ORIGIN)
+            if (oldLoc != Point.ORIGIN && oldLoc != Point.INVALID)
             {
                 var (oldX, oldY) = CellFor(oldLoc);
 

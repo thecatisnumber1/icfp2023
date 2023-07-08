@@ -19,6 +19,7 @@ namespace ICFP2023
             this.placements = placements;
         }
 
+        public Dictionary<Point, Musician> WhosThere { get; init; }
         public long ScoreCache { get; private set; }
 
         // Index of musician to the list of scores for each attendee
@@ -30,14 +31,27 @@ namespace ICFP2023
         // Musician to q(i) for playing together
         private Dictionary<int, double> MusicianDistanceScoreCache;
 
-        public Solution(ProblemSpec problem)
+        private OcclusionFinder occlusionFinder;
+
+        public long[] NScoreCache { get; init; }
+        public long NScoreCacheTotal { get; set; }
+
+        public Solution(ProblemSpec problem) : this(problem, Point.ORIGIN)
+        {}
+
+        public Solution(ProblemSpec problem, Point initial)
         {
             this.Problem = problem;
             placements = new List<Point>();
             for (int i = 0; i < problem.Musicians.Count; i++)
             {
-                placements.Add(Point.ORIGIN);
+                placements.Add(initial);
             }
+
+            this.occlusionFinder = new(this);
+
+            WhosThere = new Dictionary<Point, Musician>();
+            NScoreCache = new long[problem.Musicians.Count];
         }
 
         private Solution(ProblemSpec problem,
@@ -53,6 +67,19 @@ namespace ICFP2023
             MusicianUnblockedCache = musicianUnblockedCache;
             MusicianDistanceScoreCache = musicianDistanceScoreCache;
             ScoreCache = scoreCache;
+
+            this.occlusionFinder = new(this);
+
+            foreach (var musician in problem.Musicians)
+            {
+                occlusionFinder.OnPlacementChanged(musician, Point.ORIGIN);
+            }
+
+            WhosThere = new Dictionary<Point, Musician>();
+            foreach (var musician in problem.Musicians) {
+                WhosThere.Add(placements[musician.Index], musician);
+            }
+            NScoreCache = new long[problem.Musicians.Count];
         }
 
         public Point GetPlacement(Musician musician)
@@ -60,10 +87,17 @@ namespace ICFP2023
             return Placements[musician.Index];
         }
 
-        public void SetPlacement(Musician musician, Point loc)
+        public bool SetPlacement(Musician musician, Point loc, bool check=false)
         {
             var oldLoc = Placements[musician.Index];
             placements[musician.Index] = loc;
+            occlusionFinder.OnPlacementChanged(musician, oldLoc);
+            if (check && WhosThere.ContainsKey(loc)) {
+                return false;
+            }
+            WhosThere.Remove(oldLoc);
+            WhosThere.Add(loc, musician);
+            return true;
         }
 
         public void Swap(int m0, int m1)
@@ -305,6 +339,8 @@ namespace ICFP2023
             // Make sure the musicians won't fall off the stage
             foreach(var point in Placements)
             {
+                if (point == Point.INVALID) continue;
+
                 double minX = Problem.StageBottomLeft.X + Musician.SOCIAL_DISTANCE;
                 double maxX = Problem.StageBottomLeft.X + Problem.StageWidth - Musician.SOCIAL_DISTANCE;
                 double minY = Problem.StageBottomLeft.Y + Musician.SOCIAL_DISTANCE;
@@ -321,8 +357,10 @@ namespace ICFP2023
             // Check for musician social distancing
             for (int i = 0; i < Placements.Count; i++)
             {
+                if (Placements[i] == Point.INVALID) continue;
                 for (int j = i + 1; j < Placements.Count; j++)
                 {
+                    if (Placements[j] == Point.INVALID) continue;
                     if (Placements[i].DistSq(Placements[j]) < Musician.SOCIAL_DISTANCE * Musician.SOCIAL_DISTANCE)
                     {
                         return false;
@@ -394,7 +432,7 @@ namespace ICFP2023
             // for (var x = 0; x < Problem.StageWidth; x++)
             Parallel.For(0, (int)Problem.StageWidth, x =>
             {
-                Console.WriteLine(x);
+                // Console.WriteLine(x);
                 for (var y = 0; y < Problem.StageHeight; y++)
                 {
                     // Console.WriteLine("  " + y);
@@ -437,6 +475,45 @@ namespace ICFP2023
                 }
             }
             return gradients;
+        }
+
+        public long NScoreMusician(Musician m, int n=10, bool occlusion=true)
+        {
+            long score = 0;
+
+            for (int i = 0; i < n; i++) {
+                var attendeeIndex = Problem.Strongest[m.Instrument, i];
+                var attendee = Problem.Attendees[attendeeIndex];
+                if (!occlusion || !occlusionFinder.IsMusicianBlocked(m, attendee)) {
+                    score += PairScore(m.Index, attendeeIndex);
+                }
+            }
+
+            return score;
+        }
+
+        public long NScoreFull(int n=10, bool occlusion=true)
+        {
+            Problem.LoadMetaDataStrongest();
+
+            NScoreCacheTotal = 0;
+            foreach (var m in Problem.Musicians) {
+                NScoreCache[m.Index] = NScoreMusician(m, n, occlusion);
+                NScoreCacheTotal += NScoreCache[m.Index];
+            }
+
+            return NScoreCacheTotal;
+        }
+
+        public long NScoreWithCache(List<Musician> updates=null, int n=10, bool occlusion=true)
+        {
+            foreach (var m in updates) {
+                NScoreCacheTotal -= NScoreCache[m.Index];
+                NScoreCache[m.Index] = NScoreMusician(m, n, occlusion);
+                NScoreCacheTotal += NScoreCache[m.Index];
+            }
+
+            return NScoreCacheTotal;
         }
     }
 

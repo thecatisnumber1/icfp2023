@@ -191,13 +191,67 @@ namespace ICFP2023
         }
 
         public void LoadMetaData() {
+            LoadMetaDataStrongest();
+            LoadMetaDataGradients();
+            LoadMetaDataHeatMap();
+        }
+
+        public void LoadMetaDataHeatMap() {
             string i = Regex.Replace(ProblemName, "[^0-9]", "");
+            Console.Error.WriteLine($"Loading Heatmap for {i}");
 
-            HeatMap = JsonConvert.DeserializeObject<long[,,]>(FileUtil.Read($"metadata/heatmap-{i}.json"));
+            if (FileUtil.FileExists($"metadata/heatmap-{i}.json") && HeatMap == null)
+            {
+                HeatMap = JsonConvert.DeserializeObject<long[,,]>(FileUtil.Read($"metadata/heatmap-{i}.json"));
+            }
+        }
 
-            Gradients = JsonConvert.DeserializeObject<long[,,]>(FileUtil.Read($"metadata/gradients-{i}.json"));
+        public void LoadMetaDataGradients()
+        {
+            string i = Regex.Replace(ProblemName, "[^0-9]", "");
+            Console.Error.WriteLine($"Loading Gradients for {i}");
 
-            Strongest = JsonConvert.DeserializeObject<int[,]>(FileUtil.Read($"metadata/strongest-{i}.json"));
+            if (FileUtil.FileExists($"metadata/gradients-{i}.json") && Gradients == null)
+            {
+                Gradients = JsonConvert.DeserializeObject<long[,,]>(FileUtil.Read($"metadata/gradients-{i}.json"));
+            }
+        }
+
+        public void LoadMetaDataStrongest()
+        {
+            string i = Regex.Replace(ProblemName, "[^0-9]", "");
+            Console.Error.WriteLine($"Loading Strongest for {i}");
+
+            if (FileUtil.FileExists($"metadata/strongest-{i}.json"))
+            {
+                Strongest = JsonConvert.DeserializeObject<int[,]>(FileUtil.Read($"metadata/strongest-{i}.json"));
+            }
+        }
+
+
+        public Point Hottest(Musician m, HashSet<Point> ignore=null)
+        {
+            int maxX = 0;
+            int maxY = 0;
+            long maxH = Int64.MinValue;
+
+            for (var x = 10; x < HeatMap.GetLength(1) - 10; x++)
+            {
+                for (var y = 10; y < HeatMap.GetLength(2) - 10; y++)
+                {
+                    if (maxH < HeatMap[m.Instrument, x, y]) {
+                        if (ignore != null && ignore.Contains(new Point(StageLeft + x, StageBottom + y))) {
+                            continue;
+                        }
+
+                        maxH = HeatMap[m.Instrument, x, y];
+                        maxX = x;
+                        maxY = y;
+                    }
+                }
+            }
+
+            return new Point(StageLeft + maxX, StageBottom + maxY);
         }
     }
 }
