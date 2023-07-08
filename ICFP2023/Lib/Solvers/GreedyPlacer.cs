@@ -23,8 +23,21 @@ namespace ICFP2023
         {
             HashSet<Point> edgePoints = new HashSet<Point>(Utils.EdgePoints(solution.Problem, solution.Problem.StageTopRight));
             HashSet<Point> backupGridPoints = new HashSet<Point>(Utils.SmallerGridPoints(solution.Problem));
+            Dictionary<(int, Point), long> instrumentPointScores = new();
+
+            var instruments = solution.Problem.Musicians.Select(m => m.Instrument).Distinct();
+
+            foreach (int instrument in instruments)
+            {
+                foreach (Point p in edgePoints.Concat(backupGridPoints))
+                {
+                    long score = ScoreInstrumentAt(solution.Problem, instrument, p);
+                    instrumentPointScores.Add((instrument, p), score);
+                }
+            }
+
             List<Musician> sortedMusicians =
-                solution.Problem.Musicians.OrderByDescending(m => ScoreMusician(solution.Problem, m, edgePoints.First())).ToList();
+                solution.Problem.Musicians.OrderByDescending(m => instrumentPointScores[(m.Instrument, edgePoints.First())]).ToList();
 
             foreach (Musician m in sortedMusicians)
             {
@@ -32,7 +45,7 @@ namespace ICFP2023
                 Point bestPoint = Point.ORIGIN;
                 foreach (Point p in edgePoints)
                 {
-                    long score = ScoreMusician(solution.Problem, m, p);
+                    long score = instrumentPointScores[(m.Instrument, p)];
                     if (score > bestScore)
                     {
                         bestScore = score;
@@ -52,12 +65,12 @@ namespace ICFP2023
         }
 
         // Assumes no blocking!!
-        private static long ScoreMusician(ProblemSpec problem, Musician musician, Point location)
+        private static long ScoreInstrumentAt(ProblemSpec problem, int instrument, Point location)
         {
             long score = 0;
             for (int i = 0; i < problem.Attendees.Count; i++)
             {
-                score += problem.PairScore(musician.Index, i, location, 1);
+                score += problem.PairScore(instrument, i, location, 1);
             }
 
             return score;

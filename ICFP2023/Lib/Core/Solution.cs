@@ -232,7 +232,7 @@ namespace ICFP2023
         // Assumes no blocking!
         public long PairScore(int musicianIndex, int attendeeIndex)
         {
-            return Problem.PairScore(musicianIndex, attendeeIndex, Placements[musicianIndex], MusicianDistanceScoreCache[musicianIndex]);
+            return Problem.PairScore(Problem.Musicians[musicianIndex].Instrument, attendeeIndex, Placements[musicianIndex], MusicianDistanceScoreCache[musicianIndex]);
         }
 
         public bool IsValid()
@@ -268,9 +268,9 @@ namespace ICFP2023
             return true;
         }
 
-        public bool IsMusicianBlocked(int attendeeIndex, Musician musician)
+        public bool IsMusicianBlocked(Attendee attendee, Musician musician)
         {
-            return IsMusicianBlocked(attendeeIndex, musician.Index);
+            return IsMusicianBlocked(attendee.Index, musician.Index);
         }
 
         private bool IsMusicianBlocked(int attendeeIndex, int musicianIndex)

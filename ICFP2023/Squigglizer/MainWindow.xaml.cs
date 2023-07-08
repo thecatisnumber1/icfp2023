@@ -54,7 +54,6 @@ namespace ICFP2023
 
         private Dictionary<Shape, (Attendee Attendee, SolidColorBrush OriginalColor)> _attendeeShapeToAttendee = new Dictionary<Shape, (Attendee Attendee, SolidColorBrush OriginalColor)>();
         private Dictionary<Attendee, Shape> _attendeeToShape = new Dictionary<Attendee, Shape>();
-        private Dictionary<Attendee, int> _attendeeToIndex = new Dictionary<Attendee, int>();
         #endregion
 
         #region Hacks for Manual Placement
@@ -130,7 +129,6 @@ namespace ICFP2023
             _musicianToShape.Clear();
             _attendeeShapeToAttendee.Clear();
             _attendeeToShape.Clear();
-            _attendeeToIndex.Clear();
             ZoomArea.Reset();
 
             // Test hackery
@@ -228,7 +226,6 @@ namespace ICFP2023
                 ellipse.Fill = originalBrush;
                 _attendeeShapeToAttendee.Add(ellipse, (a, originalBrush));
                 _attendeeToShape.Add(a, ellipse);
-                _attendeeToIndex.Add(a, ai++);
 
                 BaseRender.Children.Add(ellipse);
 
@@ -441,8 +438,7 @@ namespace ICFP2023
             
             foreach (var attendee in _attendeeToShape)
             {
-                int attendeeIndex = _attendeeToIndex[attendee.Key];
-                bool blocked = _currentSolution.IsMusicianBlocked(attendeeIndex, sourceMusician);
+                bool blocked = _currentSolution.IsMusicianBlocked(attendee.Key, sourceMusician);
 
                 if (!blocked)
                 {
@@ -465,12 +461,11 @@ namespace ICFP2023
             // Highlight the musicians they can hear
             Attendee attendee = _attendeeShapeToAttendee[attendeeBubble].Attendee;
             Point p = attendee.Location;
-            int attendeeIndex = _attendeeToIndex[attendee];
 
             List<Musician> allMusicians = _musicianShapeToMusician.Values.Select(x => x.Musician).ToList();
             foreach (Musician sourceMusician in allMusicians)
             {
-                bool blocked = _currentSolution.IsMusicianBlocked(attendeeIndex, sourceMusician);
+                bool blocked = _currentSolution.IsMusicianBlocked(attendee, sourceMusician);
 
                 if (!blocked)
                 {

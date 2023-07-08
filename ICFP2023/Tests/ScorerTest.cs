@@ -31,7 +31,7 @@ namespace Tests
         public void TestExampleProblem()
         {
             var prob = ProblemSpec.ReadJson(ProblemSpecTest.PROBLEM);
-            prob.ProblemName = "problem-56";
+            prob.SetProblemName("problem-56");
             var solution = new Solution(prob);
 
             List<Point> points = new List<Point> { new Point(590.0000, 10.0000), new Point(1100.0000, 100.0000), new Point(1100.0000, 150.0000) };
@@ -50,7 +50,7 @@ namespace Tests
         public void TestOrganizerExample()
         {
             var prob = ProblemSpec.ReadJson(ProblemSpecTest.ORGANIZER_EXAMPLE);
-            prob.ProblemName = "problem-90";
+            prob.SetProblemName("problem-90");
             Assert.IsTrue(prob.UsePlayingTogetherScoring);
             var solution = new Solution(prob);
 

@@ -30,8 +30,8 @@ namespace ICFP2023
     )
     {
         // Public for testing
-        public string ProblemName { get; set; }
-        public int ProblemNumber => int.Parse(ProblemName.Substring(ProblemName.IndexOf('-') + 1));
+        public string ProblemName { get; private set; }
+        public int ProblemNumber { get; private set; }
 
         public Point StageBottomRight => StageBottomLeft + StageWidth * Vec.EAST;
 
@@ -47,17 +47,24 @@ namespace ICFP2023
 
         public double StageRight => StageBottomRight.X;
 
-        // 1 through 55 = Lightning round. 56 through 90 = Pillars + Playing Together
-        public ProblemExtensions Extensions => ProblemNumber < 56 ? ProblemExtensions.None : (ProblemExtensions.Pillars | ProblemExtensions.PlayingTogether);
+        public ProblemExtensions Extensions { get; private set; }
+        public bool UsePlayingTogetherScoring { get; private set; }
 
-        public bool UsePlayingTogetherScoring => Extensions.HasFlag(ProblemExtensions.PlayingTogether);
+        public void SetProblemName(string problemName)
+        {
+            ProblemName = problemName;
+            ProblemNumber = int.Parse(ProblemName.Substring(ProblemName.IndexOf('-') + 1));
+            // 1 through 55 = Lightning round. 56 through 90 = Pillars + Playing Together
+            Extensions = ProblemNumber < 56 ? ProblemExtensions.None : (ProblemExtensions.Pillars | ProblemExtensions.PlayingTogether);
+            UsePlayingTogetherScoring = Extensions.HasFlag(ProblemExtensions.PlayingTogether);
+        }
 
         // Usually problems are numbered but sometimes folks add their own test problems so this takes a string.
         public static ProblemSpec Read(string problemName)
         {
             var problemJson = FileUtil.Read($@"problems/{problemName}.json");
             var problem = ReadJson(problemJson);
-            problem.ProblemName = problemName;
+            problem.SetProblemName(problemName);
             return problem;
         }
 
@@ -99,9 +106,9 @@ namespace ICFP2023
             );
         }
 
-        public long PairScore(int musicianIndex, int attendeeIndex, Point location, double playingTogetherBonus)
+        public long PairScore(int instrument, int attendeeIndex, Point location, double playingTogetherBonus)
         {
-            double pairScore = 1000000 * Attendees[attendeeIndex].Tastes[Musicians[musicianIndex].Instrument] /
+            double pairScore = 1000000 * Attendees[attendeeIndex].Tastes[instrument] /
                 Attendees[attendeeIndex].Location.DistSq(location);
             if (UsePlayingTogetherScoring)
             {
