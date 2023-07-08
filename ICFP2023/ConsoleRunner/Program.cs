@@ -12,14 +12,14 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            for (int i = 5; i < 56; i++)
+            for (int i = 1; i <= 55; i++)
             {
                 try
                 {
                     Console.WriteLine($"Solving problem {i}");
                     Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
                     AnnealingSolver.GridBasedStartingState(solution);
-                    Solution best = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 45000, 1000000);
+                    Solution best = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 60000, 1000000);
                     Console.WriteLine($"Best score: {best.ScoreCache}");
                     SubmitSolution(best, i).Wait();
                 }
