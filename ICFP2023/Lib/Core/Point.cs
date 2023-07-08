@@ -74,6 +74,32 @@ namespace ICFP2023
 
         public readonly double Manhattan(Point other) => (this - other).Manhattan;
 
+        public readonly Vec VecToRect(Point bl, Point tr) {
+            double closeX;
+            if (X < bl.X) {
+                closeX = bl.X;
+            } else if (X < tr.X) {
+                closeX = X;
+            } else {
+                closeX = tr.X;
+            }
+            double closeY;
+            if (Y < bl.Y)
+            {
+                closeY = bl.Y;
+            }
+            else if (Y < tr.Y)
+            {
+                closeY = Y;
+            }
+            else
+            {
+                closeY = tr.Y;
+            }
+            return (this - new Point(closeX, closeY));
+        }
+
+        // Warning! not exact
         public readonly Point Mid(Point other) => new((X + other.X) / 2, (Y + other.Y) / 2);
     }
 }

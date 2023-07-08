@@ -387,5 +387,57 @@ namespace ICFP2023
         }
 
         private record class RawSolution(Point[] placements, int[] volumes);
+
+        public long[,,] PrecomputeStagePower()
+        {
+            long[,,] power = new long[Problem.InstrumentCount, (int)Problem.StageWidth, (int)Problem.StageHeight];
+            // for (var x = 0; x < Problem.StageWidth; x++)
+            Parallel.For(0, (int)Problem.StageWidth, x =>
+            {
+                Console.WriteLine(x);
+                for (var y = 0; y < Problem.StageHeight; y++)
+                {
+                    // Console.WriteLine("  " + y);
+                    Point p = new Point(Problem.StageBottomLeft.X + x, Problem.StageBottomLeft.Y + y);
+                    for (var i = 0; i < Problem.InstrumentCount; i++)
+                    {
+                        foreach (var a in Problem.Attendees)
+                        {
+                            power[i, (int)x, (int)y] += (long)(1000000 * a.Tastes[i] / (a.Location - p).MagnitudeSq);
+                        }
+                    }
+                }
+            // }
+            });
+
+            return power;
+        }
+
+        public static long[,,] ComputeGradients(long[,,] power)
+        {
+            int zLength = power.GetLength(0);
+            int xLength = power.GetLength(1);
+            int yLength = power.GetLength(2);
+
+            // We'll have two values (dx, dy) for each point in 2D slice, hence the 3D array
+            long[,,] gradients = new long[zLength, xLength, yLength];
+
+            for (int z = 0; z < zLength; z++)
+            {
+                for (int x = 1; x < xLength - 1; x++)
+                {
+                    for (int y = 1; y < yLength - 1; y++)
+                    {
+                        long dx = (power[z, x + 1, y] - power[z, x - 1, y]) / 2;
+                        long dy = (power[z, x, y + 1] - power[z, x, y - 1]) / 2;
+
+                        // Store the magnitude of gradient vector at each point
+                        gradients[z, x, y] = (long)Math.Sqrt(dx * dx + dy * dy);
+                    }
+                }
+            }
+            return gradients;
+        }
     }
+
 }

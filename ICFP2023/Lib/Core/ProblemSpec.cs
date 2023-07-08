@@ -7,6 +7,7 @@ using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 using static System.Formats.Asn1.AsnWriter;
+using System.Text.RegularExpressions;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ICFP2023
@@ -60,6 +61,18 @@ namespace ICFP2023
             Extensions = ProblemNumber < 56 ? ProblemExtensions.None : (ProblemExtensions.Pillars | ProblemExtensions.PlayingTogether);
             UsePlayingTogetherScoring = Extensions.HasFlag(ProblemExtensions.PlayingTogether);
         }
+
+        public int InstrumentCount
+        {
+            get
+            {
+                return Musicians.Max(x => x.Instrument) + 1;
+            }
+        }
+
+        public long[,,] HeatMap { get; set; }
+        public long[,,] Gradients { get; set; }
+        public int[,] Strongest { get; set; }
 
         // Usually problems are numbered but sometimes folks add their own test problems so this takes a string.
         public static ProblemSpec Read(string problemName)
@@ -161,5 +174,30 @@ namespace ICFP2023
             double[] center,
             double radius
         );
+
+        public int[,] StrongestAttendees() {
+            int[,] sorted = new int[InstrumentCount, Attendees.Count()];
+            for (var i = 0; i < InstrumentCount; i++) {
+                var attendees = Attendees
+                    .Select((obj, index) => new { Object = obj, Index = index })
+                    .OrderBy(a =>
+                        -Math.Abs(1000000 * a.Object.Tastes[i] / a.Object.Location.VecToRect(StageBottomLeft, StageTopRight).MagnitudeSq)
+                    )
+                    .Select(item => item.Index)
+                    .ToArray();
+                for (var j = 0; j < attendees.Length; j++) sorted[i,j] = attendees[j];
+            }
+            return sorted;
+        }
+
+        public void LoadMetaData() {
+            string i = Regex.Replace(ProblemName, "[^0-9]", "");
+
+            HeatMap = JsonConvert.DeserializeObject<long[,,]>(FileUtil.Read($"metadata/heatmap-{i}.json"));
+
+            Gradients = JsonConvert.DeserializeObject<long[,,]>(FileUtil.Read($"metadata/gradients-{i}.json"));
+
+            Strongest = JsonConvert.DeserializeObject<int[,]>(FileUtil.Read($"metadata/strongest-{i}.json"));
+        }
     }
 }
