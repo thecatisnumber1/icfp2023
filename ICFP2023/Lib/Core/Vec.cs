@@ -49,6 +49,9 @@ namespace ICFP2023
         public static Vec operator *(double scale, Vec v)
             => new(scale * v.X, scale * v.Y);
 
+        public static Vec operator *(Vec v, double scale)
+            => new(scale * v.X, scale * v.Y);
+
         public static Vec operator /(Vec v, int scale)
             => new(v.X / scale, v.Y / scale);
 
