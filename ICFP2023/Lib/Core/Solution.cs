@@ -207,6 +207,11 @@ namespace ICFP2023
             return true;
         }
 
+        public bool IsMusicianBlocked(int attendeeIndex, Musician musician)
+        {
+            return MusicianBlockedCache[GetPlacement(musician)].Contains(attendeeIndex);
+        }
+
         public bool IsMusicianBlocked(Point attendee, Musician musician, Musician blockingMusician)
         {
             return IsMusicianBlocked(attendee, musician, GetPlacement(blockingMusician), Musician.BLOCKING_RADIUS);

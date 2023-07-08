@@ -52,6 +52,7 @@ namespace ICFP2023
 
         private Dictionary<Shape, (Attendee Attendee, SolidColorBrush OriginalColor)> _attendeeShapeToAttendee = new Dictionary<Shape, (Attendee Attendee, SolidColorBrush OriginalColor)>();
         private Dictionary<Attendee, Shape> _attendeeToShape = new Dictionary<Attendee, Shape>();
+        private Dictionary<Attendee, int> _attendeeToIndex = new Dictionary<Attendee, int>();
         #endregion
 
         private Solution _currentSolution;
@@ -115,6 +116,7 @@ namespace ICFP2023
             _musicianToShape.Clear();
             _attendeeShapeToAttendee.Clear();
             _attendeeToShape.Clear();
+            _attendeeToIndex.Clear();
             ZoomArea.Reset();
 
             // Test hackery
@@ -188,6 +190,7 @@ namespace ICFP2023
                 audienceMax = Math.Max(audienceMax, kvp.Value);
             }
 
+            int ai = 0;
             foreach (Attendee a in problem.Attendees)
             {
                 Ellipse ellipse = new Ellipse();
@@ -202,6 +205,7 @@ namespace ICFP2023
                 ellipse.Fill = originalBrush;
                 _attendeeShapeToAttendee.Add(ellipse, (a, originalBrush));
                 _attendeeToShape.Add(a, ellipse);
+                _attendeeToIndex.Add(a, ai++);
 
                 BaseRender.Children.Add(ellipse);
 
@@ -412,17 +416,8 @@ namespace ICFP2023
             
             foreach (var attendee in _attendeeToShape)
             {
-                Point a = attendee.Key.Location;
-                // If any musician blocks, continue
-                bool blocked = false;
-                foreach (Musician otherMusician in otherMusicians)
-                {
-                    if (_currentSolution.IsMusicianBlocked(a, sourceMusician, otherMusician))
-                    {
-                        blocked = true;
-                        break;
-                    }
-                }
+                int attendeeIndex = _attendeeToIndex[attendee.Key];
+                bool blocked = _currentSolution.IsMusicianBlocked(attendeeIndex, sourceMusician);
 
                 if (!blocked)
                 {
@@ -445,19 +440,12 @@ namespace ICFP2023
             // Highlight the musicians they can hear
             Attendee attendee = _attendeeShapeToAttendee[attendeeBubble].Attendee;
             Point p = attendee.Location;
+            int attendeeIndex = _attendeeToIndex[attendee];
 
             List<Musician> allMusicians = _musicianShapeToMusician.Values.Select(x => x.Musician).ToList();
             foreach (Musician sourceMusician in allMusicians)
             {
-                bool blocked = false;
-                foreach (Musician otherMusician in allMusicians.Where(m => m != sourceMusician))
-                {
-                    if (_currentSolution.IsMusicianBlocked(p, sourceMusician, otherMusician))
-                    {
-                        blocked = true;
-                        break;
-                    }
-                }
+                bool blocked = _currentSolution.IsMusicianBlocked(attendeeIndex, sourceMusician);
 
                 if (!blocked)
                 {
