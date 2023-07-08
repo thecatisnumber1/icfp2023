@@ -26,8 +26,9 @@ namespace ICFP2023
         private SquigglizerSettings settings;
         private ProblemCatalog _allProblems;
         private ProblemSpec _currentProblem;
+        private CancellationTokenSource _tokenSource;
 
-        private double PersonSizePx;
+        private double PersonSizePx = 10.0;
 
         #region Colors
         private static SolidColorBrush BlackBrush = new SolidColorBrush(Colors.Black);
@@ -123,7 +124,7 @@ namespace ICFP2023
 
             // Dynamic dot sizes!? Should be about 0.5% of the long axis, but no more than 20 because musicians' no-touching zones (radius 10, diameter 20)
             double longAxis = Math.Max(problem.RoomWidth, problem.RoomHeight);
-            PersonSizePx = Math.Min(longAxis / 200.0, 20.0);
+            // PersonSizePx = Math.Min(longAxis / 200.0, 20.0);
 
             // Lazy-assed thing to make everything hit-testable
             Rectangle hack = new Rectangle();
@@ -224,13 +225,12 @@ namespace ICFP2023
             Solvers.Solver solver = Solvers.GetSolver(SolverSelector.SelectedItem.ToString());
 
             SolverRunButton.IsEnabled = false;
-
             SolverSelector.IsEnabled = false;
             ProblemSelector.IsEnabled = false;
 
-            var adapter = new UIAdapterImpl(this);
+            _tokenSource = new CancellationTokenSource();
 
-            // This should probably happen *after* the task runs
+            var adapter = new UIAdapterImpl(this, _tokenSource.Token);
 
             RunTask(() =>
             {
@@ -239,7 +239,11 @@ namespace ICFP2023
                 // This will totally screw me over later, but it lets a final Render call go through.
                 Task.Delay(50).Wait();
 
-                // Here is where I should shut down the old UIAdapter. But I'm lazy atm.
+                // Solver has finished, but if they ran to completion, the UI logger might still be pumping. Kill it with our token.
+                if (!_tokenSource.IsCancellationRequested)
+                {
+                    _tokenSource.Cancel();
+                }
 
                 // Cleanup UI on the main thread.
                 Dispatcher.BeginInvoke(() =>
@@ -247,6 +251,7 @@ namespace ICFP2023
                     Console.WriteLine("Done!");
                     SolverSelector.IsEnabled = true;
                     ProblemSelector.IsEnabled = true;
+                    SolverRunButton.IsEnabled = true;
                 });
             });
         }

@@ -10,14 +10,17 @@ namespace ICFP2023
     internal class UIAdapterImpl : UIAdapter
     {
         private readonly MainWindow _ui;
-
+        private readonly CancellationToken _cancellationToken;
         private long _rendering = 0;
         private Task _renderPump;
         private Solution _nextSolution;
 
-        public UIAdapterImpl(MainWindow ui)
+
+        public UIAdapterImpl(MainWindow ui, CancellationToken cancellationToken)
         {
             _ui = ui;
+            _cancellationToken = cancellationToken;
+
             _renderPump = Task.Run(RenderLoop);
         }
 
@@ -25,7 +28,7 @@ namespace ICFP2023
         private void RenderLoop()
         {
             // This is wrong but I just want to render *something*
-            while (true)
+            while (!_cancellationToken.IsCancellationRequested)
             {
                 if (Interlocked.Exchange(ref _rendering, 1) == 0)
                 {
