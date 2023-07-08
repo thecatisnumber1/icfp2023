@@ -52,6 +52,9 @@ namespace ICFP2023
         [JsonProperty("attendees")]
         public List<Attendee> Attendees { get; init; }
 
+        [JsonProperty("pillars")]
+        public List<Pillar> Pillars { get; init; }
+
         public ProblemSpec(
             double roomWidth,
             double roomHeight,
@@ -59,7 +62,8 @@ namespace ICFP2023
             double stageHeight,
             Point stageBottomLeft,
             List<Musician> musicians,
-            List<Attendee> attendees)
+            List<Attendee> attendees,
+            List<Pillar> pillars)
         {
             RoomWidth = roomWidth;
             RoomHeight = roomHeight;
@@ -68,6 +72,7 @@ namespace ICFP2023
             StageBottomLeft = stageBottomLeft;
             Musicians = musicians;
             Attendees = attendees;
+            Pillars = pillars;
         }
 
         // Usually problems are numbered but sometimes folks add their own test problems so this takes a string.
@@ -117,5 +122,7 @@ namespace ICFP2023
                 throw new NotImplementedException();
             }
         }
+
+        
     }
 }

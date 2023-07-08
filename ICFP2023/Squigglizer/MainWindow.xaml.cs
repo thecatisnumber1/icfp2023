@@ -31,6 +31,9 @@ namespace ICFP2023
         private static SolidColorBrush UnselectedAttendeeBorderBrush = new SolidColorBrush(Colors.Red);
         private static SolidColorBrush UnselectedAttendeeFillBrush = new SolidColorBrush(Colors.Salmon);
 
+        private static SolidColorBrush PillarBorderBrush = new SolidColorBrush(Colors.Gray);
+        private static SolidColorBrush PillarFillBrush = new SolidColorBrush(Colors.LightGray);
+
         // private static SolidColorBrush UnselectedMusicianBorderBrush = new SolidColorBrush(Colors.Blue);
         // private static SolidColorBrush UnselectedMusicianFillBrush = new SolidColorBrush(Colors.LightBlue);
 
@@ -204,6 +207,19 @@ namespace ICFP2023
                 maxAttendeeX = Math.Max(maxAttendeeX, a.Location.X);
                 minAttendeeY = Math.Min(minAttendeeY, a.Location.Y);
                 maxAttendeeY = Math.Max(maxAttendeeY, a.Location.Y);
+            }
+
+            foreach (Pillar p in problem.Pillars)
+            {
+                Ellipse ellipse = new Ellipse();
+                ellipse.Width = p.Radius * 2;
+                ellipse.Height = p.Radius * 2;
+                ellipse.Stroke = PillarBorderBrush;
+                Canvas.SetTop(ellipse, problem.RoomHeight - p.Center.Y - p.Radius);
+                Canvas.SetLeft(ellipse, p.Center.X - p.Radius);
+                ellipse.Fill = PillarFillBrush;
+
+                BaseRender.Children.Add(ellipse);
             }
 
             // Account for stage maybe not with the attendees for initial transform.
