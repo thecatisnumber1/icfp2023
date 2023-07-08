@@ -18,9 +18,36 @@ namespace ICFP2023
         public OcclusionFinder(Solution solution)
         {
             this.solution = solution;
-            this.width = (int)Math.Ceiling(solution.Problem.StageWidth / CELL_SIZE);
-            this.height = (int)Math.Ceiling(solution.Problem.StageHeight / CELL_SIZE);
+            this.width = (int)Math.Ceiling(solution.Problem.RoomWidth / CELL_SIZE);
+            this.height = (int)Math.Ceiling(solution.Problem.RoomHeight / CELL_SIZE);
             this.cells = new Cell[width, height];
+
+            // Add pillars to cells. This just adds their bounding square, so some of the
+            // cells actually have no chance of intersecting with the pillar.
+            // We can optimize that later if it becomes an issue.
+            foreach (var pillar in solution.Problem.Pillars)
+            {
+                int r = (int)Math.Ceiling(pillar.Radius / CELL_SIZE);
+                int d = (2 * r) + 1;
+                int px = (int)(pillar.Center.X / CELL_SIZE) - r;
+                int py = (int)(pillar.Center.Y / CELL_SIZE) - r;
+
+                for (int i = 0; i <= d; i++)
+                {
+                    for (int j = 0; j <= d; j++)
+                    {
+                        int cx = px + i;
+                        int cy = py + j;
+
+                        if (cells[cx, cy] == null)
+                        {
+                            cells[cx, cy] = new();
+                        }
+
+                        cells[cx, cy].Pillars.Add(pillar);
+                    }
+                }
+            }
         }
 
         private Point GetPlacement(Musician musician)
@@ -53,13 +80,14 @@ namespace ICFP2023
         private class Cell
         {
             public List<Musician> Musicians = new();
+            public List<Pillar> Pillars = new();
         }
 
         private (int, int) CellFor(Point p)
         {
             // Round to nearest cell
-            int x = (int)(p.X - solution.Problem.StageBottomLeft.X + (CELL_SIZE / 2)) / CELL_SIZE;
-            int y = (int)(p.Y - solution.Problem.StageBottomLeft.Y + (CELL_SIZE / 2)) / CELL_SIZE;
+            int x = (int)(p.X + (CELL_SIZE / 2)) / CELL_SIZE;
+            int y = (int)(p.Y + (CELL_SIZE / 2)) / CELL_SIZE;
             return (x, y);
         }
 
@@ -80,6 +108,14 @@ namespace ICFP2023
                 {
                     if (musician != blockingMusician &&
                         solution.IsMusicianBlocked(attendee.Location, musician, blockingMusician))
+                    {
+                        return true;
+                    }
+                }
+
+                foreach (var pillar in cell.Pillars)
+                {
+                    if (solution.IsMusicianBlocked(attendee.Location, musician, pillar))
                     {
                         return true;
                     }
@@ -115,7 +151,6 @@ namespace ICFP2023
                     }
                 }
 
-                // In practice this will never be true because attendees are not on the stage
                 if (x0 == x1 && y0 == y1) {
                     break;
                 }
@@ -124,7 +159,7 @@ namespace ICFP2023
 
                 if (e2 >= dy)
                 {
-                    if (x0 == width)
+                    if (x0 == x1)
                     {
                         break;
                     }
@@ -134,7 +169,7 @@ namespace ICFP2023
 
                 if (e2 <= dx)
                 {
-                    if (y0 == height)
+                    if (y0 == y1)
                     {
                         break;
                     }
@@ -143,5 +178,7 @@ namespace ICFP2023
                 }
             }
         }
+
+        
     }
 }

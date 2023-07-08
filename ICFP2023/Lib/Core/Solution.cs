@@ -13,6 +13,7 @@ namespace ICFP2023
         [JsonIgnore]
         public ProblemSpec Problem { get; private set; }
 
+        [JsonIgnore]
         public IReadOnlyList<Point> Placements => placements;
 
         [JsonProperty("placements")]
@@ -24,6 +25,7 @@ namespace ICFP2023
             this.placements = placements;
         }
 
+        [JsonIgnore]
         public long ScoreCache { get; private set; }
 
         // Index of musician to the list of scores for each attendee
@@ -207,8 +209,17 @@ namespace ICFP2023
 
         public bool IsMusicianBlocked(Point attendee, Musician musician, Musician blockingMusician)
         {
+            return IsMusicianBlocked(attendee, musician, GetPlacement(blockingMusician), Musician.BLOCKING_RADIUS);
+        }
+
+        public bool IsMusicianBlocked(Point attendee, Musician musician, Pillar pillar)
+        {
+            return IsMusicianBlocked(attendee, musician, pillar.Center, pillar.Radius);
+        }
+
+        private bool IsMusicianBlocked(Point attendee, Musician musician, Point blockingLoc, double radius)
+        {
             var musicianLoc = GetPlacement(musician);
-            var blockingLoc = GetPlacement(blockingMusician);
 
             // Calculate the vectors
             var da = attendee - musicianLoc; // vector from musician to attendee
@@ -241,7 +252,7 @@ namespace ICFP2023
 
             // If this point is within the blocking radius, the musician is blocked
             var dp = blockingLoc - projection;
-            return dp.DotProduct(dp) <= Musician.BLOCKING_RADIUS * Musician.BLOCKING_RADIUS;
+            return dp.DotProduct(dp) < radius * radius;
         }
 
         public static Solution Read(string solutionPath, ProblemSpec problem)
