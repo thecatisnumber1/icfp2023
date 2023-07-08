@@ -323,7 +323,7 @@ namespace ICFP2023
             // Compute min/max for gradient purposes
             for (int i = 0; i < solution.Placements.Count; i++)
             {
-                long effect = _currentSolution.GetScoreForMusician(i);
+                long effect = _currentSolution.SupplyGradientToUI(i);
                 minEffect = Math.Min(effect, minEffect);
                 maxEffect = Math.Max(effect, maxEffect);
             }
@@ -337,8 +337,7 @@ namespace ICFP2023
                 ellipse.Width = PersonSizePx;
                 ellipse.Height = PersonSizePx;
                 ellipse.Stroke = BlackBrush;
-
-                long effect = _currentSolution.GetScoreForMusician(i);
+                long effect = _currentSolution.SupplyGradientToUI(i);
                 ellipse.ToolTip = effect.ToString();
 
                 SolidColorBrush brush = GetBrushFromMagicGradient(effect, minEffect, maxEffect);

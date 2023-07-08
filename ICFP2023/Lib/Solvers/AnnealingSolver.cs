@@ -16,6 +16,12 @@ namespace ICFP2023
             initialSolution.InitializeScore();
             Console.WriteLine($"Finsihed initializing score: {initialSolution.ScoreCache}");
 
+            HashSet<int> instruments = new HashSet<int>(initialSolution.Problem.Musicians.Select(x => x.Instrument));
+            if (instruments.Count <= 1)
+            {
+                return initialSolution;
+            }
+
             int logDelayMs = 200;
             int lastLogTime = Environment.TickCount;
             double accepted = 0;

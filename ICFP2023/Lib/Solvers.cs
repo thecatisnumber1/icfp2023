@@ -15,6 +15,7 @@ namespace ICFP2023
         {
             ["Squiggles"] = SquigglesSolver.Solve,
             ["GreedyPlacer"] = GreedyPlacer.Solve,
+            ["EdgeClimber"] = EdgeClimber.Solve,
         };
 
         public static Solver GetSolver(string algorithm)
