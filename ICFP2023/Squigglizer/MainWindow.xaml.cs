@@ -118,9 +118,7 @@ namespace ICFP2023
             MusicianRender.Width = problem.RoomWidth; // You'll need to check whether manual placement is on the stage on your own
             MusicianRender.Height = problem.RoomHeight;
 
-            // Dynamic dot sizes!? Should be about 0.5% of the long axis, but no more than 20 because musicians' no-touching zones (radius 10, diameter 20)
             double longAxis = Math.Max(problem.RoomWidth, problem.RoomHeight);
-            // PersonSizePx = Math.Min(longAxis / 200.0, 20.0);
 
             // Lazy-assed thing to make everything hit-testable
             Rectangle hack = new Rectangle();
@@ -169,7 +167,8 @@ namespace ICFP2023
             if (_currentAudienceColorizer != null)
             {
                 evaluatedAttendees = _currentAudienceColorizer.Invoke(_currentProblem);
-            } else
+            }
+            else
             {
                 evaluatedAttendees = _currentProblem.Attendees.ToDictionary(a => a, _ => 0d);
             }
@@ -232,8 +231,16 @@ namespace ICFP2023
 
         private void ResetProblem()
         {
-            _currentProblem = _allProblems.GetSpec(ProblemSelector.SelectedItem.ToString());
+            string problemName = ProblemSelector.SelectedItem.ToString();
+            _currentProblem = _allProblems.GetSpec(problemName);
             RenderProblem(_currentProblem);
+            // Load best solution
+            string bestSaveFile = $"best-solves/{problemName}.json";
+            if (FileUtil.FileExists(bestSaveFile))
+            {
+                Solution bestSolve = Solution.Read(bestSaveFile, _currentProblem);
+                RenderSolution(bestSolve);
+            }
         }
 
         private void ProblemSelector_OnSelectionChanged(object sender, SelectionChangedEventArgs e)

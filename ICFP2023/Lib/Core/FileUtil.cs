@@ -18,6 +18,11 @@
             File.WriteAllText(PathFor(pathFromProjectRoot), contents);
         }
 
+        public static bool FileExists(string pathFromProjectRoot)
+        {
+            return File.Exists(PathFor(pathFromProjectRoot));
+        }
+
         public static string[] GetFilesInDir(string pathFromProjectRoot)
         {
             return Directory.GetFiles(PathFor(pathFromProjectRoot));
