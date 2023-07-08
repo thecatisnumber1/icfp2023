@@ -218,6 +218,7 @@ namespace ICFP2023
                 Canvas.SetTop(ellipse, problem.RoomHeight - p.Center.Y - p.Radius);
                 Canvas.SetLeft(ellipse, p.Center.X - p.Radius);
                 ellipse.Fill = PillarFillBrush;
+                ellipse.Opacity = 0.5;
 
                 BaseRender.Children.Add(ellipse);
             }
