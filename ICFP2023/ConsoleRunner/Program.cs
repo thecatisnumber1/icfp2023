@@ -42,7 +42,7 @@ namespace ICFP2023
                 {
                     Console.WriteLine($"Solving problem {i}");
                     Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
-                    Solution best = GreedyPlacer.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
+                    Solution best = BestSolveOptimizer.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
                     Console.WriteLine($"Best score: {best.ScoreCache}");
                     SubmitSolution(best, i).Wait();
                 }

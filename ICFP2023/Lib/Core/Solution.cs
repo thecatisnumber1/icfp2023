@@ -30,7 +30,7 @@ namespace ICFP2023
         // Position of the musician to the list of attendees that are blocked from that perspective
         private Dictionary<Point, HashSet<int>> MusicianBlockedCache;
 
-        private readonly OcclusionFinder occlusionFinder;
+        private OcclusionFinder occlusionFinder;
 
         public Solution(ProblemSpec problem)
         {
@@ -246,6 +246,8 @@ namespace ICFP2023
             var solutionJson = FileUtil.Read(solutionPath);
             var solution = ReadJson(solutionJson);
             solution.Problem = problem;
+            solution.occlusionFinder = new(solution);
+
             return solution;
         }
 
