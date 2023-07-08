@@ -239,7 +239,7 @@ namespace ICFP2023
         internal void RenderSolution(Solution solution)
         {
             _currentSolution = solution;
-            _ = _currentSolution.InitializeScore(); // Not doing anything with the total score for now.
+            //_ = _currentSolution.InitializeScore(); // Not doing anything with the total score for now.
 
             _musicianShapeToMusician.Clear();
             _musicianToShape.Clear();

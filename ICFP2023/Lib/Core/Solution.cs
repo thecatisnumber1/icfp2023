@@ -159,7 +159,8 @@ namespace ICFP2023
 
         public long GetScoreForMusician(int musicianIndex)
         {
-            return MusicianScoreCache[musicianIndex].Sum();
+            return 0;
+            //return MusicianScoreCache[musicianIndex].Sum();
         }
 
         // Assumes no blocking!
