@@ -46,6 +46,28 @@ namespace Tests
         }
 
         [TestMethod]
+        public void TestOrganizerExample()
+        {
+            var prob = ProblemSpec.ReadJson(ProblemSpecTest.ORGANIZER_EXAMPLE);
+            prob.ProblemName = "problem-90";
+            Assert.IsTrue(prob.UsePlayingTogetherScoring);
+            var solution = new Solution(prob);
+
+            List<Point> points = new List<Point> { 
+                new Point(590.0000, 10.0000), 
+                new Point(1100.0000, 100.0000), 
+                new Point(1100.0000, 150.0000) };
+            for (int i = 0; i < points.Count; i++)
+            {
+                solution.SetPlacement(prob.Musicians[i], points[i]);
+            }
+
+            var score = solution.InitializeScore();
+            Assert.AreEqual(3270, score);
+
+        }
+
+        [TestMethod]
         public void TestSwap()
         {
             var prob = ProblemCatalog.Instance.GetSpec("problem-1");

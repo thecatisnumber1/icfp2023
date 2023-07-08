@@ -57,7 +57,7 @@ namespace ICFP2023
             long score = 0;
             for (int i = 0; i < problem.Attendees.Count; i++)
             {
-                score += problem.PairScore(musician.Index, i, location);
+                score += problem.PairScore(musician.Index, i, location, 1);
             }
 
             return score;

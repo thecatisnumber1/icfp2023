@@ -34,7 +34,8 @@ namespace ICFP2023
         // Position of the musician to the list of attendees that are blocked from that perspective
         private Dictionary<Point, HashSet<int>> MusicianBlockedCache;
 
-        private Dictionary<int, List<long>> MusicianDistanceScoreCache;
+        // Musician to q(i) for playing together
+        private Dictionary<int, double> MusicianDistanceScoreCache;
 
         private OcclusionFinder occlusionFinder;
 
@@ -53,7 +54,7 @@ namespace ICFP2023
         private Solution(ProblemSpec problem,
             List<Point> placements,
             Dictionary<int, List<long>> musicianScoreCache,
-            Dictionary<int, List<long>> musicianDistanceScoreCache,
+            Dictionary<int, double> musicianDistanceScoreCache,
             Dictionary<Point, HashSet<int>> musicianBlockedCache,
             long scoreCache)
         {
@@ -92,9 +93,43 @@ namespace ICFP2023
                 ScoreCache -= MusicianScoreCache[m1][i];
             }
 
+            for (int i = 0; i < Problem.Musicians.Count; i++)
+            {
+                if (i != m0 && Problem.Musicians[i].Instrument == Problem.Musicians[m0].Instrument)
+                {
+                    double dist = Placements[m0].Dist(Placements[i]);
+                    MusicianDistanceScoreCache[m0] -= 1 / dist;
+                    MusicianDistanceScoreCache[i] -= 1 / dist;
+                }
+
+                if (i != m1 && Problem.Musicians[i].Instrument == Problem.Musicians[m1].Instrument)
+                {
+                    double dist = Placements[m1].Dist(Placements[i]);
+                    MusicianDistanceScoreCache[m1] -= 1 / dist;
+                    MusicianDistanceScoreCache[i] -= 1 / dist;
+                }
+            }
+
             var temp = Placements[m0];
             placements[m0] = Placements[m1];
             placements[m1] = temp;
+
+            for (int i = 0; i < Problem.Musicians.Count; i++)
+            {
+                if (i != m0 && Problem.Musicians[i].Instrument == Problem.Musicians[m0].Instrument)
+                {
+                    double dist = Placements[m0].Dist(Placements[i]);
+                    MusicianDistanceScoreCache[m0] += 1 / dist;
+                    MusicianDistanceScoreCache[i] += 1 / dist;
+                }
+
+                if (i != m1 && Problem.Musicians[i].Instrument == Problem.Musicians[m1].Instrument)
+                {
+                    double dist = Placements[m1].Dist(Placements[i]);
+                    MusicianDistanceScoreCache[m1] += 1 / dist;
+                    MusicianDistanceScoreCache[i] += 1 / dist;
+                }
+            }
 
             for (int i = 0; i < Problem.Attendees.Count; i++)
             {
@@ -123,22 +158,31 @@ namespace ICFP2023
                 cacheCopy.Add(kvp.Key, new List<long>(kvp.Value));
             }
 
-            return new Solution(Problem, new List<Point>(Placements), cacheCopy, MusicianBlockedCache, ScoreCache);
+            Dictionary<int, double> distanceCacheCopy = new Dictionary<int, double>();
+            foreach (var kvp in MusicianDistanceScoreCache)
+            {
+                distanceCacheCopy.Add(kvp.Key, kvp.Value);
+            }
+
+            return new Solution(Problem, new List<Point>(Placements), cacheCopy, distanceCacheCopy, MusicianBlockedCache, ScoreCache);
         }
 
         private void ResetCaches()
         {
             MusicianScoreCache = new Dictionary<int, List<long>>();
+            MusicianDistanceScoreCache = new Dictionary<int, double>();
             MusicianBlockedCache = new Dictionary<Point, HashSet<int>>();
             for (int i = 0; i < Problem.Musicians.Count; i++)
             {
                 MusicianScoreCache.Add(i, new List<long>());
+                MusicianDistanceScoreCache.Add(i, 1);
                 MusicianBlockedCache.Add(Placements[i], new HashSet<int>());
                 for (int j = 0; j < Problem.Attendees.Count; j++)
                 {
                     MusicianScoreCache[i].Add(0);
                 }
             }
+
         }
 
         // If you want to actually use anything this thing caches, you'd better call this first.
@@ -147,6 +191,23 @@ namespace ICFP2023
         {
             ScoreCache = 0;
             ResetCaches();
+            for (int m0 = 0; m0 < Problem.Musicians.Count - 1; m0++)
+            {
+                for (int m1 = m0 + 1; m1 < Problem.Musicians.Count; m1++)
+                {
+                    Musician musician0 = Problem.Musicians[m0];
+                    Musician musician1 = Problem.Musicians[m1];
+                    if (musician0.Instrument != musician1.Instrument)
+                    {
+                        continue;
+                    }
+
+                    double distance = Placements[m0].Dist(Placements[m1]);
+                    MusicianDistanceScoreCache[m0] += 1 / distance;
+                    MusicianDistanceScoreCache[m1] += 1 / distance;
+                }
+            }
+
             for (int musicianIndex = 0; musicianIndex < Problem.Musicians.Count; musicianIndex++)
             {
                 var musician = Problem.Musicians[musicianIndex];
@@ -178,7 +239,7 @@ namespace ICFP2023
         // Assumes no blocking!
         public long PairScore(int musicianIndex, int attendeeIndex)
         {
-            return Problem.PairScore(musicianIndex, attendeeIndex, Placements[musicianIndex]);
+            return Problem.PairScore(musicianIndex, attendeeIndex, Placements[musicianIndex], MusicianDistanceScoreCache[musicianIndex]);
         }
 
         public bool IsValid()

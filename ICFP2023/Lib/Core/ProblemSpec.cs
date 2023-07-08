@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
+using static System.Formats.Asn1.AsnWriter;
 using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace ICFP2023
@@ -28,8 +29,17 @@ namespace ICFP2023
         List<Pillar> Pillars
     )
     {
+<<<<<<< HEAD
         public string ProblemName { get; private set; }
         public int ProblemNumber => int.Parse(ProblemName.Substring(ProblemName.IndexOf('-')));
+=======
+        // Public for testing
+        [JsonIgnore]
+        public string ProblemName { get; set; }
+
+        [JsonIgnore]
+        public int ProblemNumber => int.Parse(ProblemName.Substring(ProblemName.IndexOf('-') + 1));
+>>>>>>> 8c9b594 (Play Together Scoring)
 
         public Point StageBottomRight => StageBottomLeft + StageWidth * Vec.EAST;
 
@@ -97,10 +107,16 @@ namespace ICFP2023
             );
         }
 
-        public long PairScore(int musicianIndex, int attendeeIndex, Point location)
+        public long PairScore(int musicianIndex, int attendeeIndex, Point location, double playingTogetherBonus)
         {
-            return (long)Math.Ceiling(1000000 * Attendees[attendeeIndex].Tastes[Musicians[musicianIndex].Instrument] /
-                Attendees[attendeeIndex].Location.DistSq(location));
+            double pairScore = 1000000 * Attendees[attendeeIndex].Tastes[Musicians[musicianIndex].Instrument] /
+                Attendees[attendeeIndex].Location.DistSq(location);
+            if (UsePlayingTogetherScoring)
+            {
+                pairScore *= playingTogetherBonus;
+            }
+
+            return (long)Math.Ceiling(pairScore);
         }
 
         private record class RawProblem(
