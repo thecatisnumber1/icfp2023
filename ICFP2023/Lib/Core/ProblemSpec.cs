@@ -29,17 +29,12 @@ namespace ICFP2023
         List<Pillar> Pillars
     )
     {
-<<<<<<< HEAD
-        public string ProblemName { get; private set; }
-        public int ProblemNumber => int.Parse(ProblemName.Substring(ProblemName.IndexOf('-')));
-=======
         // Public for testing
         [JsonIgnore]
         public string ProblemName { get; set; }
 
         [JsonIgnore]
         public int ProblemNumber => int.Parse(ProblemName.Substring(ProblemName.IndexOf('-') + 1));
->>>>>>> 8c9b594 (Play Together Scoring)
 
         public Point StageBottomRight => StageBottomLeft + StageWidth * Vec.EAST;
 
