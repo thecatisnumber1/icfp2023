@@ -155,9 +155,6 @@ namespace ICFP2023
             MusicianDistanceScoreCache[m0] = m0DistScoreCache;
             MusicianDistanceScoreCache[m1] = m1DistScoreCache;
 
-            var m0BlockedCache = MusicianUnblockedCache[placements[m0]];
-            var m1BlockedCache = MusicianUnblockedCache[placements[m1]];
-
             foreach(int attendeeIndex in MusicianUnblockedCache[placements[m0]])
             {
                 long pairScore = PairScore(m0, attendeeIndex);
