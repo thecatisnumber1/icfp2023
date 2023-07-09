@@ -19,11 +19,14 @@ namespace ICFP2023
         private List<long> SlotScores;
 
         private long ScoreCache;
-        
+
         public FixedPointSolution(ProblemSpec problem, List<Point> slotLocations)
+            : this(problem, slotLocations, new StaticBlockingComputer(slotLocations, problem.Attendees, problem.Pillars)) { }
+        
+        private FixedPointSolution(ProblemSpec problem, List<Point> slotLocations, StaticBlockingComputer computer)
         {
             SlotLocations = slotLocations;
-            BlockingComputerTron = new StaticBlockingComputer(slotLocations, problem.Attendees, problem.Pillars);
+            BlockingComputerTron = computer;
             Problem = problem;
             SlotScores = new List<long>();
             Qs = new List<double>();
@@ -102,6 +105,37 @@ namespace ICFP2023
             return ScoreCache;
         }
 
+        public void AssertValidity()
+        {
+            FixedPointSolution fresh = new FixedPointSolution(Problem, SlotLocations, BlockingComputerTron);
+            for (int slot = 0; slot < Slots.Count; slot++)
+            {
+                fresh.SetInstrument(slot, Slots[slot]);
+            }
+
+            for (int slot = 0; slot < Slots.Count; slot++)
+            {
+                double q = Qs[slot];
+                double freshQ = fresh.Qs[slot];
+                if (!AlmostEqual(q, freshQ, 1E-12))
+                {
+                    throw new Exception("Qs don't match");
+                }
+            }
+        }
+        private static bool AlmostEqual(double a, double b, double epsilon)
+        {
+            if (Double.IsNaN(a) || Double.IsNaN(b))
+            {
+                return Double.IsNaN(a) && Double.IsNaN(b);
+            }
+            else
+            {
+                return Math.Abs(a - b) < epsilon;
+            }
+        }
+
+
         private double UpdateQs(int changingSlot, int instrument, int modifier)
         {
             double changingSlotQ = modifier;
@@ -132,14 +166,15 @@ namespace ICFP2023
             ScoreCache += score;
         }
 
-        private void SetQ(int slot, double value)
+        private void SetQ(int slot, double newQ)
         {
             long delta = 0;
+            double oldQ = Qs[slot];
+            Qs[slot] = newQ;
             foreach (Attendee a in BlockingComputerTron.GetVisibleAttendees(slot))
             {
-                delta -= Problem.PairScore(Slots[slot], a.Index, SlotLocations[slot], Qs[slot]);
-                Qs[slot] = value;
-                delta += Problem.PairScore(Slots[slot], a.Index, SlotLocations[slot], Qs[slot]);
+                delta -= Problem.PairScore(Slots[slot], a.Index, SlotLocations[slot], oldQ);
+                delta += Problem.PairScore(Slots[slot], a.Index, SlotLocations[slot], newQ);
             }
 
             ScoreCache += delta;
