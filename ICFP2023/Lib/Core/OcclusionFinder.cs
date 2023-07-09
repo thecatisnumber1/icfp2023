@@ -94,8 +94,8 @@ namespace ICFP2023
         private (int, int) CellFor(Point p)
         {
             // Round to nearest cell
-            int x = (int)(p.X + (CELL_SIZE / 2)) / CELL_SIZE;
-            int y = (int)(p.Y + (CELL_SIZE / 2)) / CELL_SIZE;
+            int x = (int)Math.Floor((p.X + (CELL_SIZE / 2)) / CELL_SIZE);
+            int y = (int)Math.Floor((p.Y + (CELL_SIZE / 2)) / CELL_SIZE);
             return (x, y);
         }
 

@@ -9,22 +9,22 @@ namespace ICFP2023
     {
         private static Random random = new Random();
 
-        public static Solution Solve(ProblemSpec problem, SharedSettings settings, UIAdapter ui, int runtime=10000)
+        public static Solution Solve(ProblemSpec problem, SharedSettings settings, UIAdapter ui, int runtime=60000)
         {
             problem.LoadMetaData();
 
             Solution solution = new Solution(problem, Point.INVALID);
             InitialPlacement(solution, problem);
-
             solution.InitializeScore();
+
             var startScore = solution.NScoreFull();
             Console.Error.WriteLine($"Starting score {startScore}");
 
-            long initTemp = startScore * 9 / 10;
-            Anneal(solution, ComputeCost, runtime, (int)initTemp);
+            long initTemp = startScore * 2 / 10;
+            var best = Anneal(solution, ComputeCost, runtime, (int)initTemp);
 
-            ui.Render(solution);
-            return solution;
+            ui.Render(best);
+            return best;
         }
 
         public static void InitialPlacement(Solution solution, ProblemSpec problem)
@@ -64,7 +64,14 @@ namespace ICFP2023
                     lastLogTime = Environment.TickCount;
                 }
 
-                Move move = GetNeighbor(currentSolution);
+                Move move;
+                if (random.NextDouble() <= .1) {
+                    move = GetSwap(currentSolution);
+                } else {
+                    move = GetWalk(currentSolution);
+                }
+
+
                 double currentCost = heuristic(currentSolution);
                 move.Apply(currentSolution);
                 double neighborCost = heuristic(currentSolution);
@@ -78,7 +85,9 @@ namespace ICFP2023
                 else
                 {
                     accepted++;
+                    // Console.WriteLine($"{coolingScheduler.Temperature:F0} {currentCost} {neighborCost} {move}");
                 }
+                // Console.Error.WriteLine($"\t\t\t\t\t\t\t\t\t\t\t{string.Join(", ", currentSolution.Placements)}");
 
                 // Keep track of the best solution found
                 if (heuristic(currentSolution) < heuristic(bestSolution))
@@ -109,7 +118,7 @@ namespace ICFP2023
             return -solution.NScoreWithCache();
         }
 
-        private static Move GetNeighbor(Solution solution)
+        private static Move GetSwap(Solution solution)
         {
             // Pick two non-identical indexes
             int m0;
@@ -120,11 +129,11 @@ namespace ICFP2023
                 m1 = random.Next(solution.Placements.Count);
             } while (solution.Problem.Musicians[m0].Instrument == solution.Problem.Musicians[m1].Instrument);
 
-            return new Move(m0, m1);
+            return new MoveSwap(m0, m1);
         }
 
         // Previous version of GetNeighbor which would move points slightly.
-        /*private static Move GetNeighbor(Solution solution)
+        private static Move GetWalk(Solution solution)
         {
             int musicianIndex;
             Vec delta;
@@ -133,10 +142,25 @@ namespace ICFP2023
                 musicianIndex = random.Next(solution.Placements.Count);
 
                 // Generate a random vector, scaled and translated to be between 0.25 and 2.0
-                delta = new Vec(random.NextDouble() * 1.75 + 0.25, random.NextDouble() * 1.75 + 0.25);
+                delta = new Vec(
+                    Math.Round((random.NextDouble() - 0.50) * 2.5),
+                    Math.Round((random.NextDouble() - 0.50) * 2.5)
+                );
 
                 // Create the move
-                Move move = new Move(musicianIndex, delta);
+                Move move = new MoveWalk(musicianIndex, delta);
+
+                var loc = solution.Placements[musicianIndex];
+                var ahead = loc + delta;
+
+
+                // Don't go outside the bounds
+                if (ahead.X < solution.Problem.StageFenceLeft) continue;
+                if (ahead.X > solution.Problem.StageFenceRight) continue;
+                if (ahead.Y < solution.Problem.StageFenceBottom) continue;
+                if (ahead.Y > solution.Problem.StageFenceTop) continue;
+
+                return move;
 
                 // Apply the move
                 move.Apply(solution);
@@ -151,7 +175,7 @@ namespace ICFP2023
                 // Otherwise, undo the move and try again
                 move.Undo(solution);
             }
-        }*/
+        }
 
         public static bool IsCurrentlyValid(Solution solution)
         {
@@ -211,19 +235,50 @@ namespace ICFP2023
             return false;
         }
 
-        record Move(int M0, int M1)
+        interface Move {
+            public void Apply(Solution solution);
+            public void Undo(Solution solution);
+        }
+
+        record MoveSwap(int M0, int M1) : Move
         {
             public void Apply(Solution solution)
             {
-                solution.Swap(M0, M1);
-                solution.NScoreWithCache(M0);
-                solution.NScoreWithCache(M1);
+                Swap(solution);
             }
 
             public void Undo(Solution solution)
             {
-                solution.Swap(M1, M0);
+                Swap(solution);
+            }
+
+            private void Swap(Solution solution)
+            {
+                var musician0 = solution.Problem.Musicians[M0];
+                var musician1 = solution.Problem.Musicians[M1];
+
+                solution.SwapNoCache(musician0, musician1);
+
+                solution.NScoreWithCache(M0);
                 solution.NScoreWithCache(M1);
+            }
+        }
+
+        record MoveWalk(int M0, Vec delta) : Move
+        {
+            public void Apply(Solution solution)
+            {
+                var musician = solution.Problem.Musicians[M0];
+                var current = solution.GetPlacement(musician);
+                solution.SetPlacement(musician, current + delta);
+                solution.NScoreWithCache(M0);
+            }
+
+            public void Undo(Solution solution)
+            {
+                var musician = solution.Problem.Musicians[M0];
+                var current = solution.GetPlacement(musician);
+                solution.SetPlacement(musician, current - delta);
                 solution.NScoreWithCache(M0);
             }
         }

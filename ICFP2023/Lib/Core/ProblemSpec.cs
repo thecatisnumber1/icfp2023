@@ -53,6 +53,17 @@ namespace ICFP2023
         public ProblemExtensions Extensions { get; private set; }
         public bool UsePlayingTogetherScoring { get; private set; }
 
+        public double StageFenceBottom => StageBottom + Musician.SOCIAL_DISTANCE;
+
+        public double StageFenceTop => StageTop - Musician.SOCIAL_DISTANCE;
+
+        public double StageFenceLeft => StageLeft + Musician.SOCIAL_DISTANCE;
+
+        public double StageFenceRight => StageRight - Musician.SOCIAL_DISTANCE;
+
+
+        // 1 through 55 = Lightning round. 56 through 90 = Pillars + Playing Together
+
         public void SetProblemName(string problemName)
         {
             ProblemName = problemName;

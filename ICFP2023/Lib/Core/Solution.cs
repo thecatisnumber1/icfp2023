@@ -49,6 +49,10 @@ namespace ICFP2023
             }
 
             this.occlusionFinder = new(this);
+            foreach (var musician in problem.Musicians)
+            {
+                occlusionFinder.OnPlacementChanged(musician, initial);
+            }
 
             WhosThere = new Dictionary<Point, Musician>();
             NScoreCache = new long[problem.Musicians.Count];
@@ -72,16 +76,15 @@ namespace ICFP2023
             ScoreCache = scoreCache;
 
             this.occlusionFinder = new(this);
-
             foreach (var musician in problem.Musicians)
             {
                 occlusionFinder.OnPlacementChanged(musician, Point.ORIGIN);
             }
 
-            WhosThere = new Dictionary<Point, Musician>();
-            foreach (var musician in problem.Musicians) {
-                WhosThere.Add(placements[musician.Index], musician);
-            }
+            // WhosThere = new Dictionary<Point, Musician>();
+            // foreach (var musician in problem.Musicians) {
+            //     WhosThere.Add(placements[musician.Index], musician);
+            // }
             NScoreCache = nScoreCache;
             NScoreCacheTotal = nScoreCacheTotal;
         }
@@ -96,12 +99,22 @@ namespace ICFP2023
             var oldLoc = Placements[musician.Index];
             placements[musician.Index] = loc;
             occlusionFinder.OnPlacementChanged(musician, oldLoc);
-            if (check && WhosThere.ContainsKey(loc)) {
-                return false;
-            }
-            WhosThere.Remove(oldLoc);
-            WhosThere.Add(loc, musician);
+            // if (check && WhosThere.ContainsKey(loc)) {
+            //     return false;
+            // }
+            // WhosThere.Remove(oldLoc);
+            // WhosThere.Add(loc, musician);
             return true;
+        }
+
+        public void SwapNoCache(Musician m0, Musician m1)
+        {
+            var loc0 = Placements[m0.Index];
+            var loc1 = Placements[m1.Index];
+            placements[m0.Index] = loc1;
+            placements[m1.Index] = loc0;
+            occlusionFinder.OnPlacementChanged(m0, loc0);
+            occlusionFinder.OnPlacementChanged(m1, loc1);
         }
 
         public void Swap(int m0, int m1)
@@ -489,7 +502,7 @@ namespace ICFP2023
             return gradients;
         }
 
-        public long NScoreMusician(Musician m, int n=10, bool occlusion=true)
+        public long NScoreMusician(Musician m, int n=100, bool occlusion=true)
         {
             long score = 0;
 
@@ -504,7 +517,7 @@ namespace ICFP2023
             return score;
         }
 
-        public long NScoreFull(int n=10, bool occlusion=true)
+        public long NScoreFull(int n=100, bool occlusion=true)
         {
             Problem.LoadMetaDataStrongest();
 
@@ -517,7 +530,7 @@ namespace ICFP2023
             return NScoreCacheTotal;
         }
 
-        public long NScoreWithCache(int updateMusician = -1, int n=10, bool occlusion=true)
+        public long NScoreWithCache(int updateMusician = -1, int n=100, bool occlusion=true)
         {
             if (updateMusician < 0) return NScoreCacheTotal;
 
