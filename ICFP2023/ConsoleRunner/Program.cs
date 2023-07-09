@@ -45,7 +45,7 @@ namespace ICFP2023
 
                     // Call desired AI and then pass the result from it to HillClimber for optimization.
                     Solution best = GreedyPlacer.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
-                    HillSolver.Solve(best);
+                    best = HillSolver.Solve(best);
 
                     Console.WriteLine($"Score: {best.ScoreCache}");
                     SubmitSolution(best, i).Wait();
