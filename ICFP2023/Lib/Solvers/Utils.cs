@@ -66,6 +66,19 @@ namespace ICFP2023
             return m0.DistSq(m1) < GRID_SIZE * GRID_SIZE;
         }
 
+        public static bool MusiciansCollide(List<Point> points, Point m)
+        {
+            foreach (Point p in points)
+            {
+                if (MusiciansCollide(p, m))
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         private static double ScoreSpan(Side musicianSide, Attendee a, Score score, Point spanStart, Point spanEnd)
         {
             double spanLength = musicianSide.Along.DotProduct(spanEnd - spanStart);
