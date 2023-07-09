@@ -52,7 +52,10 @@ namespace ICFP2023
         public static Vec operator *(Vec v, double scale)
             => new(scale * v.X, scale * v.Y);
 
-        public static Vec operator /(Vec v, int scale)
+        public static Vec operator /(Vec v, double scale)
+            => new(v.X / scale, v.Y / scale);
+
+        public static Vec operator /(double scale, Vec v)
             => new(v.X / scale, v.Y / scale);
 
         public static Vec operator *(Vec v, int scale) => scale * v;
@@ -91,5 +94,9 @@ namespace ICFP2023
         {
             return X * b.X + Y * b.Y;
         }
+
+        public Vec Normalized() =>this / Magnitude;
+
+        public Vec RotateCCW() => new(-Y, X);
     }
 }
