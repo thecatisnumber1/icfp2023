@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection.Metadata.Ecma335;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -37,21 +38,15 @@ namespace ICFP2023
             {
                 solution.SetPlacement(solution.Problem.Musicians[i], dumpStuff[i]);
             }
-            
-            // Foreach edge
-            //   Figure out which people to target, place the cracks and crack watchers
-            //   Fill up the rest of the space on that line
-            // Toss people in the middle somwehere (close to edges, ideally)
 
+            ui.Render(solution);
 
-            // Anneal?  Be happy?
-
-
+            solution = HillSolver.Solve(solution);
 
             ui.Render(solution);
             //return HillSolver.Solve(solution);
             //solution = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 90000, 1000000);
-            return HillSolver.Solve(solution);
+            return solution;
         }
 
         private static void AddNonColliding(List<Point> allocatedLocations, List<Point> sideLocations)
@@ -112,7 +107,7 @@ namespace ICFP2023
                     Point previousPoint = allocatedLocations[^1];
                     Point midPoint = currentPoint.Mid(previousPoint);
                     double spacing = currentPoint.Manhattan(previousPoint) / 2;
-                    double distanceFromEdge = Math.Sqrt(100 - spacing * spacing);
+                    double distanceFromEdge = Math.Sqrt(100 - spacing * spacing) + 0.000001;
                     Point watcherLocation = midPoint - side.Outward * distanceFromEdge;
                     allocatedLocations.Add(watcherLocation);
                 }

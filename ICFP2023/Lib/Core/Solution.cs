@@ -174,6 +174,32 @@ namespace ICFP2023
             }
         }
 
+        public double GetScoreForMusician(int index)
+        {
+            if (MusicianScoreCache == null)
+            {
+                return 0;
+            }
+
+            return MusicianScoreCache[index].Sum();
+        }
+
+        public double GetScoreForAttendee(int index)
+        {
+            if (MusicianScoreCache == null)
+            {
+                return 0;
+            }
+
+            double score = 0;
+            foreach (var kvp in MusicianScoreCache)
+            {
+                score += kvp.Value[index];
+            }
+
+            return score;
+        }
+
         public Solution Copy()
         {
             Dictionary<int, List<long>> cacheCopy = new Dictionary<int, List<long>>();
@@ -258,8 +284,13 @@ namespace ICFP2023
 
         public long SupplyGradientToUI(int musicianIndex)
         {
-            return Problem.Musicians[musicianIndex].Instrument;
-            //return MusicianScoreCache[musicianIndex].Sum();
+            //return Problem.Musicians[musicianIndex].Instrument;
+            if (MusicianScoreCache == null)
+            {
+                return 0;
+            }
+
+            return MusicianScoreCache[musicianIndex].Sum();
         }
 
         // Assumes no blocking!

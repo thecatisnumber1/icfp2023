@@ -44,11 +44,18 @@ namespace ICFP2023
                     Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
 
                     // Call desired AI and then pass the result from it to HillClimber for optimization.
-                    Solution best = GreedyPlacer.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
+                    Solution best = LetsGetCrackin.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
                     // best = HillSolver.Solve(best);
 
                     Console.WriteLine($"Score: {best.ScoreCache}");
-                    SubmitSolution(best, i).Wait();
+                    if (best.ScoreCache == 0)
+                    {
+                        Console.WriteLine("Skipping submission of zero-score solution.");
+                    }
+                    else
+                    {
+                        SubmitSolution(best, i).Wait();
+                    }
 
 
                     // Optimize our best solution with BestSolveOptimizer, and only submit if its result is better than the old score.

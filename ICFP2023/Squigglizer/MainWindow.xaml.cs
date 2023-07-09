@@ -60,6 +60,8 @@ namespace ICFP2023
         private Rectangle _stageOverlayRect;
         #endregion
 
+        private Dictionary<int, Ellipse> AttendeeToEllipse;
+
         private Solution _currentSolution;
         private AudienceColorizers.Colorizer _currentAudienceColorizer;
 
@@ -212,9 +214,11 @@ namespace ICFP2023
             }
 
             int ai = 0;
+            AttendeeToEllipse = new Dictionary<int, Ellipse>();
             foreach (Attendee a in problem.Attendees)
             {
                 Ellipse ellipse = new Ellipse();
+                AttendeeToEllipse.Add(a.Index, ellipse);
                 ellipse.Width = PersonSizePx;
                 ellipse.Height = PersonSizePx;
                 ellipse.Stroke = UnselectedAttendeeBorderBrush;
@@ -287,6 +291,7 @@ namespace ICFP2023
             if (FileUtil.FileExists(bestSaveFile))
             {
                 Solution bestSolve = Solution.Read(bestSaveFile, _currentProblem);
+                bestSolve.InitializeScore();
                 RenderSolution(bestSolve);
             }
         }
@@ -388,7 +393,7 @@ namespace ICFP2023
                 ellipse.Height = PersonSizePx;
                 ellipse.Stroke = BlackBrush;
                 long effect = _currentSolution.SupplyGradientToUI(i);
-                ellipse.ToolTip = effect.ToString();
+                ellipse.ToolTip = (solution.GetScoreForMusician(i) / solution.ScoreCache).ToString("P2");
 
                 SolidColorBrush brush = GetBrushFromMagicGradient(effect, minEffect, maxEffect);
                 ellipse.Fill = brush; // More negative = more red. More positive = more green.
@@ -401,6 +406,11 @@ namespace ICFP2023
                 _musicianToShape.Add(m, ellipse);
 
                 MusicianRender.Children.Add(ellipse);
+            }
+
+            for (int i = 0; i < solution.Problem.Attendees.Count; i++)
+            {
+                AttendeeToEllipse[i].ToolTip = solution.GetScoreForAttendee(i);
             }
         }
 
