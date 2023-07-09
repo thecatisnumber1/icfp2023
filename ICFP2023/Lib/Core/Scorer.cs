@@ -47,7 +47,7 @@ namespace ICFP2023
                 }
 
                 // Set volume to 0 for any negative score
-                if (singleScore > 0)
+                if (singleScore >= 0)
                 {
                     score += singleScore;
 
