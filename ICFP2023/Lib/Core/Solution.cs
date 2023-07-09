@@ -103,6 +103,23 @@ namespace ICFP2023
                 }
             }
 
+            var changedMusicians = instrument0Musicians.Concat(instrument1Musicians);
+            changedMusicians = changedMusicians.Append(m0);
+            changedMusicians = changedMusicians.Append(m1);
+
+            // Musicians with the same instrument now have different distance bonuses,
+            // so we need to recompute their scores.
+            foreach (int mi in changedMusicians)
+            {
+                var mScoreCache = MusicianScoreCache[mi];
+
+                for (int i = 0; i < Problem.Attendees.Count; i++)
+                {
+                    ScoreCache -= mScoreCache[i];
+                    mScoreCache[i] = 0;
+                }
+            }
+
             Point m0Placement = Placements[m0];
             double m0DistScoreCache = MusicianDistanceScoreCache[m0];
             foreach (var mi in instrument0Musicians)
@@ -143,18 +160,17 @@ namespace ICFP2023
             MusicianDistanceScoreCache[m0] = m0DistScoreCache;
             MusicianDistanceScoreCache[m1] = m1DistScoreCache;
 
-            foreach(int attendeeIndex in MusicianUnblockedCache[placements[m0]])
+            // Recompute the scores for the changed musicians now that the distance bonuses are known
+            foreach (var mi in changedMusicians)
             {
-                long pairScore = PairScore(m0, attendeeIndex);
-                m0ScoreCache[attendeeIndex] = pairScore;
-                ScoreCache += pairScore;
-            }
+                var mScoreCache = MusicianScoreCache[mi];
 
-            foreach (int attendeeIndex in MusicianUnblockedCache[placements[m1]])
-            {
-                long pairScore = PairScore(m1, attendeeIndex);
-                m1ScoreCache[attendeeIndex] = pairScore;
-                ScoreCache += pairScore;
+                foreach (int attendeeIndex in MusicianUnblockedCache[placements[mi]])
+                {
+                    long pairScore = PairScore(mi, attendeeIndex);
+                    mScoreCache[attendeeIndex] = pairScore;
+                    ScoreCache += pairScore;
+                }
             }
         }
 
