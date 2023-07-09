@@ -44,7 +44,7 @@ namespace ICFP2023
                     Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
 
                     // Call desired AI and then pass the result from it to HillClimber for optimization.
-                    Solution best = LetsGetCrackin.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
+                    Solution best = LetsGetCrackin.FixedPointAnnealSolve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
                     // best = HillSolver.Solve(best);
 
                     Console.WriteLine($"Score: {best.ScoreCache}");

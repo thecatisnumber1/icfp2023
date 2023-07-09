@@ -17,7 +17,7 @@ namespace ICFP2023
 
         private long Iterations;
         private double PrevTempLog;
-        private Stopwatch Watch;
+        public Stopwatch Watch;
 
         public CoolingScheduler(long targetMs, double initialTemp, double finalTemp)
         {

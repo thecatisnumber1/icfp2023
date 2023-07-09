@@ -12,17 +12,10 @@ namespace ICFP2023
         public static Solution Solve(ProblemSpec problem, SharedSettings settings, UIAdapter ui)
         {
             Solution solution = new Solution(problem);
-
-            List<Point> allocatedLocations = new List<Point>();
-            foreach (Side s in problem.Stage.Sides)
-            {
-                List<Attendee> attendeesToWatch = Utils.SelectAttendees(problem, s, ComputeScore);
-                List<Point> sideLocations = AllocateLocations(attendeesToWatch, s);
-                AddNonColliding(allocatedLocations, sideLocations);
-            }
+            List<Point> allocatedLocations = PlacePointsAlongEdgesAKAGetCrackin(problem);
 
             // Is the size too small?
-            if (allocatedLocations.Count > solution.Problem.Musicians.Count) 
+            if (allocatedLocations.Count > solution.Problem.Musicians.Count)
             {
                 return solution;
             }
@@ -40,13 +33,59 @@ namespace ICFP2023
             }
 
             ui.Render(solution);
-
-            solution = HillSolver.Solve(solution);
-
-            ui.Render(solution);
-            //return HillSolver.Solve(solution);
-            //solution = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 90000, 1000000);
+            solution = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 90000, 1000000);
             return solution;
+        }
+
+        public static Solution FixedPointAnnealSolve(ProblemSpec problem, SharedSettings settings, UIAdapter ui)
+        {
+            List<Point> fixedPoints = PlacePointsAlongEdgesAKAGetCrackin(problem);
+            if (fixedPoints.Count < problem.Musicians.Count)
+            {
+                return new Solution(problem);
+            }
+
+            List<int> matches = FixedPointMatcher.FindMatching(problem, fixedPoints, ui, 90000, 60000000);
+            Solution solution = MatchingToSolution(problem, fixedPoints, matches);
+
+            Console.WriteLine($"{solution.InitializeScore()}");
+            ui.Render(solution);
+
+            return solution;
+        }
+
+        public static Solution MatchingToSolution(ProblemSpec problem, List<Point> fixedPoints, List<int> matches)
+        {
+            Solution solution = new Solution(problem);
+            List<Musician> draftees = problem.Musicians.ToList();
+            for (int slotNumber = 0; slotNumber < matches.Count; slotNumber++)
+            {
+                if (matches[slotNumber] == -1) continue;
+                for (int draftIndex = 0; draftIndex < draftees.Count; draftIndex++)
+                {
+                    if (draftees[draftIndex].Instrument == matches[slotNumber])
+                    {
+                        solution.SetPlacement(draftees[draftIndex], fixedPoints[slotNumber]);
+                        draftees.RemoveAt(draftIndex);
+                        break;
+                    }
+                }
+            }
+
+            return solution;
+        }
+
+        private static List<Point> PlacePointsAlongEdgesAKAGetCrackin(ProblemSpec problem)
+        {
+            List<Point> allocatedLocations = new List<Point>();
+            foreach (Side s in problem.Stage.Sides)
+            {
+                List<Attendee> attendeesToWatch = Utils.SelectAttendees(problem, s, ComputeScore);
+                List<Point> sideLocations = AllocateLocations(attendeesToWatch, s);
+                AddNonColliding(allocatedLocations, sideLocations);
+            }
+
+            return allocatedLocations;
         }
 
         private static void AddNonColliding(List<Point> allocatedLocations, List<Point> sideLocations)

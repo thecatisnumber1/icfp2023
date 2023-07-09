@@ -18,6 +18,7 @@ namespace ICFP2023
             ["EdgeClimber"] = EdgeClimber.Solve,
             ["BestSolveOptimizer"] = BestSolveOptimizer.Solve,
             ["LetsGetCrackin"] = LetsGetCrackin.Solve,
+            ["FixedPointCraker"] = LetsGetCrackin.FixedPointAnnealSolve,
         };
 
         public static Solver GetSolver(string algorithm)

@@ -291,7 +291,7 @@ namespace ICFP2023
             if (FileUtil.FileExists(bestSaveFile))
             {
                 Solution bestSolve = Solution.Read(bestSaveFile, _currentProblem);
-                bestSolve.InitializeScore();
+                //bestSolve.InitializeScore(); // This will be very slow if you uncomment, but it will show you score gradients.
                 RenderSolution(bestSolve);
             }
         }
@@ -410,7 +410,7 @@ namespace ICFP2023
 
             for (int i = 0; i < solution.Problem.Attendees.Count; i++)
             {
-                AttendeeToEllipse[i].ToolTip = solution.GetScoreForAttendee(i);
+                AttendeeToEllipse[i].ToolTip = $"{solution.GetScoreForAttendee(i)}, {string.Join(", ", solution.Problem.Attendees[i].Tastes)}";
             }
         }
 
@@ -430,7 +430,7 @@ namespace ICFP2023
             {
                 index = half + (int)(val / maxVal * half) - 1;
             }
-            return MagicGradient[index];
+            return MagicGradient[Math.Min(index, 1023)];
         }
 
         private void MusicianBubble_MouseDown(object sender, MouseButtonEventArgs e)

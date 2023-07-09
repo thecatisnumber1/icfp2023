@@ -43,7 +43,7 @@ namespace ICFP2023
                 }
 
                 Console.WriteLine($"Current climbing score: {currentSolution.ScoreCache}");
-                //break;
+                break;
                 if (!swapped)
                 {
                     break;

@@ -99,36 +99,6 @@ namespace ICFP2023
             return new Move(m0, m1);
         }
 
-        // Previous version of GetNeighbor which would move points slightly.
-        /*private static Move GetNeighbor(Solution solution)
-        {
-            int musicianIndex;
-            Vec delta;
-            while (true)
-            {
-                musicianIndex = random.Next(solution.Placements.Count);
-
-                // Generate a random vector, scaled and translated to be between 0.25 and 2.0
-                delta = new Vec(random.NextDouble() * 1.75 + 0.25, random.NextDouble() * 1.75 + 0.25);
-
-                // Create the move
-                Move move = new Move(musicianIndex, delta);
-
-                // Apply the move
-                move.Apply(solution);
-
-                // If the move is valid, return it
-                if (IsValidMove(solution, musicianIndex))
-                {
-                    move.Undo(solution);
-                    return move;
-                }
-
-                // Otherwise, undo the move and try again
-                move.Undo(solution);
-            }
-        }*/
-
         public static bool IsCurrentlyValid(Solution solution)
         {
             for (int i = 0; i < solution.Placements.Count; i++)

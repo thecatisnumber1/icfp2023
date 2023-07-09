@@ -290,7 +290,8 @@ namespace ICFP2023
                 return 0;
             }
 
-            return MusicianScoreCache[musicianIndex].Sum();
+            return 0;
+            //return MusicianScoreCache[musicianIndex].Sum();
         }
 
         // Assumes no blocking!

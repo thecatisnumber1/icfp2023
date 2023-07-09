@@ -15,7 +15,9 @@ namespace ICFP2023
             Place(solution, ui);
             ui.Render(solution);
             Thread.Sleep(500);
-            return AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 120000, 1000000);
+            solution = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 30000, 1000000);
+            ui.Render(solution);
+            return solution;
             //return HillSolver.Solve(solution);
         }
 
