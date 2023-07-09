@@ -5,6 +5,11 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
+using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.PixelFormats;
+using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
 
 namespace ICFP2023
 {
@@ -507,15 +512,20 @@ namespace ICFP2023
             return gradients;
         }
 
-        public long NScoreMusician(Musician m, int n=100, bool occlusion=true)
+        public long NScoreMusician(Musician m, int n=200, bool occlusion=true)
         {
+            n = Math.Min(n, Problem.Musicians.Count);
             long score = 0;
 
             for (int i = 0; i < n; i++) {
                 var attendeeIndex = Problem.Strongest[m.Instrument, i];
                 var attendee = Problem.Attendees[attendeeIndex];
+                var pairScore = PairScore(m.Index, attendeeIndex);
                 if (!occlusion || !occlusionFinder.IsMusicianBlocked(m, attendee)) {
-                    score += PairScore(m.Index, attendeeIndex);
+                    score += pairScore;
+                } else {
+                    // Allow some signal through to help signal the annealer.
+                    score += (long)(pairScore * 0.10);
                 }
             }
 
@@ -535,8 +545,9 @@ namespace ICFP2023
             return score;
         }
 
-        public long NScoreFull(int n=100, bool occlusion=true)
+        public long NScoreFull(int n=200, bool occlusion=true)
         {
+            n = Math.Min(n, Problem.Musicians.Count);
             Problem.LoadMetaDataStrongest();
 
             NScoreCacheTotal = 0;
@@ -548,8 +559,9 @@ namespace ICFP2023
             return NScoreCacheTotal;
         }
 
-        public long NScoreWithCache(int updateMusician = -1, int n=100, bool occlusion=true)
+        public long NScoreWithCache(int updateMusician = -1, int n=200, bool occlusion=true)
         {
+            n = Math.Min(n, Problem.Musicians.Count);
             if (updateMusician < 0) return NScoreCacheTotal;
 
             Musician musician = Problem.Musicians[updateMusician];
@@ -559,6 +571,49 @@ namespace ICFP2023
 
             return NScoreCacheTotal;
         }
+
+        public void Render()
+        {
+            var problem = Problem;
+
+            using var image = new Image<Rgba32>((int)problem.RoomWidth, (int)problem.RoomHeight);
+
+            image.Mutate(x => x.Draw(
+                Pens.Solid(Color.Red, 5),  // The color of the rectangle and thickness
+                new RectangleF(
+                    (int)problem.StageLeft,
+                    (int)problem.StageBottom,
+                    (int)problem.StageWidth,
+                    (int)problem.StageHeight)
+            ));
+
+            foreach (var m in problem.Musicians)
+            {
+                var p = Placements[m.Index];
+                var dotCenter = new PointF((int)p.X, (int)p.Y); // The position of the dot
+                float dotRadius = 5; // The radius of the dot
+
+                image.Mutate(x => x.Fill(
+                    Color.Green, // The color of the dot
+                    new EllipsePolygon(dotCenter, dotRadius) // The dot
+                ));
+            }
+
+            foreach (var m in problem.Attendees)
+            {
+                var p = m.Location;
+                var dotCenter = new PointF((int)p.X, (int)p.Y); // The position of the dot
+                float dotRadius = 2; // The radius of the dot
+
+                image.Mutate(x => x.Fill(
+                    Color.Black, // The color of the dot
+                    new EllipsePolygon(dotCenter, dotRadius) // The dot
+                ));
+            }
+
+            image.Save($"render-{Problem.ProblemNumber}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.png");
+        }
+
     }
 
 }

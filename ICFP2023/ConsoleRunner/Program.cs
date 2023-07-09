@@ -9,6 +9,8 @@ using Newtonsoft.Json;
 using SixLabors.ImageSharp;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
+using SixLabors.ImageSharp.Drawing;
+using SixLabors.ImageSharp.Drawing.Processing;
 using System.Threading.Tasks;
 
 
@@ -42,7 +44,7 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            List<int> toDoList = new List<int> { 8 };
+            List<int> toDoList = new List<int> { 12 };
             // foreach (int i in toDoList)
             // for (int i = 1; i <= 90; i++)
             // for (var i = 56; i <= 90; i++)
@@ -51,7 +53,7 @@ namespace ICFP2023
             {
                 // try
                 // {
-                    // Console.WriteLine($"Solving problem {i}");
+
                     Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
 
                     // Call desired AI and then pass the result from it to HillClimber for optimization.
@@ -85,9 +87,12 @@ namespace ICFP2023
                     // SubmitSolution(best, i).Wait();
                     // solution.Problem.LoadMetaData();
                     Solution best = BadAnnealingSolver.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
-                    Console.WriteLine($"Best score: {best.InitializeScore()}");
+
+                    Console.WriteLine($"Best score: {i} {best.InitializeScore()}");
                     Console.WriteLine($"Placement: {string.Join(", ", best.Placements)}");
+
                     SubmitSolution(best, i).Wait();
+                    best.Render();
 
                     // long[,,] power;
                     // string filename = "heatmap-" + i + ".json";
@@ -137,18 +142,14 @@ namespace ICFP2023
                     //     File.WriteAllText(strongestPath, JsonConvert.SerializeObject(strongest));
                     // }
 
-                    // for (var j = 0; j < power.GetLength(0); j++) {
-                    //     Heatmap(power, j, "power-" + i + "-" + j + ".png");
-                    // }
+                    for (var j = 0; j < solution.Problem.HeatMap.GetLength(0); j++) {
+                        Heatmap(solution.Problem.HeatMap, j, "power-" + i + "-" + j + ".png");
+                    }
                     // for (var j = 0; j < gradients.GetLength(0); j++)
                     // {
                     //     Heatmap(gradients, j, "gradients-" + i + "-" + j + ".png");
                     // }
 
-                    // AnnealingSolver.GridBasedStartingState(solution);
-                    // Solution best = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 60000, 1000000);
-                    // Console.WriteLine($"Best score: {best.ScoreCache}");
-                    // SubmitSolution(best, i).Wait();
                 // }
                 // catch (Exception e)
                 // {
@@ -275,5 +276,6 @@ namespace ICFP2023
 
             return responseContent;
         }
+
     }
 }

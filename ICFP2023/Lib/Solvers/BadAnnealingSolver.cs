@@ -14,6 +14,7 @@ namespace ICFP2023
             problem.LoadMetaData();
 
             Solution solution = new Solution(problem, Point.INVALID);
+
             InitialPlacement(solution, problem);
             solution.InitializeScore();
 
@@ -62,6 +63,7 @@ namespace ICFP2023
                     accepted = 0;
                     rejected = 0;
                     lastLogTime = Environment.TickCount;
+                    currentSolution.Render();
                 }
 
                 Move move;
@@ -142,20 +144,15 @@ namespace ICFP2023
             {
                 musicianIndex = random.Next(solution.Placements.Count);
 
-                // Generate a random vector, scaled and translated to be between 0.25 and 2.0
                 delta = new Vec(
-                    Math.Round((random.NextDouble() - 0.50) * 2.5),
-                    Math.Round((random.NextDouble() - 0.50) * 2.5)
+                    (random.NextDouble() - 0.50) * solution.Problem.StageWidth / 20,
+                    (random.NextDouble() - 0.50) * solution.Problem.StageHeight / 20
                 );
 
                 if (delta.MagnitudeSq == 0) continue;
 
-                // Create the move
-                Move move = new MoveWalk(musicianIndex, delta);
-
                 var loc = solution.Placements[musicianIndex];
                 var ahead = loc + delta;
-
 
                 // Don't go outside the bounds
                 if (ahead.X < solution.Problem.StageFenceLeft) continue;
@@ -163,20 +160,10 @@ namespace ICFP2023
                 if (ahead.Y < solution.Problem.StageFenceBottom) continue;
                 if (ahead.Y > solution.Problem.StageFenceTop) continue;
 
+                // Create the move
+                Move move = new MoveWalk(musicianIndex, delta);
+
                 return move;
-
-                // Apply the move
-                move.Apply(solution);
-
-                // If the move is valid, return it
-                if (IsValidMove(solution, musicianIndex))
-                {
-                    move.Undo(solution);
-                    return move;
-                }
-
-                // Otherwise, undo the move and try again
-                move.Undo(solution);
             }
         }
 
@@ -278,8 +265,8 @@ namespace ICFP2023
                 var s1p = solution.NScoreCache[musician.Index];
                 solution.NScoreWithCache(M0);
                 if (s1 == solution.NScoreCacheTotal) {
-                    Console.Error.WriteLine($"{this} {s1} {s1p} {current} {delta}");
-                    solution.NScoreMusician(musician);
+                    // Console.Error.WriteLine($"{this} {s1} {s1p} {current} {delta}");
+                    // solution.NScoreMusician(musician);
                 }
             }
 

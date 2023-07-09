@@ -209,10 +209,10 @@ namespace ICFP2023
 
         public void LoadMetaDataHeatMap() {
             string i = Regex.Replace(ProblemName, "[^0-9]", "");
-            Console.Error.WriteLine($"Loading Heatmap for {i}");
 
             if (FileUtil.FileExists($"metadata/heatmap-{i}.json") && HeatMap == null)
             {
+                Console.Error.WriteLine($"Loading Heatmap for {i}");
                 HeatMap = JsonConvert.DeserializeObject<long[,,]>(FileUtil.Read($"metadata/heatmap-{i}.json"));
             }
         }
@@ -220,10 +220,10 @@ namespace ICFP2023
         public void LoadMetaDataGradients()
         {
             string i = Regex.Replace(ProblemName, "[^0-9]", "");
-            Console.Error.WriteLine($"Loading Gradients for {i}");
 
             if (FileUtil.FileExists($"metadata/gradients-{i}.json") && Gradients == null)
             {
+                Console.Error.WriteLine($"Loading Gradients for {i}");
                 Gradients = JsonConvert.DeserializeObject<long[,,]>(FileUtil.Read($"metadata/gradients-{i}.json"));
             }
         }
@@ -231,10 +231,10 @@ namespace ICFP2023
         public void LoadMetaDataStrongest()
         {
             string i = Regex.Replace(ProblemName, "[^0-9]", "");
-            Console.Error.WriteLine($"Loading Strongest for {i}");
 
             if (FileUtil.FileExists($"metadata/strongest-{i}.json"))
             {
+                Console.Error.WriteLine($"Loading Strongest for {i}");
                 Strongest = JsonConvert.DeserializeObject<int[,]>(FileUtil.Read($"metadata/strongest-{i}.json"));
             }
         }
