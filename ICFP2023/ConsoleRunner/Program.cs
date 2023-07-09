@@ -86,13 +86,14 @@ namespace ICFP2023
                     // Console.WriteLine($"Best score: {best.ScoreCache}");
                     // SubmitSolution(best, i).Wait();
                     // solution.Problem.LoadMetaData();
-                    Solution best = BadAnnealingSolver.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
 
-                    Console.WriteLine($"Best score: {i} {best.InitializeScore()}");
-                    Console.WriteLine($"Placement: {string.Join(", ", best.Placements)}");
+                    // Solution best = BadAnnealingSolver.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
 
-                    SubmitSolution(best, i).Wait();
-                    best.Render();
+                    // Console.WriteLine($"Best score: {i} {best.InitializeScore()}");
+                    // Console.WriteLine($"Placement: {string.Join(", ", best.Placements)}");
+
+                    // SubmitSolution(best, i).Wait();
+                    // best.Render();
 
                     // long[,,] power;
                     // string filename = "heatmap-" + i + ".json";

@@ -57,7 +57,7 @@ namespace ICFP2023
             this.occlusionFinder = new(this);
             foreach (var musician in problem.Musicians)
             {
-                occlusionFinder.OnPlacementChanged(musician, initial);
+                occlusionFinder.OnPlacementChanged(initial, initial);
             }
 
             WhosThere = new Dictionary<Point, Musician>();
@@ -86,7 +86,7 @@ namespace ICFP2023
             this.occlusionFinder = new(this);
             foreach (var musician in problem.Musicians)
             {
-                occlusionFinder.OnPlacementChanged(musician, Point.ORIGIN);
+                occlusionFinder.OnPlacementChanged(Point.ORIGIN, Point.ORIGIN);
             }
 
             // WhosThere = new Dictionary<Point, Musician>();
@@ -107,7 +107,7 @@ namespace ICFP2023
         {
             var oldLoc = Placements[musician.Index];
             placements[musician.Index] = loc;
-            occlusionFinder.OnPlacementChanged(musician, oldLoc);
+            occlusionFinder.OnPlacementChanged(loc, oldLoc);
             // if (check && WhosThere.ContainsKey(loc)) {
             //     return false;
             // }
@@ -122,8 +122,8 @@ namespace ICFP2023
             var loc1 = Placements[m1.Index];
             placements[m0.Index] = loc1;
             placements[m1.Index] = loc0;
-            occlusionFinder.OnPlacementChanged(m0, loc0);
-            occlusionFinder.OnPlacementChanged(m1, loc1);
+            occlusionFinder.OnPlacementChanged(loc1, loc0);
+            occlusionFinder.OnPlacementChanged(loc0, loc1);
         }
 
         public void Swap(int m0, int m1)

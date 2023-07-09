@@ -65,7 +65,7 @@ namespace ICFP2023
                 }
             }
 
-            if (newLoc != Point.ORIGIN)
+            if (newLoc != Point.ORIGIN && newLoc != Point.INVALID)
             {
                 var (newX, newY) = CellFor(newLoc);
 
