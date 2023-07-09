@@ -14,6 +14,10 @@ namespace ICFP2023
         private StaticBlockingComputer BlockingComputerTron;
         private ProblemSpec Problem;
 
+        private List<double> Qs;
+        private List<HashSet<int>> InstrumentToUsedSlots;
+        private List<long> SlotScores;
+
         private long ScoreCache;
         
         public FixedPointSolution(ProblemSpec problem, List<Point> slotLocations)
@@ -21,7 +25,21 @@ namespace ICFP2023
             SlotLocations = slotLocations;
             BlockingComputerTron = new StaticBlockingComputer(slotLocations, problem.Attendees, problem.Pillars);
             Problem = problem;
+            SlotScores = new List<long>();
+            Qs = new List<double>();
+            for (int i = 0; i < slotLocations.Count; i++)
+            {
+                Qs.Add(double.NaN);
+                SlotScores.Add(0);
+            }
+
             Slots = new List<int>();
+            InstrumentToUsedSlots = new List<HashSet<int>>();
+            for (int i = 0; i < problem.Musicians.Max(x => x.Instrument) + 1; i++)
+            {
+                InstrumentToUsedSlots.Add(new HashSet<int>());
+            }
+
             foreach (var _ in slotLocations)
             {
                 Slots.Add(-1);
@@ -40,11 +58,10 @@ namespace ICFP2023
                 return;
             }
 
+            InstrumentToUsedSlots[instrument].Add(slot);
+            Qs[slot] = UpdateQs(slot, instrument, 1);
             Slots[slot] = instrument;
-            foreach (var attendee in BlockingComputerTron.GetVisibleAttendees(slot))
-            {
-                ScoreCache += Problem.PairScore(instrument, attendee.Index, SlotLocations[slot], 1);
-            }
+            ComputeScoreForSlot(slot);
         }
 
         public int RemoveInstrument(int slot)
@@ -54,13 +71,15 @@ namespace ICFP2023
                 return -1;
             }
 
+
             int instrument = Slots[slot];
-            foreach (var attendee in BlockingComputerTron.GetVisibleAttendees(slot))
-            {
-                ScoreCache -= Problem.PairScore(instrument, attendee.Index, SlotLocations[slot], 1);
-            }
+            InstrumentToUsedSlots[instrument].Remove(slot);
+            ScoreCache -= SlotScores[slot];
+            SlotScores[slot] = 0;
 
             Slots[slot] = -1;
+            Qs[slot] = double.NaN;
+            UpdateQs(slot, instrument, -1);
             return instrument;
         }
 
@@ -81,6 +100,50 @@ namespace ICFP2023
         public long GetScore()
         {
             return ScoreCache;
+        }
+
+        private double UpdateQs(int changingSlot, int instrument, int modifier)
+        {
+            double changingSlotQ = modifier;
+            foreach (int otherSlot in InstrumentToUsedSlots[instrument])
+            {
+                if (changingSlot == otherSlot)
+                {
+                    continue;
+                }
+
+                double update = modifier / SlotLocations[changingSlot].Dist(SlotLocations[otherSlot]);
+                SetQ(otherSlot, Qs[otherSlot] + update);
+                changingSlotQ += update;
+            }
+
+            return changingSlotQ;
+        }
+
+        private void ComputeScoreForSlot(int slot)
+        {
+            long score = 0;
+            foreach (var attendee in BlockingComputerTron.GetVisibleAttendees(slot))
+            {
+                score += Problem.PairScore(Slots[slot], attendee.Index, SlotLocations[slot], Qs[slot]);
+            }
+
+            SlotScores[slot] = score;
+            ScoreCache += score;
+        }
+
+        private void SetQ(int slot, double value)
+        {
+            long delta = 0;
+            foreach (Attendee a in BlockingComputerTron.GetVisibleAttendees(slot))
+            {
+                delta -= Problem.PairScore(Slots[slot], a.Index, SlotLocations[slot], Qs[slot]);
+                Qs[slot] = value;
+                delta += Problem.PairScore(Slots[slot], a.Index, SlotLocations[slot], Qs[slot]);
+            }
+
+            ScoreCache += delta;
+            SlotScores[slot] += delta;
         }
     }
 }
