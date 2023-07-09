@@ -21,8 +21,8 @@ namespace ICFP2023
             var startScore = solution.NScoreFull();
             Console.Error.WriteLine($"Starting score {startScore}");
 
-            long initTemp = startScore * 2 / 10;
-            var best = Anneal(solution, ComputeCost, 60000, (int)initTemp);
+            long initTemp = startScore;
+            var best = Anneal(solution, ComputeCost, 300000, (int)initTemp);
 
             ui.Render(best);
             return best;
@@ -39,7 +39,7 @@ namespace ICFP2023
                 {
                     hot = problem.Hottest(m, used);
                     used.Add(hot);
-                } while (!solution.SetPlacement(m, hot, true) || !solution.IsValid());
+                } while (!solution.SetPlacement(m, hot, true));
             }
         }
 
@@ -51,6 +51,7 @@ namespace ICFP2023
             int lastLogTime = Environment.TickCount;
             double accepted = 0;
             double rejected = 0;
+            double totalmoves = 0;
 
             Solution currentSolution = solution.Copy();
             Solution bestSolution = solution.Copy();
@@ -59,11 +60,12 @@ namespace ICFP2023
             {
                 if ((Environment.TickCount - lastLogTime) >= logDelayMs)
                 {
-                    Console.Error.WriteLine($"T = {coolingScheduler.Temperature:F0}, B = {heuristic(bestSolution)}, C = {heuristic(currentSolution)}, % = {((accepted / (accepted + rejected)) * 100):F2}, R = {coolingScheduler.RemainingMs()}, {accepted + rejected}");
+                    totalmoves += accepted + rejected;
+                    Console.Error.WriteLine($"T = {coolingScheduler.Temperature:F0}, B = {heuristic(bestSolution):N0}, C = {heuristic(currentSolution):N0}, % = {((accepted / (accepted + rejected)) * 100):F2}, R = {coolingScheduler.RemainingMs()}, {accepted + rejected} {totalmoves}");
                     accepted = 0;
                     rejected = 0;
                     lastLogTime = Environment.TickCount;
-                    currentSolution.Render();
+                    // currentSolution.Render();
                 }
 
                 Move move;
@@ -88,7 +90,7 @@ namespace ICFP2023
                 else
                 {
                     accepted++;
-                    // Console.WriteLine($"{coolingScheduler.Temperature:F0} {currentCost} {neighborCost} {move}");
+                    // Console.WriteLine($"{coolingScheduler.Temperature:F0} {currentCost:N0} {(currentCost - neighborCost),16:N0} {acceptance:F2} {move}");
                 }
                 // Console.Error.WriteLine($"\t\t\t\t\t\t\t\t\t\t\t{string.Join(", ", currentSolution.Placements)}");
 

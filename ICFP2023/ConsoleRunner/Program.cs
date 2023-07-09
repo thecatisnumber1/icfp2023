@@ -44,15 +44,14 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            List<int> toDoList = new List<int> { 12 };
-            // foreach (int i in toDoList)
-            // for (int i = 1; i <= 90; i++)
-            // for (var i = 56; i <= 90; i++)
-            Parallel.ForEach(toDoList, i =>
+            List<int> toDoList = new List<int> { 8 };
+            foreach (int i in toDoList)
+            // for (var i = 1; i <= 90; i++)
+            // Parallel.ForEach(toDoList, i =>
             // Parallel.For(1, 90, i =>
             {
-                // try
-                // {
+                try
+                {
 
                     Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
 
@@ -151,13 +150,13 @@ namespace ICFP2023
                     //     Heatmap(gradients, j, "gradients-" + i + "-" + j + ".png");
                     // }
 
-                // }
-                // catch (Exception e)
-                // {
-                //     Console.WriteLine($"Error on problem {i}: {e.Message}");
-                // }
-            // }
-            });
+                }
+                catch (Exception e)
+                {
+                    Console.WriteLine($"Error on problem {i}: {e.Message}");
+                }
+            }
+            // });
         }
 
         static void Heatmap(long[,,] power, int inst, string filename)

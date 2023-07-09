@@ -1,11 +1,14 @@
 ﻿using Newtonsoft.Json.Linq;
 using Newtonsoft.Json;
 using System;
+using System.Numerics;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.ColorSpaces;
+using SixLabors.ImageSharp.ColorSpaces.Conversion;
 using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Drawing;
@@ -539,6 +542,7 @@ namespace ICFP2023
                 if (NScoreDistCache[m.Index, mp.Index] < Musician.SOCIAL_DISTANCE) {
                     // Huge penalty if too close.
                     score = (long)(score * 0.25 * NScoreDistCache[m.Index, mp.Index] / Musician.SOCIAL_DISTANCE);
+                    break;
                 }
             }
 
@@ -576,25 +580,20 @@ namespace ICFP2023
         {
             var problem = Problem;
 
-            using var image = new Image<Rgba32>((int)problem.RoomWidth, (int)problem.RoomHeight);
-
-            image.Mutate(x => x.Draw(
-                Pens.Solid(Color.Red, 5),  // The color of the rectangle and thickness
-                new RectangleF(
-                    (int)problem.StageLeft,
-                    (int)problem.StageBottom,
-                    (int)problem.StageWidth,
-                    (int)problem.StageHeight)
-            ));
+            using var image = new Image<Rgba32>((int)problem.StageWidth, (int)problem.StageHeight);
 
             foreach (var m in problem.Musicians)
             {
                 var p = Placements[m.Index];
-                var dotCenter = new PointF((int)p.X, (int)p.Y); // The position of the dot
+                var dotCenter = new PointF((int)(p.X - problem.StageLeft), (int)(p.Y - problem.StageBottom)); // The position of the dot
                 float dotRadius = 5; // The radius of the dot
 
+                var color = new Hsv(new Vector3(360 * m.Instrument / problem.InstrumentCount, 1, 1));
+                var c = ColorSpaceConverter.ToRgb(color);
+                var rgb = Color.FromRgb((byte)(c.R * 255), (byte)(c.G * 255), (byte)(c.B * 255));
+
                 image.Mutate(x => x.Fill(
-                    Color.Green, // The color of the dot
+                    rgb,
                     new EllipsePolygon(dotCenter, dotRadius) // The dot
                 ));
             }
