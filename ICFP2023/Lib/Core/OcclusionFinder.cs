@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Collections;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
@@ -42,7 +43,7 @@ namespace ICFP2023
                         if (cx >= 0 && cx < width && cy >= 0 && cy < height) {
                             if (cells[cx, cy] == null)
                             {
-                                cells[cx, cy] = new();
+                                cells[cx, cy] = new(cx, cy);
                             }
 
                             cells[cx, cy].Pillars.Add(pillar);
@@ -70,7 +71,7 @@ namespace ICFP2023
 
                 if (cells[newX, newY] == null)
                 {
-                    cells[newX, newY] = new();
+                    cells[newX, newY] = new(newX, newY);
                 }
 
                 cells[newX, newY].Musicians.Add(newLoc);
@@ -81,6 +82,13 @@ namespace ICFP2023
         {
             public List<Point> Musicians = new();
             public List<Pillar> Pillars = new();
+            public int X = 0;
+            public int Y = 0;
+
+            public Cell(int x, int y) {
+                X = x;
+                Y = y;
+            }
         }
 
         private (int, int) CellFor(Point p)
@@ -94,16 +102,16 @@ namespace ICFP2023
         public bool IsMusicianBlocked(Musician musician, Attendee attendee)
         {
             Point musicianLoc = solution.GetPlacement(musician);
-            HashSet<Cell> visited = new();
+            var visited = new BitArray(cells.GetLength(0)*cells.GetLength(1));
 
             foreach (var cell in OccludingCells(musician, attendee))
             {
-                if (cell == null || visited.Contains(cell))
+                if (cell == null || visited[cell.X * cells.GetLength(0) + cell.Y])
                 {
                     continue;
                 }
 
-                visited.Add(cell);
+                visited[cell.X * cells.GetLength(0) + cell.Y] = true;
 
                 foreach (var blockingMusicianLoc in cell.Musicians)
                 {
@@ -180,6 +188,6 @@ namespace ICFP2023
             }
         }
 
-        
+
     }
 }
