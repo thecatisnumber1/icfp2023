@@ -74,7 +74,6 @@ namespace ICFP2023
 
         public readonly double Manhattan(Point other) => (this - other).Manhattan;
 
-        // Warning! not exact
         public readonly Point Mid(Point other) => new((X + other.X) / 2, (Y + other.Y) / 2);
     }
 }

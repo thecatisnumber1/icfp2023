@@ -49,7 +49,9 @@ namespace ICFP2023
 
 
             ui.Render(solution);
-            return AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 45000, 1000000);
+            //return HillSolver.Solve(solution);
+            //solution = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 90000, 1000000);
+            return HillSolver.Solve(solution);
         }
 
         private static void AddNonColliding(List<Point> allocatedLocations, List<Point> sideLocations)
@@ -78,11 +80,11 @@ namespace ICFP2023
 
         private static double ComputeScore(double wastedSpace, Side stageSide, Attendee crack)
         {
-            double score = -wastedSpace * 10000000;
+            double score = -wastedSpace * 10000;
             if (crack != null)
             {
                 double distance = stageSide.OutwardComponent(crack.Location);
-                score += crack.Tastes.Average() / (distance * distance);
+                score += crack.Tastes.Max() / (distance * distance);
             }
 
             return score;
@@ -100,23 +102,28 @@ namespace ICFP2023
             {
                 Point spanStart = crackPoints[i];
                 Point spanEnd = crackPoints[i + 1];
+                double spanLength = spanStart.Manhattan(spanEnd);
+                int musicianCount = ((int)spanLength) / 10;
+                double remainingSpace = spanLength - musicianCount * Utils.GRID_SIZE;
+                Point currentPoint = spanStart + side.Along * (Utils.GRID_SIZE + remainingSpace) / 2;
+
+                if (i != 0)
+                {
+                    Point previousPoint = allocatedLocations[^1];
+                    Point midPoint = currentPoint.Mid(previousPoint);
+                    double spacing = currentPoint.Manhattan(previousPoint) / 2;
+                    double distanceFromEdge = Math.Sqrt(100 - spacing * spacing);
+                    Point watcherLocation = midPoint - side.Outward * distanceFromEdge;
+                    allocatedLocations.Add(watcherLocation);
+                }
+
                 Vec step = side.Along * Utils.GRID_SIZE;
-                int musicianCount = ((int)spanStart.Manhattan(spanEnd)) / 10;
-                Point currentPoint = spanStart + side.Along * Utils.GRID_SIZE / 2;
                 for (int j = 0; j < musicianCount; j++)
                 {
                     allocatedLocations.Add(currentPoint);
                     currentPoint += step;
                 }
-
-                if (i != 0)
-                {
-                    Point watcherLocation = spanStart - side.Outward * (Utils.GRID_SIZE * Math.Sqrt(3) / 2);
-                    if (spanStart != spanEnd)
-                    {
-                        allocatedLocations.Add(watcherLocation);
-                    }
-                }
+                
             }
 
             return allocatedLocations;

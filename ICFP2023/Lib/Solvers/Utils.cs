@@ -30,6 +30,11 @@ namespace ICFP2023
                     new(new List<Attendee>() { a }, ScoreSpan(musicianSide, a, score, musicianSide.Left, a.Location));
                 foreach (CrackPlacements subset in optimalSubsets)
                 {
+                    if (musicianSide.Along.DotProduct(a.Location - subset.attendees[^1].Location) < GRID_SIZE)
+                    {
+                        continue;
+                    }
+
                     double innerScore = subset.score + ScoreSpan(musicianSide, a, score, subset.attendees[^1].Location, a.Location);
                     if (innerScore > bestPlacements.score)
                     {
@@ -75,11 +80,6 @@ namespace ICFP2023
             List<Attendee> candidates = new List<Attendee>();
             foreach (Attendee attendee in problem.Attendees)
             {
-                if (side.Right.X < 0)
-                {
-                    ;
-                }
-
                 // Are they on the right side?
                 double alongCoord = side.AlongComponent(attendee.Location);
                 if (alongCoord < 0 || alongCoord > side.Length)
