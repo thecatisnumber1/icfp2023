@@ -30,8 +30,6 @@ namespace ICFP2023
         // Musician to q(i) for playing together
         private Dictionary<int, double> MusicianDistanceScoreCache;
 
-        private OcclusionFinder occlusionFinder;
-
         public Solution(ProblemSpec problem)
         {
             this.Problem = problem;
@@ -40,8 +38,6 @@ namespace ICFP2023
             {
                 placements.Add(Point.ORIGIN);
             }
-
-            this.occlusionFinder = new(this);
         }
 
         private Solution(ProblemSpec problem,
@@ -57,13 +53,6 @@ namespace ICFP2023
             MusicianUnblockedCache = musicianUnblockedCache;
             MusicianDistanceScoreCache = musicianDistanceScoreCache;
             ScoreCache = scoreCache;
-
-            this.occlusionFinder = new(this);
-
-            foreach (var placement in placements)
-            {
-                occlusionFinder.OnPlacementChanged(placement, Point.ORIGIN);
-            }
         }
 
         public Point GetPlacement(Musician musician)
@@ -75,7 +64,6 @@ namespace ICFP2023
         {
             var oldLoc = Placements[musician.Index];
             placements[musician.Index] = loc;
-            occlusionFinder.OnPlacementChanged(loc, oldLoc);
         }
 
         public void Swap(int m0, int m1)
@@ -237,7 +225,7 @@ namespace ICFP2023
                 {
                     var attendee = Problem.Attendees[attendeeIndex];
 
-                    if (occlusionFinder.IsMusicianBlocked(musician, attendee))
+                    if (Scorer.IsBlocked(this, attendee, musician))
                     {
                         MusicianUnblockedCache[Placements[musicianIndex]].Remove(attendeeIndex);
                         continue;
@@ -363,7 +351,6 @@ namespace ICFP2023
             var solutionJson = FileUtil.Read(solutionPath);
             var solution = ReadJson(solutionJson);
             solution.Problem = problem;
-            solution.occlusionFinder = new(solution);
 
             return solution;
         }

@@ -47,7 +47,7 @@ namespace ICFP2023
             return score;
         }
 
-        private static bool IsBlocked(Solution solution, Attendee attendee, Musician musician)
+        public static bool IsBlocked(Solution solution, Attendee attendee, Musician musician)
         {
             Point musicianLoc = solution.GetPlacement(musician);
 
