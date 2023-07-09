@@ -11,8 +11,6 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Lib", "Lib\Lib.csproj", "{7
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Squigglizer", "Squigglizer\Squigglizer.csproj", "{FDEE9127-EE97-4433-B7B4-82FF7CFE4057}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Allanizer", "Allanizer\Allanizer.csproj", "{3BED0FCB-0951-4B60-9BE1-B902BAEA80A4}"
-EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
