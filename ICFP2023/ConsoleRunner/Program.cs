@@ -36,15 +36,32 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            for (int i = 56; i <= 90; i++)
+            for (int i = 1; i <= 90; i++)
             {
                 try
                 {
                     Console.WriteLine($"Solving problem {i}");
                     Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
+
+                    // Call desired AI and then pass the result from it to HillClimber for optimization.
                     Solution best = GreedyPlacer.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
-                    Console.WriteLine($"Best score: {best.ScoreCache}");
+                    HillSolver.Solve(best);
+
+                    Console.WriteLine($"Score: {best.ScoreCache}");
                     SubmitSolution(best, i).Wait();
+
+
+                    // Optimize our best solution with BestSolveOptimizer, and only submit if its result is better than the old score.
+                    /*string bestSaveFile = $"best-solves/{solution.Problem.ProblemName}.json";
+                    Solution oldBestSolution = Solution.Read(bestSaveFile, solution.Problem);
+                    oldBestSolution.InitializeScore();
+
+                    Solution newBestSolution = BestSolveOptimizer.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
+                    if (newBestSolution.ScoreCache > oldBestSolution.ScoreCache)
+                    {
+                        Console.WriteLine($"New best score: {newBestSolution.ScoreCache} > {oldBestSolution.ScoreCache} ({newBestSolution.ScoreCache - oldBestSolution.ScoreCache})");
+                        SubmitSolution(newBestSolution, i).Wait();
+                    }*/
                 }
                 catch (Exception e)
                 {

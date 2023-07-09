@@ -15,7 +15,7 @@ namespace ICFP2023
             Console.WriteLine($"Starting hill solver");
             initialSolution.InitializeScore();
             Console.WriteLine($"Finished initializing score: {initialSolution.ScoreCache}");
-            Console.WriteLine($"ComputeScore: {Scorer.ComputeScore(initialSolution)}");
+            //Console.WriteLine($"ComputeScore: {Scorer.ComputeScore(initialSolution)}");
 
             Solution currentSolution = initialSolution;
             while (true)
@@ -33,17 +33,17 @@ namespace ICFP2023
                         else
                         {
                             move.Undo(currentSolution);
-                            if (currentSolution.ScoreCache != oldScore)
+                            /*if (currentSolution.ScoreCache != oldScore)
                             {
                                 Console.WriteLine($"Score is different after undone swap: Old = {oldScore}, New = {currentSolution.ScoreCache}");
-                            }
+                            }*/
                         }
                     }
-                    Console.WriteLine($"Completed pass: {i} / {currentSolution.Placements.Count - 1}");
+                    //Console.WriteLine($"Completed pass: {i} / {currentSolution.Placements.Count - 1}");
                 }
 
                 Console.WriteLine($"Current climbing score: {currentSolution.ScoreCache}");
-                break;
+                //break;
                 if (!swapped)
                 {
                     break;
@@ -51,9 +51,10 @@ namespace ICFP2023
             }
 
             Console.WriteLine($"Finished climbing score cached: {currentSolution.ScoreCache}");
-            currentSolution.InitializeScore();
+            //Console.WriteLine($"Finished climbing ComputeScore: {Scorer.ComputeScore(currentSolution)}");
+            /*currentSolution.InitializeScore();
             Console.WriteLine($"Finished climbing score inited: {currentSolution.ScoreCache}");
-            Console.WriteLine($"Solution is valid: {currentSolution.IsValid()}");
+            Console.WriteLine($"Solution is valid: {currentSolution.IsValid()}");*/
 
             return currentSolution;
         }
