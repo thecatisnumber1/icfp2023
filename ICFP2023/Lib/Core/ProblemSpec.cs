@@ -40,8 +40,8 @@ namespace ICFP2023
 
         public Point StageTopRight => StageBottomLeft + StageWidth * Vec.EAST + StageHeight * Vec.NORTH;
 
-        public Point StageFrameBottomLeft => new Point(StageBottomLeft.X + 10, StageBottomLeft.Y + 10);
-        public Point StageFrameTopRight => new Point(StageTopRight.X - 10, StageTopRight.Y - 10);
+        public Point StageFenceBottomLeft => new Point(StageBottomLeft.X + 10, StageBottomLeft.Y + 10);
+        public Point StageFenceTopRight => new Point(StageTopRight.X - 10, StageTopRight.Y - 10);
 
         public double StageBottom => StageBottomLeft.Y;
 
@@ -195,7 +195,7 @@ namespace ICFP2023
                 var attendees = Attendees
                     .Select((obj, index) => new { Object = obj, Index = index })
                     .OrderBy(a =>
-                        -Math.Abs(1000000 * a.Object.Tastes[i] / a.Object.Location.VecToRect(StageFrameBottomLeft, StageFrameTopRight).MagnitudeSq)
+                        -Math.Abs(1000000 * a.Object.Tastes[i] / a.Object.Location.VecToRect(StageFenceBottomLeft, StageFenceTopRight).MagnitudeSq)
                     )
                     .Select(item => item.Index)
                     .ToArray();

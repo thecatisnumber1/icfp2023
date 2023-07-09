@@ -20,7 +20,7 @@ namespace ICFP2023
             Console.Error.WriteLine($"Starting score {startScore}");
 
             long initTemp = Math.Max(startScore * 10, 1000000);
-            var best = Anneal(solution, ComputeCost, 300000, initTemp);
+            var best = Anneal(solution, ComputeCost, 30000, initTemp);
             best.InitializeScore();
 
             ui.Render(best);
@@ -146,24 +146,59 @@ namespace ICFP2023
             return new MoveSwap(m0, m1);
         }
 
+        public static int Pareto(long max) {
+            double alpha = 0.2;  // shape parameter (α > 0)
+            double x_m = 0.5;  // scale parameter (x_m > 0)
+
+            double u = random.NextDouble();
+            double x = x_m / Math.Pow(u, 1 / alpha);
+
+            return (int)Math.Min(x, max);
+        }
+
         private static Move GetSnap(Solution solution, double temp)
         {
             var p = solution.Problem;
 
             var m = p.Musicians[random.Next(solution.Placements.Count)];
-            for (var a = 0; a < Math.Min(100, p.Strongest.GetLength(1)); a++) {
-                var attendee = p.Attendees[p.Strongest[m.Instrument, a]];
-                var dir = attendee.Location.VecToRect(p.StageFrameBottomLeft, p.StageFrameTopRight);
-                var ahead = attendee.Location + dir;
 
-                var loc = solution.Placements[m.Index];
-                var delta = ahead - loc;
+            var toptries = 100;
+            while (toptries-- > 0 ) {
+                var attendee = p.Attendees[p.Strongest[m.Instrument, Pareto(Math.Max(1000,p.Strongest.GetLength(1)-1))]];
+                var dir = attendee.Location.VecToRect(p.StageFenceBottomLeft, p.StageFenceTopRight);
+                var closest = attendee.Location + dir;
 
-                if (ahead.X < 0 || ahead.Y < 0) {
-                    throw new Exception("!!");
+                var pos = random.NextDouble() < .5 ? -1 : 1;
+                var overlap = solution.MusicianOverlaps(m.Index, closest);
+                var tries = 10;
+                while (overlap >= 0 && tries-- > 0) {
+                    if (closest.X == p.StageFenceLeft || closest.X == p.StageFenceRight)
+                    {
+                        closest = new Point(closest.X, solution.Placements[overlap].Y + pos * 10);
+                    }
+                    else
+                    {
+                        closest = new Point(solution.Placements[overlap].X + pos * 10, closest.Y);
+                    }
+
+                    // Don't go outside the bounds
+                    if (closest.X < solution.Problem.StageFenceLeft ||
+                        closest.X > solution.Problem.StageFenceRight ||
+                        closest.Y < solution.Problem.StageFenceBottom ||
+                        closest.Y > solution.Problem.StageFenceTop) {
+
+                        // Couldn't snap. Give up.
+                        closest = Point.INVALID;
+                        break;
+                    }
+
+                    overlap = solution.MusicianOverlaps(m.Index, closest);
                 }
 
-                if (solution.MusicianOverlaps(m.Index, ahead)) continue;
+                if (tries == 0 || closest == Point.INVALID) continue;
+
+                var loc = solution.Placements[m.Index];
+                var delta = closest - loc;
 
                 // Create the move
                 Move move = new MoveWalk(m.Index, delta);
@@ -200,7 +235,7 @@ namespace ICFP2023
                 if (ahead.Y > solution.Problem.StageFenceTop) continue;
 
                 // Towards the end, don't allow overlap moves
-                if (solution.MusicianOverlaps(musicianIndex, ahead)) {
+                if (solution.MusicianOverlaps(musicianIndex, ahead) >= 0) {
                     continue;
                 }
 

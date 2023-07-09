@@ -515,7 +515,7 @@ namespace ICFP2023
             return gradients;
         }
 
-        public bool MusicianOverlaps(int m, Point loc)
+        public int MusicianOverlaps(int m, Point loc)
         {
             foreach (var mp in Problem.Musicians)
             {
@@ -524,11 +524,11 @@ namespace ICFP2023
                 var dist = (loc - Placements[mp.Index]).Magnitude;
                 if (dist < Musician.SOCIAL_DISTANCE)
                 {
-                    return true;
+                    return mp.Index;
                 }
             }
 
-            return false;
+            return -1;
         }
 
         public long NScoreMusicianOverlap(Musician m, long score)
