@@ -33,19 +33,22 @@ namespace ICFP2023
             }
 
             ui.Render(solution);
-            solution = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 90000, 1000000);
+            solution = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 90000, 200000);
             return solution;
         }
 
         public static Solution FixedPointAnnealSolve(ProblemSpec problem, SharedSettings settings, UIAdapter ui)
         {
             List<Point> fixedPoints = PlacePointsAlongEdgesAKAGetCrackin(problem);
+            Rect innerRect = problem.Stage.Shrink(Utils.GRID_SIZE * 2);
+            List<Point> innerPoints = Utils.GridPoints(innerRect);
+            fixedPoints.AddRange(innerPoints);
             if (fixedPoints.Count < problem.Musicians.Count)
             {
                 return new Solution(problem);
             }
 
-            List<int> matches = FixedPointMatcher.FindMatching(problem, fixedPoints, ui, 90000, 60000000);
+            List<int> matches = FixedPointMatcher.FindMatching(problem, fixedPoints, ui, 90000, 200000);
             Solution solution = MatchingToSolution(problem, fixedPoints, matches);
 
             Console.WriteLine($"{solution.InitializeScore()}");
