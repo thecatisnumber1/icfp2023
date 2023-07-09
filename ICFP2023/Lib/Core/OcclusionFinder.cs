@@ -52,12 +52,7 @@ namespace ICFP2023
             }
         }
 
-        private Point GetPlacement(Musician musician)
-        {
-            return solution.GetPlacement(musician);
-        }
-
-        public void OnPlacementChanged(Musician musician, Point oldLoc)
+        public void OnPlacementChanged(Point newLoc, Point oldLoc)
         {
             if (oldLoc != Point.ORIGIN)
             {
@@ -65,23 +60,26 @@ namespace ICFP2023
 
                 if (cells[oldX, oldY] != null)
                 {
-                    cells[oldX, oldY].Musicians.Remove(musician);
+                    cells[oldX, oldY].Musicians.Remove(oldLoc);
                 }
             }
 
-            var (newX, newY) = CellFor(GetPlacement(musician));
-
-            if (cells[newX, newY] == null)
+            if (newLoc != Point.ORIGIN)
             {
-                cells[newX, newY] = new();
-            }
+                var (newX, newY) = CellFor(newLoc);
 
-            cells[newX, newY].Musicians.Add(musician);
+                if (cells[newX, newY] == null)
+                {
+                    cells[newX, newY] = new();
+                }
+
+                cells[newX, newY].Musicians.Add(newLoc);
+            }
         }
 
         private class Cell
         {
-            public List<Musician> Musicians = new();
+            public List<Point> Musicians = new();
             public List<Pillar> Pillars = new();
         }
 
@@ -95,6 +93,7 @@ namespace ICFP2023
 
         public bool IsMusicianBlocked(Musician musician, Attendee attendee)
         {
+            Point musicianLoc = solution.GetPlacement(musician);
             HashSet<Cell> visited = new();
 
             foreach (var cell in OccludingCells(musician, attendee))
@@ -106,10 +105,10 @@ namespace ICFP2023
 
                 visited.Add(cell);
 
-                foreach (var blockingMusician in cell.Musicians)
+                foreach (var blockingMusicianLoc in cell.Musicians)
                 {
-                    if (musician != blockingMusician &&
-                        solution.IsMusicianBlocked(attendee.Location, musician, blockingMusician))
+                    if (musicianLoc != blockingMusicianLoc &&
+                        solution.IsMusicianBlocked(attendee.Location, musicianLoc, blockingMusicianLoc))
                     {
                         return true;
                     }
@@ -130,7 +129,7 @@ namespace ICFP2023
         private IEnumerable<Cell> OccludingCells(Musician musician, Attendee attendee)
         {
             // This is the integer form of Bresenham's line algorithm
-            var (x0, y0) = CellFor(GetPlacement(musician));
+            var (x0, y0) = CellFor(solution.GetPlacement(musician));
             var (x1, y1) = CellFor(attendee.Location);
 
             int dx = Math.Abs(x1 - x0);

@@ -110,8 +110,8 @@ namespace ICFP2023
 
         public long PairScore(int instrument, int attendeeIndex, Point location, double playingTogetherBonus)
         {
-            double pairScore = 1000000 * Attendees[attendeeIndex].Tastes[instrument] /
-                Attendees[attendeeIndex].Location.DistSq(location);
+            double pairScore = Math.Ceiling(1000000 * Attendees[attendeeIndex].Tastes[instrument] /
+                Attendees[attendeeIndex].Location.DistSq(location));
             if (UsePlayingTogetherScoring)
             {
                 pairScore *= playingTogetherBonus;

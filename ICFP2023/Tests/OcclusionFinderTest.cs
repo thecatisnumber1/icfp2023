@@ -13,9 +13,9 @@
             solution.SetPlacement(prob.Musicians[2], new(1100.0, 150.0));
 
             var scorer = new OcclusionFinder(solution);
-            scorer.OnPlacementChanged(prob.Musicians[0], Point.ORIGIN);
-            scorer.OnPlacementChanged(prob.Musicians[1], Point.ORIGIN);
-            scorer.OnPlacementChanged(prob.Musicians[2], Point.ORIGIN);
+            scorer.OnPlacementChanged(solution.GetPlacement(prob.Musicians[0]), Point.ORIGIN);
+            scorer.OnPlacementChanged(solution.GetPlacement(prob.Musicians[1]), Point.ORIGIN);
+            scorer.OnPlacementChanged(solution.GetPlacement(prob.Musicians[2]), Point.ORIGIN);
 
             Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[0], prob.Attendees[0]));
             Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[0], prob.Attendees[1]));
@@ -43,9 +43,9 @@
             solution.SetPlacement(prob.Musicians[2], new(1100.0, 150.0));
 
             var scorer = new OcclusionFinder(solution);
-            scorer.OnPlacementChanged(prob.Musicians[0], Point.ORIGIN);
-            scorer.OnPlacementChanged(prob.Musicians[1], Point.ORIGIN);
-            scorer.OnPlacementChanged(prob.Musicians[2], Point.ORIGIN);
+            scorer.OnPlacementChanged(solution.GetPlacement(prob.Musicians[0]), Point.ORIGIN);
+            scorer.OnPlacementChanged(solution.GetPlacement(prob.Musicians[1]), Point.ORIGIN);
+            scorer.OnPlacementChanged(solution.GetPlacement(prob.Musicians[2]), Point.ORIGIN);
 
             Assert.IsTrue(scorer.IsMusicianBlocked(prob.Musicians[0], prob.Attendees[0]));
             Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[0], prob.Attendees[1]));
@@ -73,9 +73,9 @@
             solution.SetPlacement(prob.Musicians[2], new(1100.0, 150.0));
 
             var scorer = new OcclusionFinder(solution);
-            scorer.OnPlacementChanged(prob.Musicians[0], Point.ORIGIN);
-            scorer.OnPlacementChanged(prob.Musicians[1], Point.ORIGIN);
-            scorer.OnPlacementChanged(prob.Musicians[2], Point.ORIGIN);
+            scorer.OnPlacementChanged(solution.GetPlacement(prob.Musicians[0]), Point.ORIGIN);
+            scorer.OnPlacementChanged(solution.GetPlacement(prob.Musicians[1]), Point.ORIGIN);
+            scorer.OnPlacementChanged(solution.GetPlacement(prob.Musicians[2]), Point.ORIGIN);
 
             Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[0], prob.Attendees[0]));
             Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[0], prob.Attendees[1]));
@@ -103,9 +103,9 @@
             solution.SetPlacement(prob.Musicians[2], new(1100.0, 150.0));
 
             var scorer = new OcclusionFinder(solution);
-            scorer.OnPlacementChanged(prob.Musicians[0], Point.ORIGIN);
-            scorer.OnPlacementChanged(prob.Musicians[1], Point.ORIGIN);
-            scorer.OnPlacementChanged(prob.Musicians[2], Point.ORIGIN);
+            scorer.OnPlacementChanged(solution.GetPlacement(prob.Musicians[0]), Point.ORIGIN);
+            scorer.OnPlacementChanged(solution.GetPlacement(prob.Musicians[1]), Point.ORIGIN);
+            scorer.OnPlacementChanged(solution.GetPlacement(prob.Musicians[2]), Point.ORIGIN);
 
             Assert.IsTrue(scorer.IsMusicianBlocked(prob.Musicians[0], prob.Attendees[0]));
             Assert.IsFalse(scorer.IsMusicianBlocked(prob.Musicians[0], prob.Attendees[1]));

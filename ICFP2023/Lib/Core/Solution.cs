@@ -10,7 +10,7 @@ namespace ICFP2023
 {
     public class Solution
     {
-        public ProblemSpec Problem { get; private set; }
+        public ProblemSpec Problem { get; set; }
         public IReadOnlyList<Point> Placements => placements;
         private List<Point> placements;
 
@@ -60,9 +60,9 @@ namespace ICFP2023
 
             this.occlusionFinder = new(this);
 
-            foreach (var musician in problem.Musicians)
+            foreach (var placement in placements)
             {
-                occlusionFinder.OnPlacementChanged(musician, Point.ORIGIN);
+                occlusionFinder.OnPlacementChanged(placement, Point.ORIGIN);
             }
         }
 
@@ -75,7 +75,7 @@ namespace ICFP2023
         {
             var oldLoc = Placements[musician.Index];
             placements[musician.Index] = loc;
-            occlusionFinder.OnPlacementChanged(musician, oldLoc);
+            occlusionFinder.OnPlacementChanged(loc, oldLoc);
         }
 
         public void Swap(int m0, int m1)
@@ -312,20 +312,18 @@ namespace ICFP2023
             return !MusicianUnblockedCache[placements[musicianIndex]].Contains(attendeeIndex);
         }
 
-        public bool IsMusicianBlocked(Point attendee, Musician musician, Musician blockingMusician)
+        public bool IsMusicianBlocked(Point attendee, Point musicianLoc, Point blockingMusicianLoc)
         {
-            return IsMusicianBlocked(attendee, musician, GetPlacement(blockingMusician), Musician.BLOCKING_RADIUS);
+            return IsMusicianBlocked(attendee, musicianLoc, blockingMusicianLoc, Musician.BLOCKING_RADIUS);
         }
 
         public bool IsMusicianBlocked(Point attendee, Musician musician, Pillar pillar)
         {
-            return IsMusicianBlocked(attendee, musician, pillar.Center, pillar.Radius);
+            return IsMusicianBlocked(attendee, GetPlacement(musician), pillar.Center, pillar.Radius);
         }
 
-        private bool IsMusicianBlocked(Point attendee, Musician musician, Point blockingLoc, double radius)
+        private bool IsMusicianBlocked(Point attendee, Point musicianLoc, Point blockingLoc, double radius)
         {
-            var musicianLoc = GetPlacement(musician);
-
             // Calculate the vectors
             var da = attendee - musicianLoc; // vector from musician to attendee
             var db = blockingLoc - musicianLoc; // vector from musician to blockingMusician

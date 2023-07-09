@@ -15,6 +15,7 @@ namespace ICFP2023
             Console.WriteLine($"Starting hill solver");
             initialSolution.InitializeScore();
             Console.WriteLine($"Finished initializing score: {initialSolution.ScoreCache}");
+            Console.WriteLine($"ComputeScore: {Scorer.ComputeScore(initialSolution)}");
 
             Solution currentSolution = initialSolution;
             while (true)
