@@ -328,38 +328,7 @@ namespace ICFP2023
 
         private bool IsMusicianBlocked(Point attendee, Point musicianLoc, Point blockingLoc, double radius)
         {
-            // Calculate the vectors
-            var da = attendee - musicianLoc; // vector from musician to attendee
-            var db = blockingLoc - musicianLoc; // vector from musician to blockingMusician
-
-            // Calculate the dot product and magnitude squared
-            var dot = da.DotProduct(db);
-            var len_sq = da.DotProduct(da); // magnitude squared of da
-
-            // Compute t as the scalar projection without clamping
-            var t = dot / (len_sq == 0 ? 1 : len_sq);
-
-            // The point on the line (musician to attendee) closest to the blocking musician
-            Point projection;
-
-            // If t is less than 0, the projection falls before the musician's position. If t is greater than 1, it falls after the attendee's position.
-            if (t < 0)
-            {
-                projection = musicianLoc;
-            }
-            else if (t > 1)
-            {
-                projection = attendee;
-            }
-            else
-            {
-                // Compute the projection of the point on the line from the musician to the attendee
-                projection = musicianLoc + t * da; // note: da is the vector from musician to attendee
-            }
-
-            // If this point is within the blocking radius, the musician is blocked
-            var dp = blockingLoc - projection;
-            return dp.DotProduct(dp) < radius * radius;
+            return Utils.IsLineOfSightBlocked(attendee, musicianLoc, blockingLoc, radius);
         }
 
         public static Solution Read(string solutionPath, ProblemSpec problem)

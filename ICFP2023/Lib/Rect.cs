@@ -33,28 +33,56 @@ namespace ICFP2023
             return new Rect(BottomLeft + step, TopRight - step);
         }
 
-        public List<Side> Sides()
-        {
-            return new List<Side>()
+        public List<Side> Sides =>
+            new List<Side>()
             {
                 new Side(TopLeft, TopRight),
                 new Side(TopRight, BottomRight),
                 new Side(BottomRight, BottomLeft),
                 new Side(BottomLeft, TopLeft)
             };
-        }
     }
 
     public class Side
     {
         public readonly Point Left, Right;
-        public readonly Vec along, outward;
+        public readonly Vec Along, Outward;
+
+        public double Length { get; }
+
         public Side(Point left, Point right)
         {
             Left = left;
             Right = right;
-            along = right - left;
-            outward = along.RotateCCW();
+            Along = (right - left).Normalized();
+            Outward = Along.RotateCCW();
+            Length = right.Manhattan(left);
+        }
+
+        public Side Shrink(double amount)
+        {
+            Vec step = amount * Along;
+            return new Side(Left + step, Right - step);
+        }
+
+        public double AlongComponent(Point p)
+        {
+            return Along.DotProduct(p - Left);
+        }
+
+        public double OutwardComponent(Point p)
+        {
+            return Outward.DotProduct(p - Left);
+        }
+
+        public Point Project(Point p)
+        {
+            return Left + AlongComponent(p) * Along;
+        }
+
+        public Side Translate(Vec v)
+        {
+            return new Side(Left + v, Right + v);
         }
     }
 }

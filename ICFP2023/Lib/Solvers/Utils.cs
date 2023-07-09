@@ -10,26 +10,153 @@ namespace ICFP2023
     {
         public static readonly double GRID_SIZE = 10.0;
 
-        public static List<Point> GridPoints(ProblemSpec problem)
+        public delegate double Score(double wastedSpace, Side stageSide, Attendee crack);
+        record CrackPlacements(List<Attendee> attendees, double score);
+
+        public static List<Attendee> SelectAttendees(ProblemSpec problem, Side side, Score score)
         {
-            List<Point> gridPoints = new List<Point>();
-            for (double x = problem.StageBottomLeft.X + GRID_SIZE; x < problem.StageBottomLeft.X + problem.StageWidth - GRID_SIZE; x += GRID_SIZE)
+            // Filter attendees (blocked, etc.)
+            List<Attendee> candidates = FilterAttendees(problem, side);
+
+            // Sort attendees by length from start of path (along side)
+            candidates = candidates.OrderBy(x => side.AlongComponent(x.Location)).ToList();
+
+            // foreach prefix of the sorted attendees list
+            List<CrackPlacements> optimalSubsets = new();
+            Side musicianSide = side.Shrink(GRID_SIZE / 2);
+            foreach (Attendee a in candidates)
             {
-                for (double y = problem.StageBottomLeft.Y + GRID_SIZE; y < problem.StageBottomLeft.Y + problem.StageHeight - GRID_SIZE; y += GRID_SIZE)
+                CrackPlacements bestPlacements =
+                    new(new List<Attendee>() { a }, ScoreSpan(musicianSide, a, score, musicianSide.Left, a.Location));
+                foreach (CrackPlacements subset in optimalSubsets)
                 {
-                    gridPoints.Add(new Point(x, y));
+                    double innerScore = subset.score + ScoreSpan(musicianSide, a, score, subset.attendees[^1].Location, a.Location);
+                    if (innerScore > bestPlacements.score)
+                    {
+                        var newAttendees = subset.attendees.ToList();
+                        newAttendees.Add(a);
+                        bestPlacements = new CrackPlacements(newAttendees, innerScore);
+                    }
+                }
+
+                optimalSubsets.Add(bestPlacements);
+            }
+
+            CrackPlacements best =
+                new(new List<Attendee>(), ScoreSpan(musicianSide, null, score, musicianSide.Left, musicianSide.Right));
+            foreach (CrackPlacements crackPlacements in optimalSubsets)
+            {
+                double innerScore = crackPlacements.score + ScoreSpan(musicianSide, null, score, crackPlacements.attendees[^1].Location, musicianSide.Right);
+                if (innerScore > best.score)
+                {
+                    best = new CrackPlacements(crackPlacements.attendees, innerScore);
                 }
             }
 
-            return gridPoints;
+            return best.attendees;
         }
 
-        public static List<Point> SmallerGridPoints(ProblemSpec problem)
+        public static bool MusiciansCollide(Point m0, Point m1)
+        {
+            return m0.DistSq(m1) < GRID_SIZE * GRID_SIZE;
+        }
+
+        private static double ScoreSpan(Side musicianSide, Attendee a, Score score, Point spanStart, Point spanEnd)
+        {
+            double spanLength = musicianSide.Along.DotProduct(spanEnd - spanStart);
+            double wastedSpace = spanLength % GRID_SIZE;
+            return score(wastedSpace, musicianSide, a);
+        }
+
+
+        private static List<Attendee> FilterAttendees(ProblemSpec problem, Side side)
+        {
+            side = side.Shrink(GRID_SIZE * 1.5);
+            List<Attendee> candidates = new List<Attendee>();
+            foreach (Attendee attendee in problem.Attendees)
+            {
+                if (side.Right.X < 0)
+                {
+                    ;
+                }
+
+                // Are they on the right side?
+                double alongCoord = side.AlongComponent(attendee.Location);
+                if (alongCoord < 0 || alongCoord > side.Length)
+                {
+                    continue;
+                }
+
+                double outwardCoord = side.OutwardComponent(attendee.Location);
+                if (outwardCoord < 0)
+                {
+                    continue;
+                }
+
+                Point projected = side.Left + alongCoord * side.Along;
+                bool blocked = false;
+                foreach (Pillar pillar in problem.Pillars)
+                {
+                    if (IsLineOfSightBlocked(attendee.Location, projected, pillar.Center, pillar.Radius))
+                    {
+                        blocked = true;
+                        break;
+                    }
+                }
+
+                if (!blocked)
+                {
+                    candidates.Add(attendee);
+                }
+            }
+
+            return candidates;
+        }
+
+        public static bool IsLineOfSightBlocked(Point attendee, Point source, Point blockingLoc, double radius)
+        {
+            var musicianLoc = source;
+
+            // Calculate the vectors
+            var da = attendee - musicianLoc; // vector from musician to attendee
+            var db = blockingLoc - musicianLoc; // vector from musician to blockingMusician
+
+            // Calculate the dot product and magnitude squared
+            var dot = da.DotProduct(db);
+            var len_sq = da.DotProduct(da); // magnitude squared of da
+
+            // Compute t as the scalar projection without clamping
+            var t = dot / (len_sq == 0 ? 1 : len_sq);
+
+            // The point on the line (musician to attendee) closest to the blocking musician
+            Point projection;
+
+            // If t is less than 0, the projection falls before the musician's position. If t is greater than 1, it falls after the attendee's position.
+            if (t < 0)
+            {
+                projection = musicianLoc;
+            }
+            else if (t > 1)
+            {
+                projection = attendee;
+            }
+            else
+            {
+                // Compute the projection of the point on the line from the musician to the attendee
+                projection = musicianLoc + t * da; // note: da is the vector from musician to attendee
+            }
+
+            // If this point is within the blocking radius, the musician is blocked
+            var dp = blockingLoc - projection;
+            return dp.DotProduct(dp) < radius * radius;
+        }
+
+        public static List<Point> GridPoints(Rect rect)
         {
             List<Point> gridPoints = new List<Point>();
-            for (double x = problem.StageBottomLeft.X + GRID_SIZE * 2; x < problem.StageBottomLeft.X + problem.StageWidth - GRID_SIZE * 2; x += GRID_SIZE)
+            for (double x = rect.Left + GRID_SIZE; x < rect.Right - GRID_SIZE; x += GRID_SIZE)
             {
-                for (double y = problem.StageBottomLeft.Y + GRID_SIZE * 2; y < problem.StageBottomLeft.Y + problem.StageHeight - GRID_SIZE * 2; y += GRID_SIZE)
+                for (double y = rect.Bottom + GRID_SIZE; y < rect.Top - GRID_SIZE; y += GRID_SIZE)
                 {
                     gridPoints.Add(new Point(x, y));
                 }

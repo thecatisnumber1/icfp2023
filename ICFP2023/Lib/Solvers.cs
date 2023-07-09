@@ -17,6 +17,7 @@ namespace ICFP2023
             ["GreedyPlacer"] = GreedyPlacer.Solve,
             ["EdgeClimber"] = EdgeClimber.Solve,
             ["BestSolveOptimizer"] = BestSolveOptimizer.Solve,
+            ["LetsGetCrackin"] = LetsGetCrackin.Solve,
         };
 
         public static Solver GetSolver(string algorithm)

@@ -22,7 +22,7 @@ namespace ICFP2023
         public static void Place(Solution solution, UIAdapter ui)
         {
             HashSet<Point> edgePoints = new HashSet<Point>(Utils.EdgePoints(solution.Problem, solution.Problem.StageTopRight));
-            HashSet<Point> backupGridPoints = new HashSet<Point>(Utils.SmallerGridPoints(solution.Problem));
+            HashSet<Point> backupGridPoints = new HashSet<Point>(Utils.GridPoints(solution.Problem.Stage.Shrink(Utils.GRID_SIZE)));
             Dictionary<(int, Point), long> instrumentPointScores = new();
 
             var instruments = solution.Problem.Musicians.Select(m => m.Instrument).Distinct();

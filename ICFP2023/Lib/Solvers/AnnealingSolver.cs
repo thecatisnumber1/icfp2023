@@ -190,7 +190,7 @@ namespace ICFP2023
         public static void GridBasedStartingState(Solution solution)
         {
             Random random = new Random();
-            List<Point> gridPoints = Utils.GridPoints(solution.Problem);
+            List<Point> gridPoints = Utils.GridPoints(solution.Problem.Stage);
 
             // Shuffle the grid points
             int n = gridPoints.Count;
