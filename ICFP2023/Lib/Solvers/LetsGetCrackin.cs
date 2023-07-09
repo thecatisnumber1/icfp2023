@@ -40,9 +40,11 @@ namespace ICFP2023
         public static Solution FixedPointAnnealSolve(ProblemSpec problem, SharedSettings settings, UIAdapter ui)
         {
             List<Point> fixedPoints = PlacePointsAlongEdgesAKAGetCrackin(problem);
+            List<Point> initialFixedPoints = fixedPoints.ToList();
             Rect innerRect = problem.Stage.Shrink(Utils.GRID_SIZE * 2);
             List<Point> innerPoints = Utils.GridPoints(innerRect);
             fixedPoints.AddRange(innerPoints);
+            CleanInvalidPoints(initialFixedPoints, fixedPoints);
             if (fixedPoints.Count < problem.Musicians.Count)
             {
                 return new Solution(problem);
@@ -55,6 +57,36 @@ namespace ICFP2023
             ui.Render(solution);
 
             return solution;
+        }
+
+        private static void CleanInvalidPoints(List<Point> edge, List<Point> all)
+        {
+            List<Point> accepted = new List<Point>();
+            foreach (Point p in all)
+            {
+                if (edge.Contains(p))
+                {
+                    accepted.Add(p);
+                }
+
+                bool collides = false;
+                foreach (Point e in edge)
+                {
+                    if (Utils.MusiciansCollide(p, e))
+                    {
+                        collides = true;
+                        break;
+                    }
+                }
+
+                if (!collides)
+                {
+                    accepted.Add(p);
+                }
+            }
+
+            all.Clear();
+            all.AddRange(accepted);
         }
 
         public static Solution MatchingToSolution(ProblemSpec problem, List<Point> fixedPoints, List<int> matches)
