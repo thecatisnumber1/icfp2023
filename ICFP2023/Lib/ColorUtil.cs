@@ -11,10 +11,13 @@ namespace ICFP2023
         public static void ColorInstruments(UIAdapter ui, ProblemSpec problem)
         {
             var colors = MakeInstrumentColors(problem);
+            var mcolors = new string[problem.Musicians.Count];
             foreach (var m in problem.Musicians)
             {
-                ui.SetMusicianColor(m.Index, colors[m.Instrument]);
+                mcolors[m.Index] = colors[m.Instrument];
             }
+
+            ui.SetAllMusicianColors(mcolors);
         }
 
         // Picks evenly spaced colors for each instrument in the problem

@@ -70,6 +70,19 @@ namespace ICFP2023
             });
         }
 
+        public void SetAllMusicianColors(string[] colors)
+        {
+            // Lazy hack to make sure things have rendered
+            Task.Delay(20).Wait();
+            _ui.Dispatcher.BeginInvoke(() =>
+            {
+                for (int i = 0; i < colors.Length; i++)
+                {
+                    _ui.SetMusicianColor(i, colors[i]);
+                }
+            });
+        }
+
         public void ClearAllColors()
         {
             // Lazy hack to make sure things have rendered

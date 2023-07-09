@@ -12,6 +12,8 @@ namespace ICFP2023
 
         void SetMusicianColor(int index, string color);
 
+        void SetAllMusicianColors(string[] colors);
+
         void ClearAllColors();
 
         void ClearMusicianColor(int index);
