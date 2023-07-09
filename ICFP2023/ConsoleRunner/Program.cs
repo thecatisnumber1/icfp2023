@@ -13,7 +13,6 @@ using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
 using System.Threading.Tasks;
 
-
 namespace ICFP2023
 {
     class DoNothingUIAdapter : UIAdapter
@@ -44,7 +43,9 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            List<int> toDoList = new List<int> { 8 };
+            Random rng = new Random();
+            var toDoList = Enumerable.Range(1, 90).OrderBy(x => rng.Next()).ToList();
+            // toDoList = new List<int> { 59 };
             foreach (int i in toDoList)
             // for (var i = 1; i <= 90; i++)
             // Parallel.ForEach(toDoList, i =>
@@ -91,7 +92,11 @@ namespace ICFP2023
                     // Console.WriteLine($"Best score: {i} {best.InitializeScore()}");
                     // Console.WriteLine($"Placement: {string.Join(", ", best.Placements)}");
 
-                    // SubmitSolution(best, i).Wait();
+                    // if (best.IsValid()) {
+                    //     SubmitSolution(best, i).Wait();
+                    // } else {
+                    //     Console.WriteLine($"Invalid solution for {i}");
+                    // }
                     // best.Render();
 
                     // long[,,] power;
@@ -142,18 +147,18 @@ namespace ICFP2023
                     //     File.WriteAllText(strongestPath, JsonConvert.SerializeObject(strongest));
                     // }
 
-                    for (var j = 0; j < solution.Problem.HeatMap.GetLength(0); j++) {
-                        Heatmap(solution.Problem.HeatMap, j, "power-" + i + "-" + j + ".png");
-                    }
+                    // for (var j = 0; j < solution.Problem.HeatMap.GetLength(0); j++) {
+                    //     Heatmap(solution.Problem.HeatMap, j, "power-" + i + "-" + j + ".png");
+                    // }
                     // for (var j = 0; j < gradients.GetLength(0); j++)
                     // {
                     //     Heatmap(gradients, j, "gradients-" + i + "-" + j + ".png");
                     // }
-
                 }
                 catch (Exception e)
                 {
                     Console.WriteLine($"Error on problem {i}: {e.Message}");
+                    Console.WriteLine($"Stack trace: {e.StackTrace}");
                 }
             }
             // });

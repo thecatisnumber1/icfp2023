@@ -64,7 +64,7 @@ namespace ICFP2023
             return HashCode.Combine(X, Y);
         }
 
-        public override string ToString() => $"({X}, {Y})";
+        public override string ToString() => $"({X:F2}, {Y:F2})";
 
         //SPECULATIVE
 

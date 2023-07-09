@@ -21,8 +21,8 @@ namespace ICFP2023
             var startScore = solution.NScoreFull();
             Console.Error.WriteLine($"Starting score {startScore}");
 
-            long initTemp = startScore;
-            var best = Anneal(solution, ComputeCost, 300000, (int)initTemp);
+            long initTemp = Math.Max(startScore * 10, 1000000);
+            var best = Anneal(solution, ComputeCost, 200000, (int)initTemp);
 
             ui.Render(best);
             return best;
@@ -47,7 +47,7 @@ namespace ICFP2023
         {
             Console.WriteLine($"Starting annealing solver with runtime {runtimeMs}ms, starting temp {startingTemp}, ending temp {endingTemp}");
 
-            int logDelayMs = 200;
+            int logDelayMs = 1000;
             int lastLogTime = Environment.TickCount;
             double accepted = 0;
             double rejected = 0;
@@ -55,26 +55,28 @@ namespace ICFP2023
 
             Solution currentSolution = solution.Copy();
             Solution bestSolution = solution.Copy();
+
+            currentSolution.Render();
+
             CoolingScheduler coolingScheduler = new CoolingScheduler(runtimeMs, startingTemp, endingTemp);
             while (!coolingScheduler.ICE_COLD())
             {
                 if ((Environment.TickCount - lastLogTime) >= logDelayMs)
                 {
                     totalmoves += accepted + rejected;
-                    Console.Error.WriteLine($"{solution.Problem.ProblemNumber,4:N0}  T = {coolingScheduler.Temperature,12:F0}, B = {heuristic(bestSolution),16:N0}, C = {heuristic(currentSolution),16:N0}, % = {((accepted / (accepted + rejected)) * 100),4:F2}, R = {coolingScheduler.RemainingMs(),10:N0}, {(accepted + rejected),9:N0} {totalmoves,10:N0}");
+                    Console.Error.WriteLine($"{solution.Problem.ProblemNumber,4:N0}  T = {coolingScheduler.Temperature,12:F0}, B = {heuristic(bestSolution),16:N0}, C = {heuristic(currentSolution),16:N0}, % = {((accepted / (accepted + rejected)) * 100),7:F2}, R = {coolingScheduler.RemainingMs(),10:N0}, {(accepted + rejected),9:N0} {totalmoves,10:N0}");
                     accepted = 0;
                     rejected = 0;
                     lastLogTime = Environment.TickCount;
-                    // currentSolution.Render();
+                    currentSolution.Render();
                 }
 
                 Move move;
                 if (random.NextDouble() <= .1) {
-                    move = GetSwap(currentSolution);
+                    move = GetSwap(currentSolution, coolingScheduler.Temperature);
                 } else {
-                    move = GetWalk(currentSolution);
+                    move = GetWalk(currentSolution, coolingScheduler.Temperature);
                 }
-
 
                 double currentCost = heuristic(currentSolution);
                 move.Apply(currentSolution);
@@ -123,7 +125,7 @@ namespace ICFP2023
             return -solution.NScoreWithCache();
         }
 
-        private static Move GetSwap(Solution solution)
+        private static Move GetSwap(Solution solution, double temp)
         {
             // Pick two non-identical indexes
             int m0;
@@ -132,13 +134,13 @@ namespace ICFP2023
             {
                 m0 = random.Next(solution.Placements.Count);
                 m1 = random.Next(solution.Placements.Count);
-            } while (solution.Problem.Musicians[m0].Instrument == solution.Problem.Musicians[m1].Instrument);
+            } while (solution.Problem.Musicians[m0].Instrument == solution.Problem.Musicians[m1].Instrument && solution.Problem.InstrumentCount > 1);
 
             return new MoveSwap(m0, m1);
         }
 
         // Previous version of GetNeighbor which would move points slightly.
-        private static Move GetWalk(Solution solution)
+        private static Move GetWalk(Solution solution, double temp)
         {
             int musicianIndex;
             Vec delta;
@@ -147,8 +149,8 @@ namespace ICFP2023
                 musicianIndex = random.Next(solution.Placements.Count);
 
                 delta = new Vec(
-                    (random.NextDouble() - 0.50) * solution.Problem.StageWidth / 20,
-                    (random.NextDouble() - 0.50) * solution.Problem.StageHeight / 20
+                    (random.NextDouble() - 0.50) * Math.Min(100, (solution.Problem.StageWidth - 20) / 20),
+                    (random.NextDouble() - 0.50) * Math.Min(100, (solution.Problem.StageHeight- 20) / 20)
                 );
 
                 if (delta.MagnitudeSq == 0) continue;
@@ -161,6 +163,11 @@ namespace ICFP2023
                 if (ahead.X > solution.Problem.StageFenceRight) continue;
                 if (ahead.Y < solution.Problem.StageFenceBottom) continue;
                 if (ahead.Y > solution.Problem.StageFenceTop) continue;
+
+                // Towards the end, don't allow overlap moves
+                if (solution.MusicianOverlaps(musicianIndex, ahead)) {
+                    continue;
+                }
 
                 // Create the move
                 Move move = new MoveWalk(musicianIndex, delta);

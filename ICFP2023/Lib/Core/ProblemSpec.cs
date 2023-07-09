@@ -246,9 +246,9 @@ namespace ICFP2023
             int maxY = 0;
             long maxH = Int64.MinValue;
 
-            for (var x = 10; x < HeatMap.GetLength(1) - 10; x++)
+            for (var x = 10; x <= HeatMap.GetLength(1) - 10; x++)
             {
-                for (var y = 10; y < HeatMap.GetLength(2) - 10; y++)
+                for (var y = 10; y <= HeatMap.GetLength(2) - 10; y++)
                 {
                     if (maxH < HeatMap[m.Instrument, x, y]) {
                         if (ignore != null && ignore.Contains(new Point(StageLeft + x, StageBottom + y))) {

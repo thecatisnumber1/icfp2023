@@ -515,7 +515,44 @@ namespace ICFP2023
             return gradients;
         }
 
-        public long NScoreMusician(Musician m, int n=200, bool occlusion=true)
+        public bool MusicianOverlaps(int m, Point loc)
+        {
+            foreach (var mp in Problem.Musicians)
+            {
+                if (mp.Index == m) continue;
+
+                var dist = (loc - Placements[mp.Index]).Magnitude;
+                if (dist < Musician.SOCIAL_DISTANCE)
+                {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        public long NScoreMusicianOverlap(Musician m, long score)
+        {
+            foreach (var mp in Problem.Musicians)
+            {
+                if (mp.Index == m.Index) continue;
+
+                NScoreDistCache[m.Index, mp.Index] = (Placements[m.Index] - Placements[mp.Index]).Magnitude;
+                NScoreDistCache[mp.Index, m.Index] = NScoreDistCache[m.Index, mp.Index];
+
+                if (NScoreDistCache[m.Index, mp.Index] < Musician.SOCIAL_DISTANCE)
+                {
+                    // Huge penalty if too close.
+                    score = (long)(score * 0.10 * NScoreDistCache[m.Index, mp.Index] / Musician.SOCIAL_DISTANCE);
+                    // score = -(long)(score);
+                    break;
+                }
+            }
+
+            return score;
+        }
+
+        public long NScoreMusician(Musician m, int n=100, bool occlusion=true)
         {
             n = Math.Min(n, Problem.Musicians.Count);
             long score = 0;
@@ -532,24 +569,12 @@ namespace ICFP2023
                 }
             }
 
-            foreach (var mp in Problem.Musicians)
-            {
-                if (mp.Index == m.Index) continue;
-
-                NScoreDistCache[m.Index, mp.Index] = (Placements[m.Index] - Placements[mp.Index]).Magnitude;
-                NScoreDistCache[mp.Index, m.Index] = NScoreDistCache[m.Index, mp.Index];
-
-                if (NScoreDistCache[m.Index, mp.Index] < Musician.SOCIAL_DISTANCE) {
-                    // Huge penalty if too close.
-                    score = (long)(score * 0.25 * NScoreDistCache[m.Index, mp.Index] / Musician.SOCIAL_DISTANCE);
-                    break;
-                }
-            }
+            score = NScoreMusicianOverlap(m, score);
 
             return score;
         }
 
-        public long NScoreFull(int n=200, bool occlusion=true)
+        public long NScoreFull(int n=100, bool occlusion=true)
         {
             n = Math.Min(n, Problem.Musicians.Count);
             Problem.LoadMetaDataStrongest();
@@ -563,7 +588,7 @@ namespace ICFP2023
             return NScoreCacheTotal;
         }
 
-        public long NScoreWithCache(int updateMusician = -1, int n=200, bool occlusion=true)
+        public long NScoreWithCache(int updateMusician = -1, int n=100, bool occlusion=true)
         {
             n = Math.Min(n, Problem.Musicians.Count);
             if (updateMusician < 0) return NScoreCacheTotal;
@@ -602,7 +627,7 @@ namespace ICFP2023
             {
                 var p = m.Location;
                 var dotCenter = new PointF((int)p.X, (int)p.Y); // The position of the dot
-                float dotRadius = 2; // The radius of the dot
+                float dotRadius = 5; // The radius of the dot
 
                 image.Mutate(x => x.Fill(
                     Color.Black, // The color of the dot
