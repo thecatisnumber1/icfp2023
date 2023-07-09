@@ -120,6 +120,26 @@ namespace ICFP2023
             return (long)Math.Ceiling(pairScore);
         }
 
+        public double PlayingTogetherBonus(Point from, IEnumerable<Point> toPoints)
+        {
+            if (!UsePlayingTogetherScoring)
+            {
+                return 1;
+            }
+
+            double q = 1;
+
+            foreach (Point to in toPoints)
+            {
+                if (!from.Equals(to))
+                {
+                    q += 1 / from.Dist(to);
+                }
+            }
+
+            return q;
+        }
+
         private record class RawProblem(
             double room_width,
             double room_height,

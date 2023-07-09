@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
@@ -14,6 +15,8 @@ namespace ICFP2023
         private StaticBlockingComputer BlockingComputerTron;
         private ProblemSpec Problem;
 
+        private HashSet<Point>[] instrumentPoints;
+
         private long ScoreCache;
         
         public FixedPointSolution(ProblemSpec problem, List<Point> slotLocations)
@@ -25,6 +28,19 @@ namespace ICFP2023
             foreach (var _ in slotLocations)
             {
                 Slots.Add(-1);
+            }
+
+            int maxInstrument = 0;
+            foreach (var m in problem.Musicians)
+            {
+                maxInstrument = Math.Max(m.Instrument, maxInstrument);
+            }
+
+            instrumentPoints = new HashSet<Point>[maxInstrument + 1];
+
+            for (int i = 0; i < instrumentPoints.Length; i++)
+            {
+                instrumentPoints[i] = new(SlotLocations.Count);
             }
         }
 
@@ -41,9 +57,20 @@ namespace ICFP2023
             }
 
             Slots[slot] = instrument;
-            foreach (var attendee in BlockingComputerTron.GetVisibleAttendees(slot))
+            instrumentPoints[instrument].Add(SlotLocations[slot]);
+
+            var visible = BlockingComputerTron.GetVisibleAttendees(slot);
+
+            double q = 1;
+
+            if (visible.Count > 0)
             {
-                ScoreCache += Problem.PairScore(instrument, attendee.Index, SlotLocations[slot], 1);
+                q = Problem.PlayingTogetherBonus(SlotLocations[slot], instrumentPoints[instrument]);
+            }
+
+            foreach (var attendee in visible)
+            {
+                ScoreCache += Problem.PairScore(instrument, attendee.Index, SlotLocations[slot], q);
             }
         }
 
@@ -55,9 +82,20 @@ namespace ICFP2023
             }
 
             int instrument = Slots[slot];
-            foreach (var attendee in BlockingComputerTron.GetVisibleAttendees(slot))
+            instrumentPoints[instrument].Remove(SlotLocations[slot]);
+
+            var visible = BlockingComputerTron.GetVisibleAttendees(slot);
+
+            double q = 1;
+
+            if (visible.Count > 0)
             {
-                ScoreCache -= Problem.PairScore(instrument, attendee.Index, SlotLocations[slot], 1);
+                q = Problem.PlayingTogetherBonus(SlotLocations[slot], instrumentPoints[instrument]);
+            }
+
+            foreach (var attendee in visible)
+            {
+                ScoreCache -= Problem.PairScore(instrument, attendee.Index, SlotLocations[slot], q);
             }
 
             Slots[slot] = -1;
