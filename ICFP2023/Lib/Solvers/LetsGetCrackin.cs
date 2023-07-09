@@ -51,7 +51,7 @@ namespace ICFP2023
             }
 
             List<int> matches = FixedPointMatcher.FindMatching(problem, fixedPoints, ui, 90000, 200000);
-            Solution solution = MatchingToSolution(problem, fixedPoints, matches);
+            Solution solution = FixedPointSolution.MatchingToSolution(problem, fixedPoints, matches);
 
             Console.WriteLine($"{solution.InitializeScore()}");
             ui.Render(solution);
@@ -88,27 +88,6 @@ namespace ICFP2023
 
             all.Clear();
             all.AddRange(accepted);
-        }
-
-        public static Solution MatchingToSolution(ProblemSpec problem, List<Point> fixedPoints, List<int> matches)
-        {
-            Solution solution = new Solution(problem);
-            List<Musician> draftees = problem.Musicians.ToList();
-            for (int slotNumber = 0; slotNumber < matches.Count; slotNumber++)
-            {
-                if (matches[slotNumber] == -1) continue;
-                for (int draftIndex = 0; draftIndex < draftees.Count; draftIndex++)
-                {
-                    if (draftees[draftIndex].Instrument == matches[slotNumber])
-                    {
-                        solution.SetPlacement(draftees[draftIndex], fixedPoints[slotNumber]);
-                        draftees.RemoveAt(draftIndex);
-                        break;
-                    }
-                }
-            }
-
-            return solution;
         }
 
         private static List<Point> PlacePointsAlongEdgesAKAGetCrackin(ProblemSpec problem)

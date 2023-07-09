@@ -123,6 +123,28 @@ namespace ICFP2023
                 }
             }
         }
+
+        public static Solution MatchingToSolution(ProblemSpec problem, List<Point> fixedPoints, List<int> matches)
+        {
+            Solution solution = new Solution(problem);
+            List<Musician> draftees = problem.Musicians.ToList();
+            for (int slotNumber = 0; slotNumber < matches.Count; slotNumber++)
+            {
+                if (matches[slotNumber] == -1) continue;
+                for (int draftIndex = 0; draftIndex < draftees.Count; draftIndex++)
+                {
+                    if (draftees[draftIndex].Instrument == matches[slotNumber])
+                    {
+                        solution.SetPlacement(draftees[draftIndex], fixedPoints[slotNumber]);
+                        draftees.RemoveAt(draftIndex);
+                        break;
+                    }
+                }
+            }
+
+            return solution;
+        }
+
         private static bool AlmostEqual(double a, double b, double epsilon)
         {
             if (Double.IsNaN(a) || Double.IsNaN(b))

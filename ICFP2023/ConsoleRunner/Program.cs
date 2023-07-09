@@ -22,6 +22,10 @@ namespace ICFP2023
         {
         }
 
+        public void SetAllMusicianColors(string[] colors)
+        {
+        }
+
         public void SetMusicianColor(int index, string color)
         {
         }

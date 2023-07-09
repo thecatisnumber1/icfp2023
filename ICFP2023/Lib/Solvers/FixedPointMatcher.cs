@@ -39,7 +39,7 @@ namespace ICFP2023
                     rejected = 0;
                     lastLogTime = Environment.TickCount;
                     coolingScheduler.Watch.Stop();
-                    Solution uiSol = LetsGetCrackin.MatchingToSolution(problem, fixedPointSolution.SlotLocations, fixedPointSolution.Slots);
+                    Solution uiSol = FixedPointSolution.MatchingToSolution(problem, fixedPointSolution.SlotLocations, fixedPointSolution.Slots);
                     ui.Render(uiSol);
                     coolingScheduler.Watch.Start();
                 }
