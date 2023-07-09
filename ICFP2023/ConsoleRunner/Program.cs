@@ -128,17 +128,11 @@ namespace ICFP2023
 
         public static async Task<string> SubmitSolution(Solution solution, int problemId)
         {
-            // Prepare the placements
-            var placements = solution.Placements.Select(m => new { x = m.X, y = m.Y }).ToList();
-
-            // Convert the placements to a JSON string
-            var placementsJson = JsonSerializer.Serialize(new { placements });
-
             // Prepare the submission
             var submission = new Submission
             {
                 ProblemId = problemId,  // Assuming your Problem class has an Id field
-                Contents = placementsJson
+                Contents = solution.WriteJson(),
             };
 
             // Convert the submission to a JSON string
