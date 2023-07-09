@@ -45,6 +45,10 @@ namespace ICFP2023
 
         public long RemainingMs()
         {
+            if (Watch == null)
+            {
+                Watch = Stopwatch.StartNew();
+            }
             return TargetMs - (long)Watch.ElapsedMilliseconds;
         }
 

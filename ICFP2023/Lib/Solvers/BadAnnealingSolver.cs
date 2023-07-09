@@ -11,8 +11,6 @@ namespace ICFP2023
 
         public static Solution Solve(ProblemSpec problem, SharedSettings settings, UIAdapter ui)
         {
-            problem.LoadMetaData();
-
             Solution solution = new Solution(problem, Point.INVALID);
 
             InitialPlacement(solution, problem);
@@ -22,7 +20,7 @@ namespace ICFP2023
             Console.Error.WriteLine($"Starting score {startScore}");
 
             long initTemp = Math.Max(startScore * 10, 1000000);
-            var best = Anneal(solution, ComputeCost, 300000, (int)initTemp);
+            var best = Anneal(solution, ComputeCost, 300000, initTemp);
             best.InitializeScore();
 
             ui.Render(best);
@@ -31,20 +29,26 @@ namespace ICFP2023
 
         public static void InitialPlacement(Solution solution, ProblemSpec problem)
         {
+            var p = solution.Problem;
             Console.Error.WriteLine("Finding initial placement");
             HashSet<Point> used = new HashSet<Point>();
             foreach (var m in problem.Musicians)
             {
-                Point hot;
-                do
-                {
-                    hot = problem.Hottest(m, used);
-                    used.Add(hot);
-                } while (!solution.SetPlacement(m, hot, true));
+                solution.SetPlacement(m,
+                    new Point(
+                        random.NextDouble() * (p.StageWidth - 20) + p.StageLeft + 10,
+                        random.NextDouble() * (p.StageHeight - 20) + p.StageBottom + 10
+                        ));
+                // Point hot;
+                // do
+                // {
+                //     hot = problem.Hottest(m, used);
+                //     used.Add(hot);
+                // } while (!solution.SetPlacement(m, hot, true));
             }
         }
 
-        public static Solution Anneal(Solution solution, Heuristic heuristic, int runtimeMs=60000, int startingTemp = 5000, int endingTemp = 1)
+        public static Solution Anneal(Solution solution, Heuristic heuristic, int runtimeMs=60000, long startingTemp = 5000, int endingTemp = 1)
         {
             Console.WriteLine($"Starting annealing solver with runtime {runtimeMs}ms, starting temp {startingTemp}, ending temp {endingTemp}");
 
@@ -75,6 +79,8 @@ namespace ICFP2023
                 Move move;
                 if (random.NextDouble() <= .1) {
                     move = GetSwap(currentSolution, coolingScheduler.Temperature);
+                } else if (random.NextDouble() <= .2) {
+                    move = GetSnap(currentSolution, coolingScheduler.Temperature);
                 } else {
                     move = GetWalk(currentSolution, coolingScheduler.Temperature);
                 }
@@ -140,7 +146,35 @@ namespace ICFP2023
             return new MoveSwap(m0, m1);
         }
 
-        // Previous version of GetNeighbor which would move points slightly.
+        private static Move GetSnap(Solution solution, double temp)
+        {
+            var p = solution.Problem;
+
+            var m = p.Musicians[random.Next(solution.Placements.Count)];
+            for (var a = 0; a < Math.Min(100, p.Strongest.GetLength(1)); a++) {
+                var attendee = p.Attendees[p.Strongest[m.Instrument, a]];
+                var dir = attendee.Location.VecToRect(p.StageFrameBottomLeft, p.StageFrameTopRight);
+                var ahead = attendee.Location + dir;
+
+                var loc = solution.Placements[m.Index];
+                var delta = ahead - loc;
+
+                if (ahead.X < 0 || ahead.Y < 0) {
+                    throw new Exception("!!");
+                }
+
+                if (solution.MusicianOverlaps(m.Index, ahead)) continue;
+
+                // Create the move
+                Move move = new MoveWalk(m.Index, delta);
+                // Console.WriteLine($"Snapping {m.Instrument} to {ahead} for {attendee.Location}");
+                return move;
+            }
+
+            // Couldn't snap. Give up.
+            return GetWalk(solution, temp);
+        }
+
         private static Move GetWalk(Solution solution, double temp)
         {
             int musicianIndex;

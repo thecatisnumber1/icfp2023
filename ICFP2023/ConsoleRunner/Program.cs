@@ -46,9 +46,9 @@ namespace ICFP2023
             Random rng = new Random();
             var toDoList = Enumerable.Range(1, 90).OrderBy(x => rng.Next()).ToList();
             toDoList = new List<int> { 8 };
-            foreach (int i in toDoList)
+            // foreach (int i in toDoList)
             // for (var i = 1; i <= 90; i++)
-            // Parallel.ForEach(toDoList, i =>
+            Parallel.ForEach(toDoList, i =>
             // Parallel.For(1, 90, i =>
             {
                 try
@@ -59,6 +59,9 @@ namespace ICFP2023
                     // Call desired AI and then pass the result from it to HillClimber for optimization.
                     // Solution best = LetsGetCrackin.FixedPointAnnealSolve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
                     // best = HillSolver.Solve(best);
+
+
+
                     Solution best = BadAnnealingSolver.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
 
                     Console.WriteLine($"Score: {best.ScoreCache}");
@@ -91,7 +94,6 @@ namespace ICFP2023
                     // Solution best = EdgeClimber.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
                     // Console.WriteLine($"Best score: {best.ScoreCache}");
                     // SubmitSolution(best, i).Wait();
-                    // solution.Problem.LoadMetaData();
 
                     // if (best.IsValid()) {
                     //     SubmitSolution(best, i).Wait();
@@ -161,8 +163,8 @@ namespace ICFP2023
                     Console.WriteLine($"Error on problem {i}: {e.Message}");
                     Console.WriteLine($"Stack trace: {e.StackTrace}");
                 }
-            }
-            // });
+            // }
+            });
         }
 
         static void Heatmap(long[,,] power, int inst, string filename)

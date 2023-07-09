@@ -79,25 +79,26 @@ namespace ICFP2023
             double closeX;
             if (X < bl.X) {
                 closeX = bl.X;
-            } else if (X < tr.X) {
+            }
+            else if (X < tr.X) {
                 closeX = X;
-            } else {
+            }
+            else {
                 closeX = tr.X;
             }
+
             double closeY;
-            if (Y < bl.Y)
-            {
+            if (Y < bl.Y) {
                 closeY = bl.Y;
             }
-            else if (Y < tr.Y)
-            {
+            else if (Y < tr.Y) {
                 closeY = Y;
             }
-            else
-            {
+            else {
                 closeY = tr.Y;
             }
-            return (this - new Point(closeX, closeY));
+
+            return (new Point(closeX, closeY) - this);
         }
 
         // Warning! not exact

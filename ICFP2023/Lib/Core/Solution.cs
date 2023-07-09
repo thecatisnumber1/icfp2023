@@ -552,7 +552,7 @@ namespace ICFP2023
             return score;
         }
 
-        public long NScoreMusician(Musician m, int n=100, bool occlusion=true)
+        public long NScoreMusician(Musician m, int n=200, bool occlusion=true)
         {
             n = Math.Min(n, Problem.Musicians.Count);
             long score = 0;
@@ -574,7 +574,7 @@ namespace ICFP2023
             return score;
         }
 
-        public long NScoreFull(int n=100, bool occlusion=true)
+        public long NScoreFull(int n=200, bool occlusion=true)
         {
             n = Math.Min(n, Problem.Musicians.Count);
             Problem.LoadMetaDataStrongest();
@@ -588,7 +588,7 @@ namespace ICFP2023
             return NScoreCacheTotal;
         }
 
-        public long NScoreWithCache(int updateMusician = -1, int n=100, bool occlusion=true)
+        public long NScoreWithCache(int updateMusician = -1, int n=200, bool occlusion=true)
         {
             n = Math.Min(n, Problem.Musicians.Count);
             if (updateMusician < 0) return NScoreCacheTotal;
@@ -600,6 +600,8 @@ namespace ICFP2023
 
             return NScoreCacheTotal;
         }
+
+        public static long RUNID = DateTimeOffset.UtcNow.ToUnixTimeSeconds() % 10000000 / 10;
 
         public void Render()
         {
@@ -635,7 +637,9 @@ namespace ICFP2023
                 ));
             }
 
-            image.Save($"render-{Problem.ProblemNumber}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds()}.png");
+            try {
+                image.Save($"render/{RUNID}-{Problem.ProblemNumber}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds() % 1000000}.png");
+            } catch (Exception e) {}
         }
 
     }
