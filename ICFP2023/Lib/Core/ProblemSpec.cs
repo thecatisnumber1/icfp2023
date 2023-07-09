@@ -47,6 +47,8 @@ namespace ICFP2023
 
         public double StageRight => StageBottomRight.X;
 
+        public Rect Stage => new Rect(StageBottomLeft, StageWidth, StageHeight);
+
         public ProblemExtensions Extensions { get; private set; }
         public bool UsePlayingTogetherScoring { get; private set; }
 
