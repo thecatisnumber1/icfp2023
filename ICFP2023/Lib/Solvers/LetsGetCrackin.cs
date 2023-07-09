@@ -55,6 +55,7 @@ namespace ICFP2023
 
             Console.WriteLine($"{solution.InitializeScore()}");
             ui.Render(solution);
+            ColorUtil.ColorInstruments(ui, problem);
 
             return solution;
         }
