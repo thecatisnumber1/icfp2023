@@ -35,6 +35,7 @@ namespace ICFP2023
 
         public long[] NScoreCache { get; init; }
         public long NScoreCacheTotal { get; set; }
+        public double[,] NScoreDistCache { get; set; }
 
         public Solution(ProblemSpec problem) : this(problem, Point.ORIGIN)
         {}
@@ -57,6 +58,7 @@ namespace ICFP2023
             WhosThere = new Dictionary<Point, Musician>();
             NScoreCache = new long[problem.Musicians.Count];
             NScoreCacheTotal = 0;
+            NScoreDistCache = new double[problem.Musicians.Count, problem.Musicians.Count];
         }
 
         private Solution(ProblemSpec problem,
@@ -66,7 +68,8 @@ namespace ICFP2023
             Dictionary<Point, HashSet<int>> musicianUnblockedCache,
             long scoreCache,
             long[] nScoreCache,
-            long nScoreCacheTotal)
+            long nScoreCacheTotal,
+            double[,] nScoreDistCache)
         {
             Problem = problem;
             this.placements = placements;
@@ -87,6 +90,7 @@ namespace ICFP2023
             // }
             NScoreCache = nScoreCache;
             NScoreCacheTotal = nScoreCacheTotal;
+            NScoreDistCache = nScoreDistCache;
         }
 
         public Point GetPlacement(Musician musician)
@@ -273,7 +277,8 @@ namespace ICFP2023
                 MusicianUnblockedCache,
                 ScoreCache,
                 (long[])NScoreCache.Clone(),
-                NScoreCacheTotal);
+                NScoreCacheTotal,
+                (double[,])NScoreDistCache.Clone());
         }
 
         private void ResetCaches()
@@ -511,6 +516,19 @@ namespace ICFP2023
                 var attendee = Problem.Attendees[attendeeIndex];
                 if (!occlusion || !occlusionFinder.IsMusicianBlocked(m, attendee)) {
                     score += PairScore(m.Index, attendeeIndex);
+                }
+            }
+
+            foreach (var mp in Problem.Musicians)
+            {
+                if (mp.Index == m.Index) continue;
+
+                NScoreDistCache[m.Index, mp.Index] = (Placements[m.Index] - Placements[mp.Index]).Magnitude;
+                NScoreDistCache[mp.Index, m.Index] = NScoreDistCache[m.Index, mp.Index];
+
+                if (NScoreDistCache[m.Index, mp.Index] < Musician.SOCIAL_DISTANCE) {
+                    // Huge penalty if too close.
+                    score = (long)(score * 0.25 * NScoreDistCache[m.Index, mp.Index] / Musician.SOCIAL_DISTANCE);
                 }
             }
 

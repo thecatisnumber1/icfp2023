@@ -77,7 +77,8 @@ namespace ICFP2023
                 double neighborCost = heuristic(currentSolution);
 
                 // Decide if we should accept the neighbour
-                if (AcceptanceProbability(currentCost, neighborCost, coolingScheduler.Temperature) <= random.NextDouble())
+                var acceptance = AcceptanceProbability(currentCost, neighborCost, coolingScheduler.Temperature);
+                if (acceptance <= random.NextDouble())
                 {
                     move.Undo(currentSolution);
                     rejected++;
@@ -146,6 +147,8 @@ namespace ICFP2023
                     Math.Round((random.NextDouble() - 0.50) * 2.5),
                     Math.Round((random.NextDouble() - 0.50) * 2.5)
                 );
+
+                if (delta.MagnitudeSq == 0) continue;
 
                 // Create the move
                 Move move = new MoveWalk(musicianIndex, delta);
@@ -271,7 +274,13 @@ namespace ICFP2023
                 var musician = solution.Problem.Musicians[M0];
                 var current = solution.GetPlacement(musician);
                 solution.SetPlacement(musician, current + delta);
+                var s1 = solution.NScoreCacheTotal;
+                var s1p = solution.NScoreCache[musician.Index];
                 solution.NScoreWithCache(M0);
+                if (s1 == solution.NScoreCacheTotal) {
+                    Console.Error.WriteLine($"{this} {s1} {s1p} {current} {delta}");
+                    solution.NScoreMusician(musician);
+                }
             }
 
             public void Undo(Solution solution)

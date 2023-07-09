@@ -42,7 +42,7 @@ namespace ICFP2023
     {
         static void Main(string[] args)
         {
-            List<int> toDoList = new List<int> { 43 };
+            List<int> toDoList = new List<int> { 8 };
             // foreach (int i in toDoList)
             // for (int i = 1; i <= 90; i++)
             // for (var i = 56; i <= 90; i++)
