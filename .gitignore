@@ -351,3 +351,5 @@ MigrationBackup/
 
 # This has the command line args
 launchSettings.json
+
+password
