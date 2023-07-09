@@ -1,0 +1,30 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+        x:Class="ICFP2023.MainWindow"
+        Title="This One Goes to Eleven" Height="1050" Width="1600"
+        Background="White">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+            <RowDefinition Height="400" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="200" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Orientation="Vertical" Grid.Column="1" Grid.Row="0" Panel.ZIndex="255">
+        </StackPanel>
+
+        <Viewbox Stretch="Uniform" StretchDirection="Both" HorizontalAlignment="Left" Grid.Column="0">
+            <Grid x:Name="ZoomGrid">
+                <Canvas x:Name="BaseRender"/>
+            </Grid>
+        </Viewbox>
+    </Grid>
+
+</Window>
