@@ -11,10 +11,15 @@ namespace ICFP2023
     {
         public static Solution Solve(ProblemSpec problem, SharedSettings settings, UIAdapter ui)
         {
-            Solution solution = new Solution(problem);
+            Solution solution = new Solution(Approximator.Approximate(problem));
             Place(solution, ui);
             ui.Render(solution);
-            return AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 45000, 1000000);
+            var sol = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 45000, 1000000);
+
+            Console.WriteLine();
+            Console.WriteLine(Approximator.ToRealSolution(problem, solution).WriteJson());
+
+            return sol;
         }
 
         // Deal with vuvuzelas later
