@@ -45,7 +45,7 @@ namespace ICFP2023
         {
             Random rng = new Random();
             var toDoList = Enumerable.Range(1, 90).OrderBy(x => rng.Next()).ToList();
-            // toDoList = new List<int> { 59 };
+            toDoList = new List<int> { 8 };
             foreach (int i in toDoList)
             // for (var i = 1; i <= 90; i++)
             // Parallel.ForEach(toDoList, i =>
@@ -57,18 +57,24 @@ namespace ICFP2023
                     Solution solution = new Solution(ProblemSpec.Read($"problem-{i}"));
 
                     // Call desired AI and then pass the result from it to HillClimber for optimization.
-                    Solution best = LetsGetCrackin.FixedPointAnnealSolve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
+                    // Solution best = LetsGetCrackin.FixedPointAnnealSolve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
                     // best = HillSolver.Solve(best);
+                    Solution best = BadAnnealingSolver.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
 
                     Console.WriteLine($"Score: {best.ScoreCache}");
                     if (best.ScoreCache == 0)
                     {
                         Console.WriteLine("Skipping submission of zero-score solution.");
                     }
-                    else
+                    else if (best.IsValid())
                     {
-                        SubmitSolution(best, i).Wait();
+                            SubmitSolution(best, i).Wait();
                     }
+                    else {
+                        Console.WriteLine($"Invalid solution for {i}");
+                        Console.WriteLine($"Placement: {string.Join(", ", best.Placements)}");
+                    }
+                    best.Render();
 
 
                     // Optimize our best solution with BestSolveOptimizer, and only submit if its result is better than the old score.
@@ -86,11 +92,6 @@ namespace ICFP2023
                     // Console.WriteLine($"Best score: {best.ScoreCache}");
                     // SubmitSolution(best, i).Wait();
                     // solution.Problem.LoadMetaData();
-
-                    // Solution best = BadAnnealingSolver.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
-
-                    // Console.WriteLine($"Best score: {i} {best.InitializeScore()}");
-                    // Console.WriteLine($"Placement: {string.Join(", ", best.Placements)}");
 
                     // if (best.IsValid()) {
                     //     SubmitSolution(best, i).Wait();

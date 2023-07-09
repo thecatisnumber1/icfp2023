@@ -22,7 +22,8 @@ namespace ICFP2023
             Console.Error.WriteLine($"Starting score {startScore}");
 
             long initTemp = Math.Max(startScore * 10, 1000000);
-            var best = Anneal(solution, ComputeCost, 200000, (int)initTemp);
+            var best = Anneal(solution, ComputeCost, 300000, (int)initTemp);
+            best.InitializeScore();
 
             ui.Render(best);
             return best;
@@ -149,8 +150,8 @@ namespace ICFP2023
                 musicianIndex = random.Next(solution.Placements.Count);
 
                 delta = new Vec(
-                    (random.NextDouble() - 0.50) * Math.Min(100, (solution.Problem.StageWidth - 20) / 20),
-                    (random.NextDouble() - 0.50) * Math.Min(100, (solution.Problem.StageHeight- 20) / 20)
+                    (random.NextDouble() - 0.50) * Math.Min(100, (solution.Problem.StageWidth - 20)),
+                    (random.NextDouble() - 0.50) * Math.Min(100, (solution.Problem.StageHeight- 20))
                 );
 
                 if (delta.MagnitudeSq == 0) continue;
