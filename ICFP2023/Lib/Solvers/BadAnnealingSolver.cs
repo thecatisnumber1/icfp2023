@@ -9,7 +9,7 @@ namespace ICFP2023
     {
         private static Random random = new Random();
 
-        public static Solution Solve(ProblemSpec problem, SharedSettings settings, UIAdapter ui, int runtime=60000)
+        public static Solution Solve(ProblemSpec problem, SharedSettings settings, UIAdapter ui)
         {
             problem.LoadMetaData();
 
@@ -21,7 +21,7 @@ namespace ICFP2023
             Console.Error.WriteLine($"Starting score {startScore}");
 
             long initTemp = startScore * 2 / 10;
-            var best = Anneal(solution, ComputeCost, runtime, (int)initTemp);
+            var best = Anneal(solution, ComputeCost, 60000, (int)initTemp);
 
             ui.Render(best);
             return best;
@@ -42,7 +42,7 @@ namespace ICFP2023
             }
         }
 
-        public static Solution Anneal(Solution solution, Heuristic heuristic, int runtimeMs=10000, int startingTemp = 5000, int endingTemp = 1)
+        public static Solution Anneal(Solution solution, Heuristic heuristic, int runtimeMs=60000, int startingTemp = 5000, int endingTemp = 1)
         {
             Console.WriteLine($"Starting annealing solver with runtime {runtimeMs}ms, starting temp {startingTemp}, ending temp {endingTemp}");
 

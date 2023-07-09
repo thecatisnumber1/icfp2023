@@ -19,6 +19,7 @@ namespace ICFP2023
             ["BestSolveOptimizer"] = BestSolveOptimizer.Solve,
             ["LetsGetCrackin"] = LetsGetCrackin.Solve,
             ["FixedPointCraker"] = LetsGetCrackin.FixedPointAnnealSolve,
+            ["BadAnnealer"] = BadAnnealingSolver.Solve,
         };
 
         public static Solver GetSolver(string algorithm)
