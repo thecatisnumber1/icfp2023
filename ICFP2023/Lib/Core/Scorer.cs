@@ -8,7 +8,7 @@ namespace ICFP2023
 {
     public class Scorer
     {
-        public static long ComputeScore(Solution solution)
+        public static long ComputeScore(Solution solution, int[] volumes = null)
         {
             if (!solution.IsValid())
             {
@@ -33,14 +33,31 @@ namespace ICFP2023
                     }
                 }
 
+                long singleScore = 0;
+
                 foreach (var attendee in solution.Problem.Attendees)
                 {
                     if (!IsBlocked(solution, attendee, musician))
                     {
                         double taste = attendee.Tastes[musician.Instrument];
                         double distSq = attendee.Location.DistSq(musicianLoc);
-                        score += (long)Math.Ceiling(q * Math.Ceiling(1000000 * taste / distSq));
+                        // Assume the volume is 10
+                        singleScore += (long)Math.Ceiling(10 * q * Math.Ceiling(1000000 * taste / distSq));
                     }
+                }
+
+                // Set volume to 0 for any negative score
+                if (singleScore > 0)
+                {
+                    score += singleScore;
+
+                    if (volumes != null) {
+                        volumes[musician.Index] = 10;
+                    }
+                }
+                else if (volumes != null)
+                {
+                    volumes[musician.Index] = 0;
                 }
             }
 

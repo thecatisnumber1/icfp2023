@@ -348,9 +348,12 @@ namespace ICFP2023
 
         public string WriteJson()
         {
-            return JsonConvert.SerializeObject(new RawSolution(placements.ToArray()));
+            // Have the scorer compute the score and output the volumes that maximized the score
+            int[] volumes = new int[Problem.Musicians.Count];
+            Scorer.ComputeScore(this, volumes);
+            return JsonConvert.SerializeObject(new RawSolution(placements.ToArray(), volumes));
         }
 
-        private record class RawSolution(Point[] placements);
+        private record class RawSolution(Point[] placements, int[] volumes);
     }
 }
