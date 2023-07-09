@@ -10,28 +10,32 @@ namespace ICFP2023
     {
         private static readonly Random random = new Random();
 
-        public static Solution Solve(Solution initialSolution, Heuristic heuristic, int runtimeMs, int startingTemp = 5000, int endingTemp = 1)
+        public static Solution Solve(Solution initialSolution)//, Heuristic heuristic, int runtimeMs, int startingTemp = 5000, int endingTemp = 1)
         {
-            Console.WriteLine($"Starting hill solver with runtime {runtimeMs}ms, starting temp {startingTemp}, ending temp {endingTemp}");
+            Console.WriteLine($"Starting hill solver");
             initialSolution.InitializeScore();
             Console.WriteLine($"Finished initializing score: {initialSolution.ScoreCache}");
 
-            Solution currentSolution = initialSolution.Copy();
+            Solution currentSolution = initialSolution;
             while (true)
             {
                 bool swapped = false;
                 for (int i = 0; i < currentSolution.Placements.Count-1; ++i) {
                     for (int j = i+1; j < currentSolution.Placements.Count; ++j) {
-                        Move move = new Move(i, j);
-                        double currentCost = heuristic(currentSolution);
+                        Move move = new(i, j);
+                        double oldScore = currentSolution.ScoreCache;
                         move.Apply(currentSolution);
-                        if (heuristic(currentSolution) < currentCost)
+                        if (currentSolution.ScoreCache > oldScore)
                         {
                             swapped = true;
                         }
                         else
                         {
                             move.Undo(currentSolution);
+                            if (currentSolution.ScoreCache != oldScore)
+                            {
+                                Console.WriteLine($"Score is different after undone swap: Old = {oldScore}, New = {currentSolution.ScoreCache}");
+                            }
                         }
                     }
                     Console.WriteLine($"Completed pass: {i} / {currentSolution.Placements.Count - 1}");
@@ -45,7 +49,10 @@ namespace ICFP2023
                 }
             }
 
-            Console.WriteLine($"Finished climbing score: {currentSolution.ScoreCache}");
+            Console.WriteLine($"Finished climbing score cached: {currentSolution.ScoreCache}");
+            currentSolution.InitializeScore();
+            Console.WriteLine($"Finished climbing score inited: {currentSolution.ScoreCache}");
+            Console.WriteLine($"Solution is valid: {currentSolution.IsValid()}");
 
             return currentSolution;
         }

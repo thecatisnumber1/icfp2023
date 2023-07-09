@@ -13,7 +13,7 @@ namespace ICFP2023
         {
             string bestSaveFile = $"best-solves/{problem.ProblemName}.json";
             Solution solution = Solution.Read(bestSaveFile, problem);
-            return HillSolver.Solve(solution, AnnealingSolver.ComputeCost, 45000, 1000000);
+            return HillSolver.Solve(solution);//, AnnealingSolver.ComputeCost, 45000, 1000000);
         }
     }
 }
