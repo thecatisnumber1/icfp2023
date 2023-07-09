@@ -61,7 +61,7 @@ namespace ICFP2023
                 if ((Environment.TickCount - lastLogTime) >= logDelayMs)
                 {
                     totalmoves += accepted + rejected;
-                    Console.Error.WriteLine($"T = {coolingScheduler.Temperature:F0}, B = {heuristic(bestSolution):N0}, C = {heuristic(currentSolution):N0}, % = {((accepted / (accepted + rejected)) * 100):F2}, R = {coolingScheduler.RemainingMs()}, {accepted + rejected} {totalmoves}");
+                    Console.Error.WriteLine($"{solution.Problem.ProblemNumber,4:N0}  T = {coolingScheduler.Temperature,12:F0}, B = {heuristic(bestSolution),16:N0}, C = {heuristic(currentSolution),16:N0}, % = {((accepted / (accepted + rejected)) * 100),4:F2}, R = {coolingScheduler.RemainingMs(),10:N0}, {(accepted + rejected),9:N0} {totalmoves,10:N0}");
                     accepted = 0;
                     rejected = 0;
                     lastLogTime = Environment.TickCount;
@@ -263,13 +263,7 @@ namespace ICFP2023
                 var musician = solution.Problem.Musicians[M0];
                 var current = solution.GetPlacement(musician);
                 solution.SetPlacement(musician, current + delta);
-                var s1 = solution.NScoreCacheTotal;
-                var s1p = solution.NScoreCache[musician.Index];
                 solution.NScoreWithCache(M0);
-                if (s1 == solution.NScoreCacheTotal) {
-                    // Console.Error.WriteLine($"{this} {s1} {s1p} {current} {delta}");
-                    // solution.NScoreMusician(musician);
-                }
             }
 
             public void Undo(Solution solution)
