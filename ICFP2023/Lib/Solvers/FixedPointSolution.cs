@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections;
 using System.Collections.Generic;
 using System.Diagnostics.Metrics;
 using System.Linq;
@@ -22,7 +23,7 @@ namespace ICFP2023
 
         public FixedPointSolution(ProblemSpec problem, List<Point> slotLocations)
             : this(problem, slotLocations, new StaticBlockingComputer(slotLocations, problem.Attendees, problem.Pillars)) { }
-        
+
         private FixedPointSolution(ProblemSpec problem, List<Point> slotLocations, StaticBlockingComputer computer)
         {
             SlotLocations = slotLocations;
@@ -64,7 +65,9 @@ namespace ICFP2023
             InstrumentToUsedSlots[instrument].Add(slot);
             Qs[slot] = UpdateQs(slot, instrument, 1);
             Slots[slot] = instrument;
-            ComputeScoreForSlot(slot);
+
+            long scoreDiff = ComputeScoreForSlot(slot);
+            UpdateScoreCache(slot, scoreDiff);
         }
 
         public int RemoveInstrument(int slot)
@@ -77,7 +80,7 @@ namespace ICFP2023
 
             int instrument = Slots[slot];
             InstrumentToUsedSlots[instrument].Remove(slot);
-            ScoreCache -= SlotScores[slot];
+            UpdateScoreCache(slot, -SlotScores[slot]);
             SlotScores[slot] = 0;
 
             Slots[slot] = -1;
@@ -157,6 +160,10 @@ namespace ICFP2023
             }
         }
 
+        private void UpdateScoreCache(int slot, long scoreDiff)
+        {
+            ScoreCache += (long)Math.Ceiling(Qs[slot] * scoreDiff);
+        }
 
         private double UpdateQs(int changingSlot, int instrument, int modifier)
         {
@@ -169,38 +176,34 @@ namespace ICFP2023
                 }
 
                 double update = modifier / SlotLocations[changingSlot].Dist(SlotLocations[otherSlot]);
-                SetQ(otherSlot, Qs[otherSlot] + update);
+
+                // Update the other slot's Q, which means the score cache changes also
+                long otherScore = SlotScores[otherSlot];
+                UpdateScoreCache(otherSlot, -otherScore);
+                Qs[otherSlot] += update;
+                UpdateScoreCache(otherSlot, otherScore);
+
                 changingSlotQ += update;
             }
 
             return changingSlotQ;
         }
 
-        private void ComputeScoreForSlot(int slot)
+        private long ComputeScoreForSlot(int slot)
         {
             long score = 0;
             foreach (var attendee in BlockingComputerTron.GetVisibleAttendees(slot))
             {
-                score += Problem.PairScore(Slots[slot], attendee.Index, SlotLocations[slot], Qs[slot]);
+                score += PairScore(Slots[slot], attendee, SlotLocations[slot]);
             }
 
             SlotScores[slot] = score;
-            ScoreCache += score;
+            return score;
         }
 
-        private void SetQ(int slot, double newQ)
+        private static long PairScore(int instrument, Attendee attendee, Point location)
         {
-            long delta = 0;
-            double oldQ = Qs[slot];
-            Qs[slot] = newQ;
-            foreach (Attendee a in BlockingComputerTron.GetVisibleAttendees(slot))
-            {
-                delta -= Problem.PairScore(Slots[slot], a.Index, SlotLocations[slot], oldQ);
-                delta += Problem.PairScore(Slots[slot], a.Index, SlotLocations[slot], newQ);
-            }
-
-            ScoreCache += delta;
-            SlotScores[slot] += delta;
+            return (long)Math.Ceiling(1000000 * attendee.Tastes[instrument] / attendee.Location.DistSq(location));
         }
     }
 }
