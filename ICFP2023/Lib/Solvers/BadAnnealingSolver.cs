@@ -20,7 +20,7 @@ namespace ICFP2023
             Console.Error.WriteLine($"Starting score {startScore}");
 
             long initTemp = Math.Max(startScore * 10, 1000000);
-            var best = Anneal(solution, ComputeCost, 120000, initTemp);
+            var best = Anneal(solution, ComputeCost, 30000, initTemp);
             best.InitializeScore();
 
             ui.Render(best);

@@ -9,15 +9,12 @@
 
   <ItemGroup>
     <PackageReference Include="Magick.NET.core" Version="13.1.3" />
+    <PackageReference Include="QuadTrees" Version="1.0.4" />
     <PackageReference Include="SixLabors.ImageSharp" Version="3.0.1" />
     <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta19" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
     <PackageReference Include="UltimateQuadTree" Version="1.0.3" />
-  </ItemGroup>
-
-  <ItemGroup>
-    <ProjectReference Include="..\QuadTrees\QuadTrees.csproj" />
   </ItemGroup>
 
 </Project>
