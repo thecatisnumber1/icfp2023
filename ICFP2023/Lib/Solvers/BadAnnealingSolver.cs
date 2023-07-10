@@ -254,10 +254,10 @@ namespace ICFP2023
                 musicianIndex = random.Next(solution.Placements.Count);
 
                 delta = new Vec(
-                    // RandExp(solution.Problem.StageWidth - 20, 0.0, 0.25) * (random.NextDouble() < 0.5 ? -1 : 1),
-//                     RandExp(solution.Problem.StageHeight - 20, 0.0, 0.25) * (random.NextDouble() < 0.5 ? -1 : 1)
-                    (random.NextDouble() - 0.50) * Math.Min(100, (solution.Problem.StageWidth - 20)),
-                    (random.NextDouble() - 0.50) * Math.Min(100, (solution.Problem.StageHeight- 20))
+                    RandExp(solution.Problem.StageWidth - 20, 0.0, 0.25) * (random.NextDouble() < 0.5 ? -1 : 1),
+                    RandExp(solution.Problem.StageHeight - 20, 0.0, 0.25) * (random.NextDouble() < 0.5 ? -1 : 1)
+                    // (random.NextDouble() - 0.50) * Math.Min(100, (solution.Problem.StageWidth - 20)),
+                    // (random.NextDouble() - 0.50) * Math.Min(100, (solution.Problem.StageHeight- 20))
                 );
 
                 if (delta.MagnitudeSq == 0) continue;

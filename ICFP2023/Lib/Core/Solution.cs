@@ -650,7 +650,7 @@ namespace ICFP2023
 
         public long NScoreMusician(Musician m, int n=5000, bool occlusion=true)
         {
-            n = Math.Min(n, Problem.Musicians.Count);
+            n = Math.Min(n, Problem.Strongest.GetLength(1));
             long score = 0;
 
             for (int i = 0; i < n; i++) {
