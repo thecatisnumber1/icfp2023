@@ -72,6 +72,7 @@ namespace ICFP2023
                         Console.WriteLine("Skipping submission of zero-score solution.");
                     }
                     else if (!best.IsValid())
+                    {
                         Console.WriteLine($"Invalid solution for {i}");
                         Console.WriteLine($"Placement: {string.Join(", ", best.Placements)}");
                     }

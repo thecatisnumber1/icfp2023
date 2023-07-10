@@ -521,6 +521,9 @@ namespace ICFP2023
             // Have the scorer compute the score and output the volumes that maximized the score
             int[] volumes = new int[Problem.Musicians.Count];
             Scorer.ComputeScore(this, volumes);
+            for (var i = 0; i < placements.Count; i++ ) {
+                placements[i] = new Point(Math.Round(placements[i].X, 3), Math.Round(placements[i].Y, 3));
+            }
             return JsonConvert.SerializeObject(new RawSolution(placements.ToArray(), volumes));
         }
 
