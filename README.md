@@ -35,7 +35,7 @@ FILL THIS IN
 
 We're kind of a competetive lot and really enjoy seeing how we're doing in real time. To facilitate that, we build our own scoreboard so we could see places below 10:
 
-!(imgs/scoreboard.gif)
+![scoreboard](imgs/scoreboard.gif)
 
 There's also a page tabling all the problems with a bunch of random metadata about all the problems.
 
