@@ -121,15 +121,15 @@ namespace ICFP2023
             }
         }
 
-        public class Submission
+        public static async Task<string> SubmitSolution(Solution solution, int problemId)
         {
-            [JsonPropertyName("problem_id")]
-            public int ProblemId { get; set; }
-
-            [JsonPropertyName("contents")]
-            public string Contents { get; set; }
+            return await SubmitHelper.SubmitSolution(solution, problemId);
         }
 
+    }
+
+    public static class SubmitHelper
+    { 
         public static async Task<string> SubmitSolution(Solution solution, int problemId)
         {
             // Prepare the submission
@@ -160,6 +160,15 @@ namespace ICFP2023
             var responseContent = await response.Content.ReadAsStringAsync();
 
             return responseContent;
+        }
+
+        public class Submission
+        {
+            [JsonPropertyName("problem_id")]
+            public int ProblemId { get; set; }
+
+            [JsonPropertyName("contents")]
+            public string Contents { get; set; }
         }
     }
 }

@@ -129,7 +129,7 @@ namespace ICFP2023
 
         private static double ComputeScore(double wastedSpace, Side stageSide, Attendee crack)
         {
-            double score = -wastedSpace * 10000;
+            double score = -wastedSpace * 1000;
             if (crack != null)
             {
                 double distance = stageSide.OutwardComponent(crack.Location);

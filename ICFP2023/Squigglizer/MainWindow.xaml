@@ -32,6 +32,7 @@
             <ComboBox HorizontalAlignment="Stretch" VerticalAlignment="Top" x:Name="ColorizerSelector" SelectionChanged="ColorizerSelector_OnSelectionChanged" />
             <Separator />
             <local:SettingsControl x:Name="SettingsControl" />
+            <Button x:Name="SubmitButton" Content="Submit" Click="SubmitButton_OnClick"/>
         </StackPanel>
         <local:ConsoleControl x:Name="ConsoleControl" Grid.Column="0" Grid.Row="1" Panel.ZIndex="255"/>
 

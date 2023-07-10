@@ -18,6 +18,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ConsoleRunner\ConsoleRunner.csproj" />
     <ProjectReference Include="..\Lib\Lib.csproj" />
   </ItemGroup>
 

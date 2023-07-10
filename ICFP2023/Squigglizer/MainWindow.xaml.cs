@@ -306,6 +306,11 @@ namespace ICFP2023
             SolverRunButton.IsEnabled = true;
         }
 
+        private async void SubmitButton_OnClick(object sender, RoutedEventArgs e)
+        {
+            await SubmitHelper.SubmitSolution(_currentSolution, _currentProblem.ProblemNumber);
+        }
+
         private void SolverRunButton_OnClick(object sender, RoutedEventArgs e)
         {
             Solvers.Solver solver = Solvers.GetSolver(SolverSelector.SelectedItem.ToString());
