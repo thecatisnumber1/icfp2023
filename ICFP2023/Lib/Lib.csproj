@@ -13,6 +13,11 @@
     <PackageReference Include="SixLabors.Fonts" Version="1.0.0-beta19" />
     <PackageReference Include="SixLabors.ImageSharp.Drawing" Version="1.0.0-beta15" />
     <PackageReference Include="Newtonsoft.Json" Version="13.0.3" />
+    <PackageReference Include="UltimateQuadTree" Version="1.0.3" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\QuadTrees\QuadTrees.csproj" />
   </ItemGroup>
 
 </Project>

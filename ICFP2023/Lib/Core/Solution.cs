@@ -13,9 +13,44 @@ using SixLabors.ImageSharp.PixelFormats;
 using SixLabors.ImageSharp.Processing;
 using SixLabors.ImageSharp.Drawing;
 using SixLabors.ImageSharp.Drawing.Processing;
+using UltimateQuadTree;
+using QuadTrees;
+using QuadTrees.QTreePointF;
+using ICFP2023;
+
 
 namespace ICFP2023
 {
+    public readonly struct MusicianLoc : IQuadTreeObjectBounds<MusicianLoc>, IPointFQuadStorable, IEqualityComparer<MusicianLoc>
+    {
+        public readonly int m;
+        public readonly Point loc;
+
+        public bool Equals(MusicianLoc obj, MusicianLoc other)
+        {
+            return obj.m == other.m && obj.loc.Equals(other.loc);
+        }
+
+        public int GetHashCode(MusicianLoc obj)
+        {
+            return HashCode.Combine(obj.m, obj.loc);
+        }
+
+        public MusicianLoc(int _m, Point _loc)
+        {
+            m = _m;
+            loc = _loc;
+            Point = new System.Drawing.PointF((float)loc.X, (float)loc.Y);
+        }
+
+        public double GetLeft(MusicianLoc mloc) => mloc.loc.X;
+        public double GetRight(MusicianLoc mloc) => mloc.loc.X;
+        public double GetTop(MusicianLoc mloc) => mloc.loc.Y;
+        public double GetBottom(MusicianLoc mloc) => mloc.loc.Y;
+
+        public System.Drawing.PointF Point { get; init; }
+    }
+
     public class Solution
     {
         public ProblemSpec Problem { get; set; }
@@ -44,6 +79,7 @@ namespace ICFP2023
         public long[] NScoreCache { get; init; }
         public long NScoreCacheTotal { get; set; }
         public double[,] NScoreDistCache { get; set; }
+        public QuadTreePointF<MusicianLoc> MusicianTree { get; init; }
 
         public Solution(ProblemSpec problem) : this(problem, Point.ORIGIN)
         {}
@@ -57,10 +93,13 @@ namespace ICFP2023
                 placements.Add(initial);
             }
 
+            MusicianTree = new(-1, -1, (int)Problem.RoomWidth, (int)Problem.RoomHeight);
+
             this.occlusionFinder = new(this);
             foreach (var musician in problem.Musicians)
             {
                 occlusionFinder.OnPlacementChanged(initial, initial);
+                MusicianTree.Add(new MusicianLoc(musician.Index, initial));
             }
 
             WhosThere = new Dictionary<Point, Musician>();
@@ -77,7 +116,8 @@ namespace ICFP2023
             long scoreCache,
             long[] nScoreCache,
             long nScoreCacheTotal,
-            double[,] nScoreDistCache)
+            double[,] nScoreDistCache,
+            QuadTreePointF<MusicianLoc> mtree)
         {
             Problem = problem;
             this.placements = placements;
@@ -86,10 +126,12 @@ namespace ICFP2023
             MusicianDistanceScoreCache = musicianDistanceScoreCache;
             ScoreCache = scoreCache;
 
+            MusicianTree = mtree;
+
             this.occlusionFinder = new(this);
             foreach (var musician in problem.Musicians)
             {
-                occlusionFinder.OnPlacementChanged(Point.ORIGIN, Point.ORIGIN);
+                occlusionFinder.OnPlacementChanged(placements[musician.Index], Point.ORIGIN);
             }
 
             // WhosThere = new Dictionary<Point, Musician>();
@@ -111,6 +153,9 @@ namespace ICFP2023
             var oldLoc = Placements[musician.Index];
             placements[musician.Index] = loc;
             occlusionFinder.OnPlacementChanged(loc, oldLoc);
+
+            MusicianTree.Remove(new MusicianLoc(musician.Index, oldLoc));
+            MusicianTree.Add(new MusicianLoc(musician.Index, loc));
             // if (check && WhosThere.ContainsKey(loc)) {
             //     return false;
             // }
@@ -127,6 +172,10 @@ namespace ICFP2023
             placements[m1.Index] = loc0;
             occlusionFinder.OnPlacementChanged(loc1, loc0);
             occlusionFinder.OnPlacementChanged(loc0, loc1);
+            MusicianTree.Remove(new MusicianLoc(m0.Index, loc0));
+            MusicianTree.Add(new MusicianLoc(m0.Index, loc1));
+            MusicianTree.Remove(new MusicianLoc(m1.Index, loc1));
+            MusicianTree.Add(new MusicianLoc(m1.Index, loc0));
         }
 
         public void Swap(int m0, int m1)
@@ -277,6 +326,11 @@ namespace ICFP2023
                 distanceCacheCopy.Add(kvp.Key, kvp.Value);
             }
 
+            QuadTreePointF<MusicianLoc>  MusicianTreeCopy = new(-1, -1, (int)Problem.RoomWidth, (int)Problem.RoomHeight);
+            foreach (var n in MusicianTree.GetAllObjects()) {
+                MusicianTreeCopy.Add(n);
+            }
+
             return new Solution(
                 Problem,
                 new List<Point>(Placements),
@@ -286,7 +340,8 @@ namespace ICFP2023
                 ScoreCache,
                 (long[])NScoreCache.Clone(),
                 NScoreCacheTotal,
-                (double[,])NScoreDistCache.Clone());
+                (double[,])NScoreDistCache.Clone(),
+                MusicianTreeCopy);
         }
 
         private void ResetCaches()
@@ -299,7 +354,7 @@ namespace ICFP2023
                 MusicianScoreCache.Add(i, new List<long>());
                 MusicianDistanceScoreCache.Add(i, 1);
                 HashSet<int> unblocked = new();
-                MusicianUnblockedCache.Add(Placements[i], unblocked);
+                // MusicianUnblockedCache.Add(Placements[i], unblocked);
 
                 for (int j = 0; j < Problem.Attendees.Count; j++)
                 {
@@ -341,7 +396,7 @@ namespace ICFP2023
 
                     if (Scorer.IsBlocked(this, attendee, musician))
                     {
-                        MusicianUnblockedCache[Placements[musicianIndex]].Remove(attendeeIndex);
+                        // MusicianUnblockedCache[Placements[musicianIndex]].Remove(attendeeIndex);
                         continue;
                     }
 
@@ -388,11 +443,13 @@ namespace ICFP2023
                     point.X < minX || point.X > maxX ||
                     point.Y < minY || point.Y > maxY)
                 {
+                    Console.Error.WriteLine($"{point} not in bounds");
                     return false;
                 }
             }
 
             // Check for musician social distancing
+            bool valid = true;
             for (int i = 0; i < Placements.Count; i++)
             {
                 if (Placements[i] == Point.INVALID) continue;
@@ -401,12 +458,13 @@ namespace ICFP2023
                     if (Placements[j] == Point.INVALID) continue;
                     if (Placements[i].DistSq(Placements[j]) < Musician.SOCIAL_DISTANCE * Musician.SOCIAL_DISTANCE)
                     {
-                        return false;
+                        valid = false;
+                        Console.Error.WriteLine($"{i} @ {Placements[i]} overlaps {j} @ {Placements[j]}");
                     }
                 }
             }
 
-            return true;
+            return valid;
         }
 
         public bool IsMusicianBlocked(Attendee attendee, Musician musician)
@@ -515,19 +573,50 @@ namespace ICFP2023
             return gradients;
         }
 
-        public int MusicianOverlaps(int m, Point loc)
+        public int MusicianOverlaps(int m, Point loc) {
+            return MusicianOverlapsB(m, loc);
+        }
+
+        public int MusicianOverlapsC(int m, Point loc) {
+            var a = MusicianOverlapsA(m, loc);
+            var b = MusicianOverlapsB(m, loc);
+            if (a != -1 && b != -1 || a == -1 && b == -1) {
+                return a;
+            }
+            // Something went bad
+            Console.WriteLine($"Overlap failed {a} {b}");
+            a = MusicianOverlapsA(m, loc);
+            b = MusicianOverlapsB(m, loc);
+            return a;
+        }
+
+        public int MusicianOverlapsB(int m, Point loc)
+        {
+            var neighbors = new List<MusicianLoc>();
+            MusicianTree.GetObjects(
+                new System.Drawing.RectangleF((float)loc.X-10, (float)loc.Y-10, 20, 20), neighbors);
+            foreach (var n in neighbors) {
+                if (n.m == m) continue;
+                if ((loc - n.loc).Magnitude < Musician.SOCIAL_DISTANCE) {
+                    return n.m;
+                }
+            }
+
+            return -1;
+        }
+
+        public int MusicianOverlapsA(int m, Point loc)
         {
             foreach (var mp in Problem.Musicians)
             {
                 if (mp.Index == m) continue;
 
                 var dist = (loc - Placements[mp.Index]).Magnitude;
-                if (dist < Musician.SOCIAL_DISTANCE)
+                if (dist<Musician.SOCIAL_DISTANCE)
                 {
                     return mp.Index;
                 }
             }
-
             return -1;
         }
 
@@ -625,17 +714,17 @@ namespace ICFP2023
                 ));
             }
 
-            foreach (var m in problem.Attendees)
-            {
-                var p = m.Location;
-                var dotCenter = new PointF((int)p.X, (int)p.Y); // The position of the dot
-                float dotRadius = 5; // The radius of the dot
+            // foreach (var m in problem.Attendees)
+            // {
+            //     var p = m.Location;
+            //     var dotCenter = new PointF((int)p.X, (int)p.Y); // The position of the dot
+            //     float dotRadius = 5; // The radius of the dot
 
-                image.Mutate(x => x.Fill(
-                    Color.Black, // The color of the dot
-                    new EllipsePolygon(dotCenter, dotRadius) // The dot
-                ));
-            }
+            //     image.Mutate(x => x.Fill(
+            //         Color.Black, // The color of the dot
+            //         new EllipsePolygon(dotCenter, dotRadius) // The dot
+            //     ));
+            // }
 
             try {
                 image.Save($"render/{RUNID}-{Problem.ProblemNumber}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds() % 1000000}.png");

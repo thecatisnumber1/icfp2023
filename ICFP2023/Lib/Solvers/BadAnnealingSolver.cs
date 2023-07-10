@@ -20,7 +20,7 @@ namespace ICFP2023
             Console.Error.WriteLine($"Starting score {startScore}");
 
             long initTemp = Math.Max(startScore * 10, 1000000);
-            var best = Anneal(solution, ComputeCost, 30000, initTemp);
+            var best = Anneal(solution, ComputeCost, 120000, initTemp);
             best.InitializeScore();
 
             ui.Render(best);
@@ -78,9 +78,9 @@ namespace ICFP2023
 
                 Move move;
                 bool issnap = false;
-                if (random.NextDouble() <= .1) {
+                if (random.NextDouble() <= .15) {
                     move = GetSwap(currentSolution, coolingScheduler.Temperature);
-                } else if (random.NextDouble() <= .15) {
+                } else if (random.NextDouble() <= .17) {
                     move = GetSnap(currentSolution, coolingScheduler.Temperature);
                     // issnap = true;
                 } else {
@@ -199,11 +199,11 @@ namespace ICFP2023
                 while (overlap >= 0 && tries-- > 0) {
                     if (closest.X == p.StageFenceLeft || closest.X == p.StageFenceRight)
                     {
-                        closest = new Point(closest.X, solution.Placements[overlap].Y + pos * 10 + RandExp(2.0, 0.0, 2.0));
+                        closest = new Point(closest.X, solution.Placements[overlap].Y + pos * (float)(10 + RandExp(2.0, 0.0, 2.0)));
                     }
                     else
                     {
-                        closest = new Point(solution.Placements[overlap].X + pos * 10 + +RandExp(2.0, 0.0, 2.0), closest.Y);
+                        closest = new Point(solution.Placements[overlap].X + pos * (float)(10 + RandExp(2.0, 0.0, 2.0)), closest.Y);
                     }
 
                     // Don't go outside the bounds
