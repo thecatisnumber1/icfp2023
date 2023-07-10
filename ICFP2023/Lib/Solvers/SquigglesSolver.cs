@@ -4,7 +4,7 @@
     {
         public static Solution Solve(ProblemSpec problem, SharedSettings settings, UIAdapter ui)
         {
-            for (int musicianCount = 9; musicianCount <= 9; musicianCount += 2)
+            for (int musicianCount = 13; musicianCount <= 13; musicianCount += 2)
             {
                 problem.Musicians.Clear();
                 for (int i = 0; i < musicianCount; i++)
@@ -29,10 +29,10 @@
         public static Solution LensPlacer(ProblemSpec problem)
         {
             Solution solution = new Solution(problem);
-            List<Point> lens = LensCrafter.CraftLens(problem.Attendees[0].Location, problem.Stage.Sides[0], problem.Musicians.Count / 2);
-            for (int i = 0; i < lens.Count; i++)
+            LensCrafter.Lens lens = LensCrafter.CraftLens(problem.Attendees[0].Location, problem.Stage.Sides[0], problem.Musicians.Count / 2);
+            for (int i = 0; i < lens.Points.Count; i++)
             {
-                solution.SetPlacement(problem.Musicians[i], lens[i]);
+                solution.SetPlacement(problem.Musicians[i], lens.Points[i]);
             }
 
             return solution;

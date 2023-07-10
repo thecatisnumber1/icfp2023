@@ -84,5 +84,25 @@ namespace ICFP2023
         {
             return new Side(Left + v, Right + v);
         }
+
+        public bool LineSegementIntersects(Point p0, Point p1)
+        {
+            Vec r = p1 - p0;
+            Vec s = Right - Left;
+
+            double denominator = r.CrossProduct(s);
+
+            // If the denominator is 0, r and s are parallel
+            if (denominator == 0)
+            {
+                return false; // They are parallel and non intersecting
+            }
+
+            double t = (Left - p0).CrossProduct(s) / denominator;
+            double u = (Left - p0).CrossProduct(r) / denominator;
+
+            // If t and u are between 0 and 1, the line segments intersect
+            return (t >= 0) && (t <= 1) && (u >= 0) && (u <= 1);
+        }
     }
 }

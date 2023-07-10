@@ -90,6 +90,11 @@ namespace ICFP2023
 
         public readonly double Manhattan => Math.Abs(X) + Math.Abs(Y);
 
+        public double CrossProduct(Vec b)
+        {
+            return X * b.Y - Y * b.X;
+        }
+
         public double DotProduct(Vec b)
         {
             return X * b.X + Y * b.Y;

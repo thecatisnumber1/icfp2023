@@ -174,6 +174,27 @@ namespace ICFP2023
             }
         }
 
+        public Musician GetBestPlayerForAttendee(Attendee attendee)
+        {
+            long bestScore = 0;
+            int bestPlayer = -1;
+            foreach (var kvp in MusicianScoreCache)
+            {
+                if (kvp.Value[attendee.Index] > bestScore)
+                {
+                    bestPlayer = kvp.Key;
+                    bestScore = kvp.Value[attendee.Index];
+                }
+            }
+
+            if (bestPlayer == -1)
+            {
+                return null;
+            }
+
+            return Problem.Musicians[bestPlayer];
+        }
+
         public double GetScoreForMusician(int index)
         {
             if (MusicianScoreCache == null)
