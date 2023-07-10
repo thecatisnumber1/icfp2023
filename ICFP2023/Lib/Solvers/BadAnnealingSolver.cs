@@ -77,10 +77,12 @@ namespace ICFP2023
                 }
 
                 Move move;
+                bool issnap = false;
                 if (random.NextDouble() <= .1) {
                     move = GetSwap(currentSolution, coolingScheduler.Temperature);
-                } else if (random.NextDouble() <= .2) {
+                } else if (random.NextDouble() <= .15) {
                     move = GetSnap(currentSolution, coolingScheduler.Temperature);
+                    // issnap = true;
                 } else {
                     move = GetWalk(currentSolution, coolingScheduler.Temperature);
                 }
@@ -88,6 +90,17 @@ namespace ICFP2023
                 double currentCost = heuristic(currentSolution);
                 move.Apply(currentSolution);
                 double neighborCost = heuristic(currentSolution);
+
+                if (issnap){
+                    Console.WriteLine(move);
+                    Console.WriteLine(currentSolution.Placements[((MoveWalk)move).M0]);
+                    var o = currentSolution.MusicianOverlaps(((MoveWalk)move).M0, currentSolution.Placements[((MoveWalk)move).M0]);
+                    Console.WriteLine(o);
+                    if (o >= 0) {
+                        Console.WriteLine(currentSolution.Placements[o]);
+                    }
+                    currentSolution.IsValid();
+                }
 
                 // Decide if we should accept the neighbour
                 var acceptance = AcceptanceProbability(currentCost, neighborCost, coolingScheduler.Temperature);
@@ -146,14 +159,26 @@ namespace ICFP2023
             return new MoveSwap(m0, m1);
         }
 
-        public static int Pareto(long max) {
-            double alpha = 0.2;  // shape parameter (α > 0)
-            double x_m = 0.5;  // scale parameter (x_m > 0)
-
+        public static double Pareto(double max=100, double min = 0) {
             double u = random.NextDouble();
-            double x = x_m / Math.Pow(u, 1 / alpha);
+            double t = -Math.Log(u) / 1.0;
+            double increment = (max - min) / 6.0;
+            return Math.Min(min + (t * increment), max);
+        }
 
-            return (int)Math.Min(x, max);
+        public static double RandExp(double max, double min=0.0, double lambda=1.0)
+        {
+            double range = max - min;
+            double x;
+
+            do
+            {
+                double u = random.NextDouble();
+                x = -Math.Log(1 - u) / lambda;  // standard exponential distribution
+            }
+            while (x > range);  // retry if outside the desired range
+
+            return x + min;  // shift to desired range
         }
 
         private static Move GetSnap(Solution solution, double temp)
@@ -164,7 +189,7 @@ namespace ICFP2023
 
             var toptries = 100;
             while (toptries-- > 0 ) {
-                var attendee = p.Attendees[p.Strongest[m.Instrument, Pareto(Math.Max(1000,p.Strongest.GetLength(1)-1))]];
+                var attendee = p.Attendees[p.Strongest[m.Instrument, (int)RandExp(Math.Min(1000, p.Strongest.GetLength(1)-1))]];
                 var dir = attendee.Location.VecToRect(p.StageFenceBottomLeft, p.StageFenceTopRight);
                 var closest = attendee.Location + dir;
 
@@ -174,11 +199,11 @@ namespace ICFP2023
                 while (overlap >= 0 && tries-- > 0) {
                     if (closest.X == p.StageFenceLeft || closest.X == p.StageFenceRight)
                     {
-                        closest = new Point(closest.X, solution.Placements[overlap].Y + pos * 10);
+                        closest = new Point(closest.X, solution.Placements[overlap].Y + pos * 10 + RandExp(2.0, 0.0, 2.0));
                     }
                     else
                     {
-                        closest = new Point(solution.Placements[overlap].X + pos * 10, closest.Y);
+                        closest = new Point(solution.Placements[overlap].X + pos * 10 + +RandExp(2.0, 0.0, 2.0), closest.Y);
                     }
 
                     // Don't go outside the bounds
@@ -195,7 +220,7 @@ namespace ICFP2023
                     overlap = solution.MusicianOverlaps(m.Index, closest);
                 }
 
-                if (tries == 0 || closest == Point.INVALID) continue;
+                if (overlap >= 0 || closest == Point.INVALID) continue;
 
                 var loc = solution.Placements[m.Index];
                 var delta = closest - loc;
@@ -219,6 +244,8 @@ namespace ICFP2023
                 musicianIndex = random.Next(solution.Placements.Count);
 
                 delta = new Vec(
+                    // RandExp(solution.Problem.StageWidth - 20, 0.0, 0.25) * (random.NextDouble() < 0.5 ? -1 : 1),
+//                     RandExp(solution.Problem.StageHeight - 20, 0.0, 0.25) * (random.NextDouble() < 0.5 ? -1 : 1)
                     (random.NextDouble() - 0.50) * Math.Min(100, (solution.Problem.StageWidth - 20)),
                     (random.NextDouble() - 0.50) * Math.Min(100, (solution.Problem.StageHeight- 20))
                 );
