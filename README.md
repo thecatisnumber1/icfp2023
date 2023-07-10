@@ -1,3 +1,5 @@
+![Squigglizer](imgs/squigglizer.png)
+
 # The Cat is #1!! ICFP 2023
 
 ## Project Structure
@@ -29,7 +31,10 @@ GUI runner. Render problems, shows meta data and can run solvers. Can be fun to 
 
 ## Major approaches
 
-FILL THIS IN
+### Simulated anealing
+
+This is all we did.
+
 
 ## Support stuff
 
@@ -44,3 +49,4 @@ There's also a page tabling all the problems with a bunch of random metadata abo
 As well as a page per problem so we could see how submissions were doing:
 
 ![table](imgs/sol_table.gif)
+All of these were sortable, mostly for copy and paste reasons.
