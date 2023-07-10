@@ -15,9 +15,10 @@ namespace ICFP2023
         private const long FakeMillis = 50;
         private const long FakeIterations = 500;
 
-        private long Iterations;
-        private double PrevTempLog;
+        public long Iterations;
+        public double PrevTempLog;
         public Stopwatch Watch;
+        private double lastAcceptance;
 
         public CoolingScheduler(long targetMs, double initialTemp, double finalTemp)
         {
@@ -26,9 +27,10 @@ namespace ICFP2023
             FinalTempLog = Math.Log(finalTemp);
         }
 
-        public double Temperature => Math.Exp(PrevTempLog);
+        public double Temperature => Math.Exp(TempLog);
+        public double TempLog => (Watch != null && Watch.ElapsedMilliseconds >= TargetMs ? FinalTempLog : PrevTempLog);
 
-        public void AdvanceTemperature()
+        public void AdvanceTemperature(double acceptance=0.0)
         {
             // First iteration
             if (Watch == null)
@@ -41,6 +43,8 @@ namespace ICFP2023
             long remainingIterations = (long)((TargetMs - Watch.ElapsedMilliseconds) * iterationsPerMs);
             double delta = (FinalTempLog - PrevTempLog) / remainingIterations;
             PrevTempLog += delta;
+
+            lastAcceptance = acceptance;
         }
 
         public long RemainingMs()
@@ -59,7 +63,7 @@ namespace ICFP2023
                 return false;
             }
 
-            return Watch.ElapsedMilliseconds >= TargetMs;
+            return lastAcceptance == 0 && Watch.ElapsedMilliseconds >= TargetMs;
         }
     }
 }

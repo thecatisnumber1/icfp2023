@@ -60,11 +60,12 @@ namespace ICFP2023
                     // Solution best = LetsGetCrackin.FixedPointAnnealSolve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
                     // best = HillSolver.Solve(best);
 
+                    solution.Render(true);
 
 
                     Solution best = BadAnnealingSolver.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
 
-                    Console.WriteLine($"Score: {best.ScoreCache} for {i}");
+                    Console.WriteLine($"Score: {best.ScoreCache:N0} for {i}");
                     if (best.ScoreCache == 0)
                     {
                         Console.WriteLine("Skipping submission of zero-score solution.");
@@ -77,7 +78,7 @@ namespace ICFP2023
                         Console.WriteLine($"Invalid solution for {i}");
                         Console.WriteLine($"Placement: {string.Join(", ", best.Placements)}");
                     }
-                    best.Render();
+                    best.Render(true);
 
 
                     // Optimize our best solution with BestSolveOptimizer, and only submit if its result is better than the old score.

@@ -19,9 +19,9 @@ namespace ICFP2023
             var startScore = solution.NScoreFull();
             Console.Error.WriteLine($"Starting score {startScore}");
 
-            long initTemp = Math.Max(startScore * 10, 1000000);
-            var best = Anneal(solution, ComputeCost, 30000, initTemp);
-            best.InitializeScore();
+            long initTemp = Math.Max(startScore, 10000000);
+            var best = Anneal(solution, ComputeCost, 60000, initTemp);
+            best.InitializeScore(true);
 
             ui.Render(best);
             return best;
@@ -61,7 +61,7 @@ namespace ICFP2023
             Solution currentSolution = solution.Copy();
             Solution bestSolution = solution.Copy();
 
-            currentSolution.Render();
+            currentSolution.Render(true);
 
             CoolingScheduler coolingScheduler = new CoolingScheduler(runtimeMs, startingTemp, endingTemp);
             while (!coolingScheduler.ICE_COLD())
@@ -69,61 +69,67 @@ namespace ICFP2023
                 if ((Environment.TickCount - lastLogTime) >= logDelayMs)
                 {
                     totalmoves += accepted + rejected;
-                    Console.Error.WriteLine($"{solution.Problem.ProblemNumber,4:N0}  T = {coolingScheduler.Temperature,12:F0}, B = {heuristic(bestSolution),16:N0}, C = {heuristic(currentSolution),16:N0}, % = {((accepted / (accepted + rejected)) * 100),7:F2}, R = {coolingScheduler.RemainingMs(),10:N0}, {(accepted + rejected),9:N0} {totalmoves,10:N0}");
+                    Console.Error.WriteLine($"{solution.Problem.ProblemNumber,4:N0}  T = {coolingScheduler.Temperature,12:F0}, {coolingScheduler.TempLog,12:F6}, B = {heuristic(bestSolution),16:N0}, C = {heuristic(currentSolution),16:N0}, % = {((accepted / (accepted + rejected)) * 100),7:F2}, R = {coolingScheduler.RemainingMs(),10:N0}, {(accepted + rejected),9:N0} {totalmoves,10:N0}");
                     accepted = 0;
                     rejected = 0;
                     lastLogTime = Environment.TickCount;
-                    currentSolution.Render();
+                    // currentSolution.Render();
                 }
 
-                Move move;
-                bool issnap = false;
-                if (random.NextDouble() <= .15) {
-                    move = GetSwap(currentSolution, coolingScheduler.Temperature);
-                } else if (random.NextDouble() <= .17) {
-                    move = GetSnap(currentSolution, coolingScheduler.Temperature);
-                    // issnap = true;
-                } else {
-                    move = GetWalk(currentSolution, coolingScheduler.Temperature);
-                }
-
-                double currentCost = heuristic(currentSolution);
-                move.Apply(currentSolution);
-                double neighborCost = heuristic(currentSolution);
-
-                if (issnap){
-                    Console.WriteLine(move);
-                    Console.WriteLine(currentSolution.Placements[((MoveWalk)move).M0]);
-                    var o = currentSolution.MusicianOverlaps(((MoveWalk)move).M0, currentSolution.Placements[((MoveWalk)move).M0]);
-                    Console.WriteLine(o);
-                    if (o >= 0) {
-                        Console.WriteLine(currentSolution.Placements[o]);
+                for (var n = 0; n < 1000; n++) {
+                    Move move;
+                    bool issnap = false;
+                    if (random.NextDouble() <= .25) {
+                        move = GetSwap(currentSolution, coolingScheduler.Temperature);
+                    } else if (random.NextDouble() <= .30) {
+                        move = GetSnap(currentSolution, coolingScheduler.Temperature);
+                        // issnap = true;
+                    } else {
+                        move = GetWalk(currentSolution, coolingScheduler.Temperature);
                     }
-                    currentSolution.IsValid();
+
+                    double currentCost = heuristic(currentSolution);
+                    move.Apply(currentSolution);
+                    double neighborCost = heuristic(currentSolution);
+
+                    if (issnap){
+                        Console.WriteLine(move);
+                        Console.WriteLine(currentSolution.Placements[((MoveWalk)move).M0]);
+                        var o = currentSolution.MusicianOverlaps(((MoveWalk)move).M0, currentSolution.Placements[((MoveWalk)move).M0]);
+                        Console.WriteLine(o);
+                        if (o >= 0) {
+                            Console.WriteLine(currentSolution.Placements[o]);
+                        }
+                        currentSolution.IsValid();
+                    }
+
+                    // Decide if we should accept the neighbour
+                    var acceptance = AcceptanceProbability(currentCost, neighborCost, coolingScheduler.Temperature);
+                    if (acceptance <= random.NextDouble())
+                    {
+                        move.Undo(currentSolution);
+                        rejected++;
+                    }
+                    else
+                    {
+                        accepted++;
+                        // Console.WriteLine($"{coolingScheduler.Temperature:F0} {currentCost:N0} {(currentCost - neighborCost),16:N0} {acceptance:F2} {move}");
+                    }
+                    // Console.Error.WriteLine($"\t\t\t\t\t\t\t\t\t\t\t{string.Join(", ", currentSolution.Placements)}");
+
+                    // Keep track of the best solution found
+                    if (heuristic(currentSolution) < heuristic(bestSolution))
+                    {
+                        bestSolution = currentSolution.Copy();
+                    }
                 }
 
-                // Decide if we should accept the neighbour
-                var acceptance = AcceptanceProbability(currentCost, neighborCost, coolingScheduler.Temperature);
-                if (acceptance <= random.NextDouble())
-                {
-                    move.Undo(currentSolution);
-                    rejected++;
-                }
-                else
-                {
-                    accepted++;
-                    // Console.WriteLine($"{coolingScheduler.Temperature:F0} {currentCost:N0} {(currentCost - neighborCost),16:N0} {acceptance:F2} {move}");
-                }
-                // Console.Error.WriteLine($"\t\t\t\t\t\t\t\t\t\t\t{string.Join(", ", currentSolution.Placements)}");
+                currentSolution = bestSolution.Copy();
 
-                // Keep track of the best solution found
-                if (heuristic(currentSolution) < heuristic(bestSolution))
-                {
-                    bestSolution = currentSolution.Copy();
-                }
-
-                coolingScheduler.AdvanceTemperature();
+                coolingScheduler.AdvanceTemperature(accepted / (accepted + rejected));
             }
+
+            Console.Error.WriteLine($"{solution.Problem.ProblemNumber,4:N0}  T = {coolingScheduler.Temperature,12:F0}, {coolingScheduler.TempLog,12:F6}, B = {heuristic(bestSolution),16:N0}, C = {heuristic(currentSolution),16:N0}, % = {((accepted / (accepted + rejected)) * 100),7:F2}, R = {coolingScheduler.RemainingMs(),10:N0}, {(accepted + rejected),9:N0} {totalmoves,10:N0}");
 
             return bestSolution;
         }

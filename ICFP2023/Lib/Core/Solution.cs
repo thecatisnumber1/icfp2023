@@ -354,7 +354,7 @@ namespace ICFP2023
                 MusicianScoreCache.Add(i, new List<long>());
                 MusicianDistanceScoreCache.Add(i, 1);
                 HashSet<int> unblocked = new();
-                // MusicianUnblockedCache.Add(Placements[i], unblocked);
+                MusicianUnblockedCache.Add(Placements[i], unblocked);
 
                 for (int j = 0; j < Problem.Attendees.Count; j++)
                 {
@@ -366,7 +366,7 @@ namespace ICFP2023
 
         // If you want to actually use anything this thing caches, you'd better call this first.
         // Any changes (calls to SetLocation) will also require this to be re-called first.
-        public long InitializeScore()
+        public long InitializeScore(bool allscore=false)
         {
             ScoreCache = 0;
             ResetCaches();
@@ -387,23 +387,27 @@ namespace ICFP2023
                 }
             }
 
-            for (int musicianIndex = 0; musicianIndex < Problem.Musicians.Count; musicianIndex++)
+            var instmuses = Problem.Musicians.OrderBy(x => x.Instrument).ToList();
+            foreach (var musician in instmuses)
             {
-                var musician = Problem.Musicians[musicianIndex];
+                var musicianIndex = musician.Index;
+                long mscore = 0;
                 for (int attendeeIndex = 0; attendeeIndex < Problem.Attendees.Count; attendeeIndex++)
                 {
                     var attendee = Problem.Attendees[attendeeIndex];
 
                     if (Scorer.IsBlocked(this, attendee, musician))
                     {
-                        // MusicianUnblockedCache[Placements[musicianIndex]].Remove(attendeeIndex);
+                        MusicianUnblockedCache[Placements[musicianIndex]].Remove(attendeeIndex);
                         continue;
                     }
 
                     long tempScore = PairScore(musicianIndex, attendeeIndex);
                     MusicianScoreCache[musicianIndex][attendeeIndex] = tempScore;
                     ScoreCache += tempScore;
+                    mscore += tempScore;
                 }
+                if (allscore) Console.Error.WriteLine($"Score: {musician.Index,4:N0}\t{musician.Instrument,4:N0}\t{placements[musician.Index]} {mscore,16:N0}\t");
             }
 
             return ScoreCache;
@@ -641,7 +645,7 @@ namespace ICFP2023
             return score;
         }
 
-        public long NScoreMusician(Musician m, int n=200, bool occlusion=true)
+        public long NScoreMusician(Musician m, int n=5000, bool occlusion=true)
         {
             n = Math.Min(n, Problem.Musicians.Count);
             long score = 0;
@@ -663,7 +667,7 @@ namespace ICFP2023
             return score;
         }
 
-        public long NScoreFull(int n=200, bool occlusion=true)
+        public long NScoreFull(int n=5000, bool occlusion=true)
         {
             n = Math.Min(n, Problem.Musicians.Count);
             Problem.LoadMetaDataStrongest();
@@ -677,7 +681,7 @@ namespace ICFP2023
             return NScoreCacheTotal;
         }
 
-        public long NScoreWithCache(int updateMusician = -1, int n=200, bool occlusion=true)
+        public long NScoreWithCache(int updateMusician = -1, int n=5000, bool occlusion=true)
         {
             n = Math.Min(n, Problem.Musicians.Count);
             if (updateMusician < 0) return NScoreCacheTotal;
@@ -692,19 +696,30 @@ namespace ICFP2023
 
         public static long RUNID = DateTimeOffset.UtcNow.ToUnixTimeSeconds() % 10000000 / 10;
 
-        public void Render()
+        public void Render(bool all=false)
         {
-            var problem = Problem;
+            var p = Problem;
 
-            using var image = new Image<Rgba32>((int)problem.StageWidth, (int)problem.StageHeight);
+            var height = all ? p.RoomHeight : p.StageHeight;
+            var width = all ? p.RoomWidth : p.StageWidth;
 
-            foreach (var m in problem.Musicians)
+            using var image = new Image<Rgba32>((int)width, (int)height);
+
+            if (all) {
+                var pen = Pens.Solid(Color.Black, 1); // Red color and thickness of 5
+                image.Mutate(ctx => ctx.Draw(pen, new RectangleF((float)p.StageLeft, (float)p.StageBottom, (float)p.StageWidth, (float)p.StageHeight)));
+                image.Mutate(ctx => ctx.Draw(pen, new RectangleF((float)p.StageFenceLeft, (float)p.StageFenceBottom, (float)p.StageWidth - 20, (float)p.StageHeight - 20)));
+            }
+
+            foreach (var m in p.Musicians)
             {
-                var p = Placements[m.Index];
-                var dotCenter = new PointF((int)(p.X - problem.StageLeft), (int)(p.Y - problem.StageBottom)); // The position of the dot
+                var pl = Placements[m.Index];
+                var dotCenter = all
+                    ? new PointF((int)(pl.X), (int)(pl.Y)) // The position of the dot:
+                    : new PointF((int)(pl.X - p.StageLeft), (int)(pl.Y - p.StageBottom)); // The position of the dot
                 float dotRadius = 5; // The radius of the dot
 
-                var color = new Hsv(new Vector3(360 * m.Instrument / problem.InstrumentCount, 1, 1));
+                var color = new Hsv(new Vector3(360 * m.Instrument / p.InstrumentCount, 1, 1));
                 var c = ColorSpaceConverter.ToRgb(color);
                 var rgb = Color.FromRgb((byte)(c.R * 255), (byte)(c.G * 255), (byte)(c.B * 255));
 
@@ -714,20 +729,22 @@ namespace ICFP2023
                 ));
             }
 
-            // foreach (var m in problem.Attendees)
-            // {
-            //     var p = m.Location;
-            //     var dotCenter = new PointF((int)p.X, (int)p.Y); // The position of the dot
-            //     float dotRadius = 5; // The radius of the dot
+            if (all) {
+                foreach (var m in p.Attendees)
+                {
+                    var pl = m.Location;
+                    var dotCenter = new PointF((float)pl.X, (float)pl.Y); // The position of the dot
+                    float dotRadius = 2; // The radius of the dot
 
-            //     image.Mutate(x => x.Fill(
-            //         Color.Black, // The color of the dot
-            //         new EllipsePolygon(dotCenter, dotRadius) // The dot
-            //     ));
-            // }
+                    image.Mutate(x => x.Fill(
+                        Color.Black, // The color of the dot
+                        new EllipsePolygon(dotCenter, dotRadius) // The dot
+                    ));
+                }
+            }
 
             try {
-                image.Save($"render/{RUNID}-{Problem.ProblemNumber}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds() % 1000000}.png");
+                image.Save($"render/{RUNID}-{Problem.ProblemNumber}-{DateTimeOffset.UtcNow.ToUnixTimeSeconds() % 1000000}" + (all ? "-all" : "") + ".png");
             } catch (Exception e) {}
         }
 
