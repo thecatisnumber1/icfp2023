@@ -18,7 +18,7 @@ namespace ICFP2023
                 return new Solution(problem);
             }
 
-            List<int> matches = FixedPointMatcher.FindMatching(problem, fixedPoints, ui, 90000, 200000);
+            List<int> matches = FixedPointMatcher.FindMatching(problem, fixedPoints, ui, 20000, 200000);
             Solution solution = FixedPointSolution.MatchingToSolution(problem, fixedPoints, matches);
 
             Console.WriteLine($"{solution.InitializeScore()}");

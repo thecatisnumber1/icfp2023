@@ -195,9 +195,9 @@ namespace ICFP2023
             // Attendees
             // Compute gradient values
             Dictionary<Attendee, double> evaluatedAttendees;
-            if (_currentAudienceColorizer != null)
+            if (_currentAudienceColorizer != null && _currentSolution != null)
             {
-                evaluatedAttendees = _currentAudienceColorizer.Invoke(_currentProblem);
+                evaluatedAttendees = _currentAudienceColorizer.Invoke(_currentSolution);
             }
             else
             {
@@ -410,7 +410,7 @@ namespace ICFP2023
 
             for (int i = 0; i < solution.Problem.Attendees.Count; i++)
             {
-                AttendeeToEllipse[i].ToolTip = $"{solution.GetScoreForAttendee(i)}, {string.Join(", ", solution.Problem.Attendees[i].Tastes)}";
+                AttendeeToEllipse[i].ToolTip = $"score: {solution.GetScoreForAttendee(i) / solution.ScoreCache}, {string.Join(", ", solution.Problem.Attendees[i].Tastes)}";
             }
         }
 
@@ -540,7 +540,7 @@ namespace ICFP2023
             // Re-colorize anything we need to. This will hose highlighted stuff
 
             // TODO: Refactor
-            Dictionary<Attendee, double> evaluatedAttendees = _currentAudienceColorizer.Invoke(_currentProblem);
+            Dictionary<Attendee, double> evaluatedAttendees = _currentAudienceColorizer(_currentSolution);
 
             double audienceMin = double.MaxValue;
             double audienceMax = double.MinValue;

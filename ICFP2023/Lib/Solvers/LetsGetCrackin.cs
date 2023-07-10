@@ -33,7 +33,7 @@ namespace ICFP2023
             }
 
             ui.Render(solution);
-            solution = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 90000, 200000);
+            solution = AnnealingSolver.Solve(solution, AnnealingSolver.ComputeCost, 20000, 200000);
             return solution;
         }
 
