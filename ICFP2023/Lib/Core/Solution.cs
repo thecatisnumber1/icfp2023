@@ -444,8 +444,8 @@ namespace ICFP2023
                 double maxY = Problem.StageBottomLeft.Y + Problem.StageHeight - Musician.SOCIAL_DISTANCE;
 
                 if (point == Point.ORIGIN ||
-                    point.X < minX || point.X > maxX ||
-                    point.Y < minY || point.Y > maxY)
+                    (float)point.X < (float)minX || (float)point.X > (float)maxX ||
+                    (float)point.Y < (float)minY || (float)point.Y > (float)maxY)
                 {
                     Console.Error.WriteLine($"{point} not in bounds");
                     return false;

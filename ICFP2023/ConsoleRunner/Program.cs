@@ -64,17 +64,14 @@ namespace ICFP2023
 
 
                     Solution best = BadAnnealingSolver.Solve(solution.Problem, new ConsoleSettings(), new DoNothingUIAdapter());
+                    SubmitSolution(best, i).Wait();
 
                     Console.WriteLine($"Score: {best.ScoreCache:N0} for {i}");
                     if (best.ScoreCache == 0)
                     {
                         Console.WriteLine("Skipping submission of zero-score solution.");
                     }
-                    else if (best.IsValid())
-                    {
-                            SubmitSolution(best, i).Wait();
-                    }
-                    else {
+                    else if (!best.IsValid())
                         Console.WriteLine($"Invalid solution for {i}");
                         Console.WriteLine($"Placement: {string.Join(", ", best.Placements)}");
                     }
