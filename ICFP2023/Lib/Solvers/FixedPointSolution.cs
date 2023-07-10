@@ -17,9 +17,9 @@ namespace ICFP2023
 
         private List<double> Qs;
         private List<HashSet<int>> InstrumentToUsedSlots;
-        private List<long> SlotScores;
+        private List<double> SlotScores;
 
-        private long ScoreCache;
+        private double ScoreCache;
 
         public FixedPointSolution(ProblemSpec problem, List<Point> slotLocations)
             : this(problem, slotLocations, new StaticBlockingComputer(slotLocations, problem.Attendees, problem.Pillars)) { }
@@ -29,7 +29,7 @@ namespace ICFP2023
             SlotLocations = slotLocations;
             BlockingComputerTron = computer;
             Problem = problem;
-            SlotScores = new List<long>();
+            SlotScores = new();
             Qs = new List<double>();
             for (int i = 0; i < slotLocations.Count; i++)
             {
@@ -66,7 +66,7 @@ namespace ICFP2023
             Qs[slot] = UpdateQs(slot, instrument, 1);
             Slots[slot] = instrument;
 
-            long scoreDiff = ComputeScoreForSlot(slot);
+            double scoreDiff = ComputeScoreForSlot(slot);
             UpdateScoreCache(slot, scoreDiff);
         }
 
@@ -100,12 +100,12 @@ namespace ICFP2023
             int newS1 = RemoveInstrument(s0);
             SetInstrument(s0, newS0);
             SetInstrument(s1, newS1);
-            return ScoreCache;
+            return (long)ScoreCache;
         }
 
         public long GetScore()
         {
-            return ScoreCache;
+            return (long)ScoreCache;
         }
 
         public void AssertValidity()
@@ -160,11 +160,11 @@ namespace ICFP2023
             }
         }
 
-        private void UpdateScoreCache(int slot, long scoreDiff)
+        private void UpdateScoreCache(int slot, double scoreDiff)
         {
             if (Problem.UsePlayingTogetherScoring)
             {
-                ScoreCache += (long)Math.Ceiling(Qs[slot] * scoreDiff);
+                ScoreCache += Qs[slot] * scoreDiff;
             }
             else
             {
@@ -190,7 +190,7 @@ namespace ICFP2023
                 double update = modifier / SlotLocations[changingSlot].Dist(SlotLocations[otherSlot]);
 
                 // Update the other slot's Q, which means the score cache changes also
-                long otherScore = SlotScores[otherSlot];
+                double otherScore = SlotScores[otherSlot];
                 UpdateScoreCache(otherSlot, -otherScore);
                 Qs[otherSlot] += update;
                 UpdateScoreCache(otherSlot, otherScore);
@@ -201,9 +201,9 @@ namespace ICFP2023
             return changingSlotQ;
         }
 
-        private long ComputeScoreForSlot(int slot)
+        private double ComputeScoreForSlot(int slot)
         {
-            long score = 0;
+            double score = 0;
             foreach (var attendee in BlockingComputerTron.GetVisibleAttendees(slot))
             {
                 score += PairScore(Slots[slot], attendee, SlotLocations[slot]);
@@ -213,9 +213,9 @@ namespace ICFP2023
             return score;
         }
 
-        private static long PairScore(int instrument, Attendee attendee, Point location)
+        private static double PairScore(int instrument, Attendee attendee, Point location)
         {
-            return (long)Math.Ceiling(1000000 * attendee.Tastes[instrument] / attendee.Location.DistSq(location));
+            return 1000000 * attendee.Tastes[instrument] / attendee.Location.DistSq(location);
         }
     }
 }

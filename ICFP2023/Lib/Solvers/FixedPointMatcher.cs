@@ -34,7 +34,7 @@ namespace ICFP2023
             {
                 if ((Environment.TickCount - lastLogTime) >= logDelayMs)
                 {
-                    Console.WriteLine($"T = {coolingScheduler.Temperature:F0}, B = {bestScore}, C = {fixedPointSolution.GetScore()}, % = {((accepted / (accepted + rejected)) * 100):F2}, R = {coolingScheduler.RemainingMs()}, {accepted + rejected}");
+                    Console.WriteLine($"T = {coolingScheduler.Temperature:F0}, B = {bestScore}, C = {fixedPointSolution.GetScore()}, % = {((accepted / (accepted + rejected)) * 100):F4}, R = {coolingScheduler.RemainingMs()}, {accepted + rejected}");
                     accepted = 0;
                     rejected = 0;
                     lastLogTime = Environment.TickCount;
