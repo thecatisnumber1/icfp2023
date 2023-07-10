@@ -63,7 +63,7 @@ namespace ICFP2023
                 return false;
             }
 
-            return lastAcceptance == 0 && Watch.ElapsedMilliseconds >= TargetMs;
+            return lastAcceptance <= 0.01 && Watch.ElapsedMilliseconds >= TargetMs;
         }
     }
 }

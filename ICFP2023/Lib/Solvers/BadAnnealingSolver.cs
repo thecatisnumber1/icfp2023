@@ -54,6 +54,7 @@ namespace ICFP2023
 
             int logDelayMs = 1000;
             int lastLogTime = Environment.TickCount;
+            double good = 0;
             double accepted = 0;
             double rejected = 0;
             double totalmoves = 0;
@@ -69,9 +70,10 @@ namespace ICFP2023
                 if ((Environment.TickCount - lastLogTime) >= logDelayMs)
                 {
                     totalmoves += accepted + rejected;
-                    Console.Error.WriteLine($"{solution.Problem.ProblemNumber,4:N0}  T = {coolingScheduler.Temperature,12:F0}, {coolingScheduler.TempLog,12:F6}, B = {heuristic(bestSolution),16:N0}, C = {heuristic(currentSolution),16:N0}, % = {((accepted / (accepted + rejected)) * 100),7:F2}, R = {coolingScheduler.RemainingMs(),10:N0}, {(accepted + rejected),9:N0} {totalmoves,10:N0}");
+                    Console.Error.WriteLine($"{solution.Problem.ProblemNumber,4:N0}  T = {coolingScheduler.Temperature,12:F0}, {coolingScheduler.TempLog,12:F6}, B = {heuristic(bestSolution),16:N0}, C = {heuristic(currentSolution),16:N0}, % = {((accepted / (accepted + rejected)) * 100),7:F2}, R = {coolingScheduler.RemainingMs(),10:N0}, {(accepted + rejected),9:N0} {good,10:N0} {totalmoves,10:N0}");
                     accepted = 0;
                     rejected = 0;
+                    good = 0;
                     lastLogTime = Environment.TickCount;
                     // currentSolution.Render();
                 }
@@ -115,6 +117,8 @@ namespace ICFP2023
                         accepted++;
                         // Console.WriteLine($"{coolingScheduler.Temperature:F0} {currentCost:N0} {(currentCost - neighborCost),16:N0} {acceptance:F2} {move}");
                     }
+
+                    if (currentCost > neighborCost) good++;
                     // Console.Error.WriteLine($"\t\t\t\t\t\t\t\t\t\t\t{string.Join(", ", currentSolution.Placements)}");
 
                     // Keep track of the best solution found
