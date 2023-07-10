@@ -162,11 +162,23 @@ namespace ICFP2023
 
         private void UpdateScoreCache(int slot, long scoreDiff)
         {
-            ScoreCache += (long)Math.Ceiling(Qs[slot] * scoreDiff);
+            if (Problem.UsePlayingTogetherScoring)
+            {
+                ScoreCache += (long)Math.Ceiling(Qs[slot] * scoreDiff);
+            }
+            else
+            {
+                ScoreCache += scoreDiff;
+            }
         }
 
         private double UpdateQs(int changingSlot, int instrument, int modifier)
         {
+            if (!Problem.UsePlayingTogetherScoring)
+            {
+                return double.NaN;
+            }
+
             double changingSlotQ = modifier;
             foreach (int otherSlot in InstrumentToUsedSlots[instrument])
             {
