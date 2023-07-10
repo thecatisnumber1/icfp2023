@@ -39,8 +39,8 @@ We're kind of a competetive lot and really enjoy seeing how we're doing in real 
 
 There's also a page tabling all the problems with a bunch of random metadata about all the problems.
 
-PNG
+![table](imgs/prob_table.gif)
 
 As well as a page per problem so we could see how submissions were doing:
 
-GIF
+![table](imgs/sol_table.gif)
