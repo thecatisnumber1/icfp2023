@@ -1,3 +1,5 @@
+[//]: # (View this readme at https://github.com/thecatisnumber1/icfp2023)
+
 ![Squigglizer](imgs/squigglizer.png)
 
 # The Cat is #1!! ICFP 2023
@@ -33,7 +35,19 @@ GUI runner. Render problems, shows meta data and can run solvers. Can be fun to 
 
 ### Simulated Annealing
 
-This is all we did.
+This is all we did. However a naive implementation of the scoring function was too slow for annealing to be useful. To get around this we made a major simplification to the problem. Most of our annealers weren't able to move musicians by tiny amounts. Instead they worked off of a fixed set of points, often called slots in our codebase. A musician could be moved from one slot to another by the anealer but the slots themselves could not move. We were able to speed up scoring by precomputing line of sight with the pessimistic assumption that every slot would be filled. In reallity there were many more slots than musicians but since slots closer to audience members were more valuable, they'd tend to always be filled up anyway. The downside with this approach was that if the slots were chosen badly (or even slightly unoptimally) there was nothing the annealer could do to fix it. We tried a number of different way's to intelligently place slots.
+
+#### Let's get crackin
+
+![Let's get crackin](imgs/lets_get_crackin.png)
+
+#### Honeycomber
+
+![Honeycomber](imgs/honeycomber.png)
+
+#### Lens Crafter
+
+![Lens](imgs/lens.png)
 
 ## Support stuff
 
