@@ -41,13 +41,19 @@ This is all we did. However a naive implementation of the scoring function was t
 
 ![Let's get crackin](imgs/lets_get_crackin.png)
 
+This approach used dynamic programming to open up small cracks in the front row enabling one more musician to sing to a VIP. It was primarily useful for problems that didn't use the playing together bonus since it only placed a small number of people on the edge. The leftover musicians were dumped in the center were they couldn't do anything. 
+
 #### Honeycomber
 
 ![Honeycomber](imgs/honeycomber.png)
 
+This just placed hexagonal grids along the the 4 sides to best take advantage of playing together. We really should have combined this with let's get crackin, but we never did.
+
 #### Lens Crafter
 
 ![Lens](imgs/lens.png)
+
+This organized many musicians around one VIP to milk them for as many points as possible. VIPs Tended to be close to the stage which meant that the lens had significant curvature which disrupted packing other musicians tightly with them. We never solved the problem of how to pack musicans to either side of the lens and have more circular rows behind the lens. One of the inspirations behind focusing a lens on a VIP was this comic: [https://www.smbc-comics.com/comic/2012-04-03](https://www.smbc-comics.com/comic/2012-04-03). We really wanted to make Felix happy.
 
 ## Support stuff
 
