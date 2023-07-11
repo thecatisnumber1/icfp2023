@@ -61,7 +61,7 @@ We're kind of a competetive lot and really enjoy seeing how we're doing in real 
 
 ![scoreboard](imgs/scoreboard.gif)
 
-There's also a page tabling all the problems with a bunch of random metadata about all the problems.
+There's also a page tabling all the problems with a bunch of random metadata about all the problems. This was really useful because it allowed us to focus our time studying the problems that could give us the most points. We never got stuck trying to figure out how to get points on problem 16 for example because we knew it would never matter.
 
 ![table](imgs/prob_table.png)
 
