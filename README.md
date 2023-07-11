@@ -31,10 +31,9 @@ GUI runner. Render problems, shows meta data and can run solvers. Can be fun to 
 
 ## Major approaches
 
-### Simulated anealing
+### Simulated Annealing
 
 This is all we did.
-
 
 ## Support stuff
 
