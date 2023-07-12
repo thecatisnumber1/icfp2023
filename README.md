@@ -1,4 +1,4 @@
-[//]: # (View this readme at https://github.com/thecatisnumber1/icfp2023)
+[//]: # (View the current updated version of this readme at https://github.com/thecatisnumber1/icfp2023)
 
 ![Squigglizer](imgs/squigglizer.png)
 
